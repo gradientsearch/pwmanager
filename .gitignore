@@ -1,0 +1,48 @@
+# Project
+app/services/pwmanager-api/pwmanager-api
+app/services/metrics/metrics
+app/tooling/pwmanager-admin/pwmanager-admin
+app/tooling/pwmanager-admin/logfmt
+app/tooling/pwmanager-admin/docs
+.excalidraw
+database-data/
+
+# Environment
+api/cmd/frontends/admin/.env
+
+# Mac
+.DS_Store
+
+# Backup files
+*~*
+
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+
+# Folders
+_obj
+_test
+
+# Editor files
+.idea/
+*.iml
+*.swp
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+_testmain.go
+
+*.exe
+//*.test
+.vscode/tasks.json
+zarf/compose/database-data/data
