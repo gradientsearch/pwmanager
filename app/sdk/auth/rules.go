@@ -15,7 +15,7 @@ const (
 
 // Package name of our rego code.
 const (
-	opaPackage string = "ardan.rego"
+	opaPackage string = "gradientsearch.rego"
 )
 
 // Core OPA policies.

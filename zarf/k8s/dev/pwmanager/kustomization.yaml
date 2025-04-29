@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/pwmanager/
+  - ./dev-pwmanager-configmap.yaml
+patches:
+  - path: ./dev-pwmanager-patch-deploy.yaml
+  - path: ./dev-pwmanager-patch-service.yaml
+images:
+  - name: pwmanager-image
+    newName: localhost/gradientsearch/pwmanager
+    newTag: 0.0.1
+  - name: metrics-image
+    newName: localhost/gradientsearch/metrics
+    newTag: 0.0.1

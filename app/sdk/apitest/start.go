@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	authbuild "github.com/gradientsearch/pwmanager/api/services/auth/build/all"
-	salesbuild "github.com/gradientsearch/pwmanager/api/services/sales/build/all"
+	pwmanagerbuild "github.com/gradientsearch/pwmanager/api/services/pwmanager/build/all"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
@@ -53,10 +53,10 @@ func New(t *testing.T, testName string) *Test {
 			HomeBus:     db.BusDomain.Home,
 			VProductBus: db.BusDomain.VProduct,
 		},
-		SalesConfig: mux.SalesConfig{
+		PwManagerConfig: mux.PwManagerConfig{
 			AuthClient: authClient,
 		},
-	}, salesbuild.Routes())
+	}, pwmanagerbuild.Routes())
 
 	return &Test{
 		DB:   db,

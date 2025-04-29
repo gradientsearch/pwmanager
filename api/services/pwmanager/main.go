@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/ardanlabs/conf/v3"
-	"github.com/gradientsearch/pwmanager/api/services/sales/build/all"
-	"github.com/gradientsearch/pwmanager/api/services/sales/build/crud"
-	"github.com/gradientsearch/pwmanager/api/services/sales/build/reporting"
+	"github.com/gradientsearch/pwmanager/api/services/pwmanager/build/all"
+	"github.com/gradientsearch/pwmanager/api/services/pwmanager/build/crud"
+	"github.com/gradientsearch/pwmanager/api/services/pwmanager/build/reporting"
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/debug"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
@@ -58,7 +58,7 @@ func main() {
 		return otel.GetTraceID(ctx)
 	}
 
-	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "SALES", traceIDFn, events)
+	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "PWMANAGERS", traceIDFn, events)
 
 	// -------------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		}
 		Tempo struct {
 			Host        string  `conf:"default:tempo:4317"`
-			ServiceName string  `conf:"default:sales"`
+			ServiceName string  `conf:"default:pwmanager"`
 			Probability float64 `conf:"default:0.05"`
 			// Shouldn't use a high Probability value in non-developer systems.
 			// 0.05 should be enough for most systems. Some might want to have
@@ -114,11 +114,11 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}{
 		Version: conf.Version{
 			Build: build,
-			Desc:  "Sales",
+			Desc:  "PwManager",
 		},
 	}
 
-	const prefix = "SALES"
+	const prefix = "PWMANAGERS"
 	help, err := conf.Parse(prefix, &cfg)
 	if err != nil {
 		if errors.Is(err, conf.ErrHelpWanted) {
@@ -232,7 +232,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 			HomeBus:     homeBus,
 			VProductBus: vproductBus,
 		},
-		SalesConfig: mux.SalesConfig{
+		PwManagerConfig: mux.PwManagerConfig{
 			AuthClient: authClient,
 		},
 	}

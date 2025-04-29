@@ -1,9 +1,9 @@
 # Project
-app/services/sales-api/sales-api
+app/services/pwmanager-api/pwmanager-api
 app/services/metrics/metrics
-app/tooling/sales-admin/sales-admin
-app/tooling/sales-admin/logfmt
-app/tooling/sales-admin/docs
+app/tooling/pwmanager-admin/pwmanager-admin
+app/tooling/pwmanager-admin/logfmt
+app/tooling/pwmanager-admin/docs
 .excalidraw
 database-data/
 

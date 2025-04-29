@@ -1,5 +1,5 @@
 # Build the Go Binary.
-FROM golang:1.24 AS build_sales
+FROM golang:1.24 AS build_pwmanager
 ENV CGO_ENABLED=0
 ARG BUILD_REF
 
@@ -19,7 +19,7 @@ WORKDIR /service/api/tooling/admin
 RUN go build -ldflags "-X main.build=${BUILD_REF}"
 
 # Build the service binary.
-WORKDIR /service/api/services/sales
+WORKDIR /service/api/services/pwmanager
 RUN go build -ldflags "-X main.build=${BUILD_REF}"
 
 
@@ -27,14 +27,14 @@ RUN go build -ldflags "-X main.build=${BUILD_REF}"
 FROM alpine:3.21
 ARG BUILD_DATE
 ARG BUILD_REF
-RUN addgroup -g 1000 -S sales && \
-    adduser -u 1000 -h /service -G sales -S sales
-COPY --from=build_sales --chown=sales:sales /service/api/tooling/admin/admin /service/admin
-COPY --from=build_sales --chown=sales:sales /service/api/services/sales/sales /service/sales
+RUN addgroup -g 1000 -S pwmanager && \
+    adduser -u 1000 -h /service -G pwmanager -S pwmanager
+COPY --from=build_pwmanager --chown=pwmanager:pwmanager /service/api/tooling/admin/admin /service/admin
+COPY --from=build_pwmanager --chown=pwmanager:pwmanager /service/api/services/pwmanager/pwmanager /service/pwmanager
 WORKDIR /service
-USER sales
-CMD ["./sales"]
+USER pwmanager
+CMD ["./pwmanager"]
 
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
-      org.opencontainers.image.title="sales-api" \
+      org.opencontainers.image.title="pwmanager-api" \
       org.opencontainers.image.revision="${BUILD_REF}"

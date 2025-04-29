@@ -1,19 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: sales-service
-  namespace: sales-system
+  name: pwmanager-service
+  namespace: pwmanager-system
 
 spec:
   type: ClusterIP
 
   ports:
-  - name: sales
+  - name: pwmanager
     port: 3000
-    targetPort: sales
-  - name: sales-debug
+    targetPort: pwmanager
+  - name: pwmanager-debug
     port: 3010
-    targetPort: sales-debug
+    targetPort: pwmanager-debug
   - name: metrics
     port: 4000
     targetPort: metrics

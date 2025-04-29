@@ -1,4 +1,4 @@
-// This program performs administrative tasks for the garage sale service.
+// This program performs administrative tasks for the pwmanager service.
 package main
 
 import (
@@ -9,10 +9,10 @@ import (
 	"os"
 
 	"github.com/ardanlabs/conf/v3"
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/api/tooling/admin/commands"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
-	"github.com/google/uuid"
 )
 
 var build = "develop"
@@ -54,7 +54,7 @@ func run(log *logger.Logger) error {
 		},
 	}
 
-	const prefix = "SALES"
+	const prefix = "PWMANAGERS"
 	help, err := conf.Parse(prefix, &cfg)
 	if err != nil {
 		if errors.Is(err, conf.ErrHelpWanted) {

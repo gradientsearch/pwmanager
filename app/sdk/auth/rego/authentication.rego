@@ -1,4 +1,4 @@
-package ardan.rego
+package gradientsearch.rego
 
 import rego.v1
 
