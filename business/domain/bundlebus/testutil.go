@@ -17,9 +17,9 @@ func TestGenerateNewBundles(n int, userID uuid.UUID) []NewBundle {
 	for i := range n {
 		idx++
 
-		t := bundletype.Single
+		t := bundletype.Personal
 		if v := (idx + i) % 2; v == 0 {
-			t = bundletype.Condo
+			t = bundletype.Shareable
 		}
 
 		nh := NewBundle{

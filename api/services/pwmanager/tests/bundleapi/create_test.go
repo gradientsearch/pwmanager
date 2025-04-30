@@ -18,7 +18,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.NewBundle{
-				Type: "SINGLE FAMILY",
+				Type: "PERSONAL",
 				Address: bundleapp.NewAddress{
 					Address1: "123 Mocking Bird Lane",
 					ZipCode:  "35810",
@@ -30,7 +30,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			GotResp: &bundleapp.Bundle{},
 			ExpResp: &bundleapp.Bundle{
 				UserID: sd.Users[0].ID.String(),
-				Type:   "SINGLE FAMILY",
+				Type:   "PERSONAL",
 				Address: bundleapp.Address{
 					Address1: "123 Mocking Bird Lane",
 					ZipCode:  "35810",

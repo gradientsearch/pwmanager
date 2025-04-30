@@ -5,8 +5,8 @@ import "fmt"
 
 // The set of types that can be used.
 var (
-	Single = newType("SINGLE FAMILY")
-	Condo  = newType("CONDO")
+	Personal  = newType("PERSONAL")
+	Shareable = newType("SHAREABLE")
 )
 
 // =============================================================================

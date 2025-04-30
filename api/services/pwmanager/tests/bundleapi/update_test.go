@@ -21,7 +21,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.UpdateBundle{
-				Type: dbtest.StringPointer("SINGLE FAMILY"),
+				Type: dbtest.StringPointer("PERSONAL"),
 				Address: &bundleapp.UpdateAddress{
 					Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
 					Address2: dbtest.StringPointer("apt 105"),
@@ -35,7 +35,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &bundleapp.Bundle{
 				ID:     sd.Users[0].Bundles[0].ID.String(),
 				UserID: sd.Users[0].ID.String(),
-				Type:   "SINGLE FAMILY",
+				Type:   "PERSONAL",
 				Address: bundleapp.Address{
 					Address1: "123 Mocking Bird Lane",
 					Address2: "apt 105",
@@ -142,7 +142,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			Input: &bundleapp.UpdateBundle{
-				Type: dbtest.StringPointer("SINGLE FAMILY"),
+				Type: dbtest.StringPointer("PERSONAL"),
 				Address: &bundleapp.UpdateAddress{
 					Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
 					Address2: dbtest.StringPointer("apt 105"),
