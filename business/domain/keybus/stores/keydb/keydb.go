@@ -51,9 +51,9 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (keybus.Storer, error) {
 func (s *Store) Create(ctx context.Context, prd keybus.Key) error {
 	const q = `
 	INSERT INTO keys
-		(key_id, user_id, name, cost, quantity, date_created, date_updated)
+		(key_id, user_id, bundle_id, data, date_created, date_updated)
 	VALUES
-		(:key_id, :user_id, :name, :cost, :quantity, :date_created, :date_updated)`
+		(:key_id, :user_id, :bundle_id, :data, :date_created, :date_updated)`
 
 	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBKey(prd)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
@@ -69,9 +69,7 @@ func (s *Store) Update(ctx context.Context, prd keybus.Key) error {
 	UPDATE
 		keys
 	SET
-		"name" = :name,
-		"cost" = :cost,
-		"quantity" = :quantity,
+		"data" = :data,
 		"date_updated" = :date_updated
 	WHERE
 		key_id = :key_id`
@@ -113,7 +111,7 @@ func (s *Store) Query(ctx context.Context, filter keybus.QueryFilter, orderBy or
 
 	const q = `
 	SELECT
-	    key_id, user_id, name, cost, quantity, date_created, date_updated
+	    key_id, user_id,  bundle_id, data, date_created, date_updated
 	FROM
 		keys`
 
@@ -171,7 +169,7 @@ func (s *Store) QueryByID(ctx context.Context, keyID uuid.UUID) (keybus.Key, err
 
 	const q = `
 	SELECT
-	    key_id, user_id, name, cost, quantity, date_created, date_updated
+	    key_id, user_id,  bundle_id, data, date_created, date_updated
 	FROM
 		keys
 	WHERE
@@ -198,7 +196,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]keybus.K
 
 	const q = `
 	SELECT
-	    key_id, user_id, name, cost, quantity, date_created, date_updated
+	    key_id, user_id, date_created, date_updated
 	FROM
 		keys
 	WHERE

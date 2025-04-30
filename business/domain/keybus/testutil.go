@@ -18,8 +18,9 @@ func TestGenerateNewKeys(n int, userID uuid.UUID) []NewKey {
 		idx++
 
 		np := NewKey{
-			Data:   key.MustParse(fmt.Sprintf("Name%d", idx)),
-			UserID: userID,
+			Data:     key.MustParse(fmt.Sprintf("Name%d", idx)),
+			BundleID: uuid.New(),
+			UserID:   userID,
 		}
 
 		newPrds[i] = np

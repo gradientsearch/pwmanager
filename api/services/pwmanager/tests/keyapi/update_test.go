@@ -48,26 +48,6 @@ func update200(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func update400(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
-		{
-			Name:       "bad-input",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
-			Token:      sd.Users[0].Token,
-			Method:     http.MethodPut,
-			StatusCode: http.StatusBadRequest,
-			Input:      &keyapp.UpdateKey{},
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"cost\",\"error\":\"cost must be 0 or greater\"},{\"field\":\"quantity\",\"error\":\"quantity must be 1 or greater\"}]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-	}
-
-	return table
-}
-
 func update401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{

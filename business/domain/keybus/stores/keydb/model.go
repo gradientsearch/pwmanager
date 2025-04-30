@@ -12,9 +12,8 @@ import (
 type key struct {
 	ID          uuid.UUID `db:"key_id"`
 	UserID      uuid.UUID `db:"user_id"`
-	Name        string    `db:"name"`
-	Cost        float64   `db:"cost"`
-	Quantity    int       `db:"quantity"`
+	BundleID    uuid.UUID `db:"bundle_id"`
+	Data        string    `db:"data"`
 	DateCreated time.Time `db:"date_created"`
 	DateUpdated time.Time `db:"date_updated"`
 }
@@ -23,7 +22,8 @@ func toDBKey(bus keybus.Key) key {
 	db := key{
 		ID:          bus.ID,
 		UserID:      bus.UserID,
-		Name:        bus.Data.String(),
+		BundleID:    bus.BundleID,
+		Data:        bus.Data.String(),
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
@@ -32,7 +32,7 @@ func toDBKey(bus keybus.Key) key {
 }
 
 func toBusKey(db key) (keybus.Key, error) {
-	key, err := kt.Parse(db.Name)
+	key, err := kt.Parse(db.Data)
 	if err != nil {
 		return keybus.Key{}, fmt.Errorf("parse key: %w", err)
 	}
@@ -40,6 +40,7 @@ func toBusKey(db key) (keybus.Key, error) {
 	bus := keybus.Key{
 		ID:          db.ID,
 		UserID:      db.UserID,
+		BundleID:    db.BundleID,
 		Data:        key,
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
