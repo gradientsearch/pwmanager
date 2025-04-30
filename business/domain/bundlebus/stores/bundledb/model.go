@@ -13,12 +13,6 @@ type bundle struct {
 	ID          uuid.UUID `db:"bundle_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Type        string    `db:"type"`
-	Address1    string    `db:"address_1"`
-	Address2    string    `db:"address_2"`
-	ZipCode     string    `db:"zip_code"`
-	City        string    `db:"city"`
-	Country     string    `db:"country"`
-	State       string    `db:"state"`
 	DateCreated time.Time `db:"date_created"`
 	DateUpdated time.Time `db:"date_updated"`
 }
@@ -28,12 +22,6 @@ func toDBBundle(bus bundlebus.Bundle) bundle {
 		ID:          bus.ID,
 		UserID:      bus.UserID,
 		Type:        bus.Type.String(),
-		Address1:    bus.Address.Address1,
-		Address2:    bus.Address.Address2,
-		ZipCode:     bus.Address.ZipCode,
-		City:        bus.Address.City,
-		Country:     bus.Address.Country,
-		State:       bus.Address.State,
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
@@ -48,17 +36,9 @@ func toBusBundle(db bundle) (bundlebus.Bundle, error) {
 	}
 
 	bus := bundlebus.Bundle{
-		ID:     db.ID,
-		UserID: db.UserID,
-		Type:   typ,
-		Address: bundlebus.Address{
-			Address1: db.Address1,
-			Address2: db.Address2,
-			ZipCode:  db.ZipCode,
-			City:     db.City,
-			Country:  db.Country,
-			State:    db.State,
-		},
+		ID:          db.ID,
+		UserID:      db.UserID,
+		Type:        typ,
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
 	}

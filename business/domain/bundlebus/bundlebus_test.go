@@ -189,26 +189,12 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name: "basic",
 			ExpResp: bundlebus.Bundle{
 				UserID: sd.Users[0].ID,
-				Type:   bundletype.Single,
-				Address: bundlebus.Address{
-					Address1: "123 Mocking Bird Lane",
-					ZipCode:  "35810",
-					City:     "Huntsville",
-					State:    "AL",
-					Country:  "US",
-				},
+				Type:   bundletype.Personal,
 			},
 			ExcFunc: func(ctx context.Context) any {
 				nh := bundlebus.NewBundle{
 					UserID: sd.Users[0].ID,
-					Type:   bundletype.Single,
-					Address: bundlebus.Address{
-						Address1: "123 Mocking Bird Lane",
-						ZipCode:  "35810",
-						City:     "Huntsville",
-						State:    "AL",
-						Country:  "US",
-					},
+					Type:   bundletype.Personal,
 				}
 
 				resp, err := busDomain.Bundle.Create(ctx, nh)
@@ -243,31 +229,15 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 		{
 			Name: "basic",
 			ExpResp: bundlebus.Bundle{
-				ID:     sd.Users[0].Bundles[0].ID,
-				UserID: sd.Users[0].ID,
-				Type:   bundletype.Single,
-				Address: bundlebus.Address{
-					Address1: "123 Mocking Bird Lane",
-					Address2: "apt 105",
-					ZipCode:  "35810",
-					City:     "Huntsville",
-					State:    "AL",
-					Country:  "US",
-				},
+				ID:          sd.Users[0].Bundles[0].ID,
+				UserID:      sd.Users[0].ID,
+				Type:        bundletype.Personal,
 				DateCreated: sd.Users[0].Bundles[0].DateCreated,
 				DateUpdated: sd.Users[0].Bundles[0].DateCreated,
 			},
 			ExcFunc: func(ctx context.Context) any {
 				uh := bundlebus.UpdateBundle{
-					Type: &bundletype.Single,
-					Address: &bundlebus.UpdateAddress{
-						Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
-						Address2: dbtest.StringPointer("apt 105"),
-						ZipCode:  dbtest.StringPointer("35810"),
-						City:     dbtest.StringPointer("Huntsville"),
-						State:    dbtest.StringPointer("AL"),
-						Country:  dbtest.StringPointer("US"),
-					},
+					Type: &bundletype.Personal,
 				}
 
 				resp, err := busDomain.Bundle.Update(ctx, sd.Users[0].Bundles[0], uh)

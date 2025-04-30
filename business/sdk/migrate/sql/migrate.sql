@@ -50,16 +50,10 @@ JOIN
 -- Description: Create table bundles
 CREATE TABLE bundles (
     bundle_id       UUID       NOT NULL,
-    type          TEXT       NOT NULL,
-    user_id       UUID       NOT NULL,
-    address_1     TEXT       NOT NULL,
-    address_2     TEXT       NULL,
-    zip_code      TEXT       NOT NULL,
-    city          TEXT       NOT NULL,
-    state         TEXT       NOT NULL,
-    country       TEXT       NOT NULL,
-    date_created  TIMESTAMP  NOT NULL,
-    date_updated  TIMESTAMP  NOT NULL,
+    type            TEXT       NOT NULL,
+    user_id         UUID       NOT NULL,
+    date_created    TIMESTAMP  NOT NULL,
+    date_updated    TIMESTAMP  NOT NULL,
 
     PRIMARY KEY (bundle_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE

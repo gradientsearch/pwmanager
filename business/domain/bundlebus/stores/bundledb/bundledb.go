@@ -50,9 +50,9 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (bundlebus.Storer, error) {
 func (s *Store) Create(ctx context.Context, hme bundlebus.Bundle) error {
 	const q = `
     INSERT INTO bundles
-        (bundle_id, user_id, type, address_1, address_2, zip_code, city, state, country, date_created, date_updated)
+        (bundle_id, user_id, type, date_created, date_updated)
     VALUES
-        (:bundle_id, :user_id, :type, :address_1, :address_2, :zip_code, :city, :state, :country, :date_created, :date_updated)`
+        (:bundle_id, :user_id, :type, :date_created, :date_updated)`
 
 	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBBundle(hme)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
@@ -88,12 +88,6 @@ func (s *Store) Update(ctx context.Context, hme bundlebus.Bundle) error {
     UPDATE
         bundles
     SET
-        "address_1"     = :address_1,
-        "address_2"     = :address_2,
-        "zip_code"      = :zip_code,
-        "city"          = :city,
-        "state"         = :state,
-        "country"       = :country,
         "type"          = :type,
         "date_updated"  = :date_updated
     WHERE
@@ -115,7 +109,7 @@ func (s *Store) Query(ctx context.Context, filter bundlebus.QueryFilter, orderBy
 
 	const q = `
     SELECT
-	    bundle_id, user_id, type, address_1, address_2, zip_code, city, state, country, date_created, date_updated
+	    bundle_id, user_id, type, date_created, date_updated
 	FROM
 	  	bundles`
 
@@ -176,7 +170,7 @@ func (s *Store) QueryByID(ctx context.Context, bundleID uuid.UUID) (bundlebus.Bu
 
 	const q = `
     SELECT
-	  	bundle_id, user_id, type, address_1, address_2, zip_code, city, state, country, date_created, date_updated
+	  	bundle_id, user_id, type, date_created, date_updated
     FROM
         bundles
     WHERE
@@ -203,7 +197,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]bundlebu
 
 	const q = `
 	SELECT
-	    bundle_id, user_id, type, address_1, address_2, zip_code, city, state, country, date_created, date_updated
+	    bundle_id, user_id, type, date_created, date_updated
 	FROM
 		bundles
 	WHERE

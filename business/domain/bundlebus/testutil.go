@@ -17,21 +17,13 @@ func TestGenerateNewBundles(n int, userID uuid.UUID) []NewBundle {
 	for i := range n {
 		idx++
 
-		t := bundletype.Single
+		t := bundletype.Personal
 		if v := (idx + i) % 2; v == 0 {
-			t = bundletype.Condo
+			t = bundletype.Shareable
 		}
 
 		nh := NewBundle{
-			Type: t,
-			Address: Address{
-				Address1: fmt.Sprintf("Address%d", idx),
-				Address2: fmt.Sprintf("Address%d", idx),
-				ZipCode:  fmt.Sprintf("%05d", idx),
-				City:     fmt.Sprintf("City%d", idx),
-				State:    fmt.Sprintf("State%d", idx),
-				Country:  fmt.Sprintf("Country%d", idx),
-			},
+			Type:   t,
 			UserID: userID,
 		}
 
@@ -56,16 +48,4 @@ func TestGenerateSeedBundles(ctx context.Context, n int, api *Business, userID u
 	}
 
 	return hmes, nil
-}
-
-// ParseAddress is a helper function to create an address value.
-func ParseAddress(address1 string, address2 string, zipCode string, city string, state string, country string) Address {
-	return Address{
-		Address1: address1,
-		Address2: address2,
-		ZipCode:  zipCode,
-		City:     city,
-		State:    state,
-		Country:  country,
-	}
 }

@@ -9,17 +9,9 @@ import (
 
 func toAppBundle(hme bundlebus.Bundle) bundleapp.Bundle {
 	return bundleapp.Bundle{
-		ID:     hme.ID.String(),
-		UserID: hme.UserID.String(),
-		Type:   hme.Type.String(),
-		Address: bundleapp.Address{
-			Address1: hme.Address.Address1,
-			Address2: hme.Address.Address2,
-			ZipCode:  hme.Address.ZipCode,
-			City:     hme.Address.City,
-			State:    hme.Address.State,
-			Country:  hme.Address.Country,
-		},
+		ID:          hme.ID.String(),
+		UserID:      hme.UserID.String(),
+		Type:        hme.Type.String(),
 		DateCreated: hme.DateCreated.Format(time.RFC3339),
 		DateUpdated: hme.DateUpdated.Format(time.RFC3339),
 	}

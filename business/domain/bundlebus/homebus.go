@@ -94,16 +94,8 @@ func (b *Business) Create(ctx context.Context, nh NewBundle) (Bundle, error) {
 	now := time.Now()
 
 	hme := Bundle{
-		ID:   uuid.New(),
-		Type: nh.Type,
-		Address: Address{
-			Address1: nh.Address.Address1,
-			Address2: nh.Address.Address2,
-			ZipCode:  nh.Address.ZipCode,
-			City:     nh.Address.City,
-			State:    nh.Address.State,
-			Country:  nh.Address.Country,
-		},
+		ID:          uuid.New(),
+		Type:        nh.Type,
 		UserID:      nh.UserID,
 		DateCreated: now,
 		DateUpdated: now,
@@ -123,32 +115,6 @@ func (b *Business) Update(ctx context.Context, hme Bundle, uh UpdateBundle) (Bun
 
 	if uh.Type != nil {
 		hme.Type = *uh.Type
-	}
-
-	if uh.Address != nil {
-		if uh.Address.Address1 != nil {
-			hme.Address.Address1 = *uh.Address.Address1
-		}
-
-		if uh.Address.Address2 != nil {
-			hme.Address.Address2 = *uh.Address.Address2
-		}
-
-		if uh.Address.ZipCode != nil {
-			hme.Address.ZipCode = *uh.Address.ZipCode
-		}
-
-		if uh.Address.City != nil {
-			hme.Address.City = *uh.Address.City
-		}
-
-		if uh.Address.State != nil {
-			hme.Address.State = *uh.Address.State
-		}
-
-		if uh.Address.Country != nil {
-			hme.Address.Country = *uh.Address.Country
-		}
 	}
 
 	hme.DateUpdated = time.Now()

@@ -8,7 +8,7 @@ import (
 )
 
 // Address represents an individual address.
-type Address struct {
+type xAddress struct {
 	Address1 string // We should create types for these fields.
 	Address2 string
 	ZipCode  string
@@ -22,26 +22,14 @@ type Bundle struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
 	Type        bundletype.BundleType
-	Address     Address
 	DateCreated time.Time
 	DateUpdated time.Time
 }
 
 // NewBundle is what we require from clients when adding a Bundle.
 type NewBundle struct {
-	UserID  uuid.UUID
-	Type    bundletype.BundleType
-	Address Address
-}
-
-// UpdateAddress is what fields can be updated in the store.
-type UpdateAddress struct {
-	Address1 *string
-	Address2 *string
-	ZipCode  *string
-	City     *string
-	State    *string
-	Country  *string
+	UserID uuid.UUID
+	Type   bundletype.BundleType
 }
 
 // UpdateBundle defines what information may be provided to modify an existing
@@ -51,6 +39,5 @@ type UpdateAddress struct {
 // we do not want to use pointers to basic types but we make exception around
 // marshalling/unmarshalling.
 type UpdateBundle struct {
-	Type    *bundletype.BundleType
-	Address *UpdateAddress
+	Type *bundletype.BundleType
 }
