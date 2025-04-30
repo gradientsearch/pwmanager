@@ -9,8 +9,8 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/quantity"
 )
 
-// Product represents an individual product with extended information.
-type Product struct {
+// Key represents an individual key with extended information.
+type Key struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
 	Name        name.Name

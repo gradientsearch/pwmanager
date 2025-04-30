@@ -1,4 +1,4 @@
-package product_test
+package key_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
 	"github.com/gradientsearch/pwmanager/business/types/role"
@@ -21,14 +21,14 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
 	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding products : %w", err)
+		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu1 := apitest.User{
-		User:     usrs[0],
-		Products: prds,
+		User: usrs[0],
+		Keys: prds,
 
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
@@ -40,15 +40,15 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
 	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding products : %w", err)
+		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := apitest.User{
-		User:     usrs[0],
-		Products: prds,
-		Token:    apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		User:  usrs[0],
+		Keys:  prds,
+		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------

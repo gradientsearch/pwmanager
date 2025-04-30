@@ -1,4 +1,4 @@
-package productbus
+package keybus
 
 import (
 	"context"
@@ -29,7 +29,7 @@ func (b *Business) actionUserUpdated(ctx context.Context, data delegate.Data) er
 	b.log.Info(ctx, "action-userupdate", "user_id", params.UserID, "enabled", params.Enabled)
 
 	// Now we can see if this user has been disabled. If they have been, we will
-	// want to disable to mark all these products as deleted. Right now we don't
+	// want to disable to mark all these keys as deleted. Right now we don't
 	// have support for this, but you can see how we can process the event.
 
 	return nil

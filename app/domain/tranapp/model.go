@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/types/money"
 	"github.com/gradientsearch/pwmanager/business/types/name"
@@ -15,8 +15,8 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
 
-// Product represents an individual product.
-type Product struct {
+// Key represents an individual key.
+type Key struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
 	Name        string  `json:"name"`
@@ -27,13 +27,13 @@ type Product struct {
 }
 
 // Encode implements the encoder interface.
-func (app Product) Encode() ([]byte, string, error) {
+func (app Key) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
 	return data, "application/json", err
 }
 
-func toAppProduct(prd productbus.Product) Product {
-	return Product{
+func toAppKey(prd keybus.Key) Key {
+	return Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name.String(),
@@ -49,8 +49,8 @@ func toAppProduct(prd productbus.Product) Product {
 // NewTran represents an example of cross domain transaction at the
 // application layer.
 type NewTran struct {
-	Product NewProduct `json:"product"`
-	User    NewUser    `json:"user"`
+	Key  NewKey  `json:"key"`
+	User NewUser `json:"user"`
 }
 
 // Validate checks the data in the model is considered clean.
@@ -122,15 +122,15 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 
 // =============================================================================
 
-// NewProduct is what we require from clients when adding a Product.
-type NewProduct struct {
+// NewKey is what we require from clients when adding a Key.
+type NewKey struct {
 	Name     string  `json:"name" validate:"required"`
 	Cost     float64 `json:"cost" validate:"required,gte=0"`
 	Quantity int     `json:"quantity" validate:"required,gte=1"`
 }
 
 // Validate checks the data in the model is considered clean.
-func (app NewProduct) Validate() error {
+func (app NewKey) Validate() error {
 	if err := errs.Check(app); err != nil {
 		return fmt.Errorf("validate: %w", err)
 	}
@@ -138,23 +138,23 @@ func (app NewProduct) Validate() error {
 	return nil
 }
 
-func toBusNewProduct(app NewProduct) (productbus.NewProduct, error) {
+func toBusNewKey(app NewKey) (keybus.NewKey, error) {
 	name, err := name.Parse(app.Name)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse: %w", err)
 	}
 
 	cost, err := money.Parse(app.Cost)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse cost: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse cost: %w", err)
 	}
 
 	quantity, err := quantity.Parse(app.Quantity)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse quantity: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse quantity: %w", err)
 	}
 
-	bus := productbus.NewProduct{
+	bus := keybus.NewKey{
 		Name:     name,
 		Cost:     cost,
 		Quantity: quantity,

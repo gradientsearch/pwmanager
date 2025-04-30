@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/web"
@@ -31,7 +31,7 @@ const (
 	claimKey ctxKey = iota + 1
 	userIDKey
 	userKey
-	productKey
+	keyKey
 	bundleKey
 	trKey
 )
@@ -77,15 +77,15 @@ func GetUser(ctx context.Context) (userbus.User, error) {
 	return v, nil
 }
 
-func setProduct(ctx context.Context, prd productbus.Product) context.Context {
-	return context.WithValue(ctx, productKey, prd)
+func setKey(ctx context.Context, prd keybus.Key) context.Context {
+	return context.WithValue(ctx, keyKey, prd)
 }
 
-// GetProduct returns the product from the context.
-func GetProduct(ctx context.Context) (productbus.Product, error) {
-	v, ok := ctx.Value(productKey).(productbus.Product)
+// GetKey returns the key from the context.
+func GetKey(ctx context.Context) (keybus.Key, error) {
+	v, ok := ctx.Value(keyKey).(keybus.Key)
 	if !ok {
-		return productbus.Product{}, errors.New("product not found in context")
+		return keybus.Key{}, errors.New("key not found in context")
 	}
 
 	return v, nil

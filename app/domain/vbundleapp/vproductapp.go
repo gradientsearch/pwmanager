@@ -51,5 +51,5 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.Newf(errs.Internal, "count: %s", err)
 	}
 
-	return query.NewResult(toAppProducts(prds), total, page)
+	return query.NewResult(toAppKeys(prds), total, page)
 }

@@ -12,8 +12,8 @@ import (
 )
 
 func query200(sd apitest.SeedData) []apitest.Table {
-	prds := toAppVBundles(sd.Admins[0].User, sd.Admins[0].Products)
-	prds = append(prds, toAppVBundles(sd.Users[0].User, sd.Users[0].Products)...)
+	prds := toAppVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
+	prds = append(prds, toAppVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
 
 	sort.Slice(prds, func(i, j int) bool {
 		return prds[i].ID <= prds[j].ID
@@ -22,12 +22,12 @@ func query200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        "/v1/vbundles?page=1&rows=10&orderBy=product_id,ASC",
+			URL:        "/v1/vbundles?page=1&rows=10&orderBy=key_id,ASC",
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &query.Result[vbundleapp.Product]{},
-			ExpResp: &query.Result[vbundleapp.Product]{
+			GotResp:    &query.Result[vbundleapp.Key]{},
+			ExpResp: &query.Result[vbundleapp.Key]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(prds),

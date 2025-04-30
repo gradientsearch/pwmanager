@@ -1,4 +1,4 @@
-package productapp
+package keyapp
 
 import (
 	"context"
@@ -8,14 +8,14 @@ import (
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/types/money"
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/quantity"
 )
 
-// Product represents information about an individual product.
-type Product struct {
+// Key represents information about an individual key.
+type Key struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
 	Name        string  `json:"name"`
@@ -26,13 +26,13 @@ type Product struct {
 }
 
 // Encode implements the encoder interface.
-func (app Product) Encode() ([]byte, string, error) {
+func (app Key) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
 	return data, "application/json", err
 }
 
-func toAppProduct(prd productbus.Product) Product {
-	return Product{
+func toAppKey(prd keybus.Key) Key {
+	return Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name.String(),
@@ -43,10 +43,10 @@ func toAppProduct(prd productbus.Product) Product {
 	}
 }
 
-func toAppProducts(prds []productbus.Product) []Product {
-	app := make([]Product, len(prds))
+func toAppKeys(prds []keybus.Key) []Key {
+	app := make([]Key, len(prds))
 	for i, prd := range prds {
-		app[i] = toAppProduct(prd)
+		app[i] = toAppKey(prd)
 	}
 
 	return app
@@ -54,20 +54,20 @@ func toAppProducts(prds []productbus.Product) []Product {
 
 // =============================================================================
 
-// NewProduct defines the data needed to add a new product.
-type NewProduct struct {
+// NewKey defines the data needed to add a new key.
+type NewKey struct {
 	Name     string  `json:"name" validate:"required"`
 	Cost     float64 `json:"cost" validate:"required,gte=0"`
 	Quantity int     `json:"quantity" validate:"required,gte=1"`
 }
 
 // Decode implements the decoder interface.
-func (app *NewProduct) Decode(data []byte) error {
+func (app *NewKey) Decode(data []byte) error {
 	return json.Unmarshal(data, app)
 }
 
 // Validate checks the data in the model is considered clean.
-func (app NewProduct) Validate() error {
+func (app NewKey) Validate() error {
 	if err := errs.Check(app); err != nil {
 		return fmt.Errorf("validate: %w", err)
 	}
@@ -75,28 +75,28 @@ func (app NewProduct) Validate() error {
 	return nil
 }
 
-func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct, error) {
+func toBusNewKey(ctx context.Context, app NewKey) (keybus.NewKey, error) {
 	userID, err := mid.GetUserID(ctx)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("getuserid: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("getuserid: %w", err)
 	}
 
 	name, err := name.Parse(app.Name)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse name: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse name: %w", err)
 	}
 
 	cost, err := money.Parse(app.Cost)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse cost: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse cost: %w", err)
 	}
 
 	quantity, err := quantity.Parse(app.Quantity)
 	if err != nil {
-		return productbus.NewProduct{}, fmt.Errorf("parse quantity: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse quantity: %w", err)
 	}
 
-	bus := productbus.NewProduct{
+	bus := keybus.NewKey{
 		UserID:   userID,
 		Name:     name,
 		Cost:     cost,
@@ -108,20 +108,20 @@ func toBusNewProduct(ctx context.Context, app NewProduct) (productbus.NewProduct
 
 // =============================================================================
 
-// UpdateProduct defines the data needed to update a product.
-type UpdateProduct struct {
+// UpdateKey defines the data needed to update a key.
+type UpdateKey struct {
 	Name     *string  `json:"name"`
 	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
 	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
 }
 
 // Decode implements the decoder interface.
-func (app *UpdateProduct) Decode(data []byte) error {
+func (app *UpdateKey) Decode(data []byte) error {
 	return json.Unmarshal(data, app)
 }
 
 // Validate checks the data in the model is considered clean.
-func (app UpdateProduct) Validate() error {
+func (app UpdateKey) Validate() error {
 	if err := errs.Check(app); err != nil {
 		return fmt.Errorf("validate: %w", err)
 	}
@@ -129,12 +129,12 @@ func (app UpdateProduct) Validate() error {
 	return nil
 }
 
-func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
+func toBusUpdateKey(app UpdateKey) (keybus.UpdateKey, error) {
 	var nme *name.Name
 	if app.Name != nil {
 		nm, err := name.Parse(*app.Name)
 		if err != nil {
-			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+			return keybus.UpdateKey{}, fmt.Errorf("parse: %w", err)
 		}
 		nme = &nm
 	}
@@ -143,7 +143,7 @@ func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
 	if app.Cost != nil {
 		cst, err := money.Parse(*app.Cost)
 		if err != nil {
-			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+			return keybus.UpdateKey{}, fmt.Errorf("parse: %w", err)
 		}
 		cost = &cst
 	}
@@ -152,12 +152,12 @@ func toBusUpdateProduct(app UpdateProduct) (productbus.UpdateProduct, error) {
 	if app.Cost != nil {
 		qn, err := quantity.Parse(*app.Quantity)
 		if err != nil {
-			return productbus.UpdateProduct{}, fmt.Errorf("parse: %w", err)
+			return keybus.UpdateKey{}, fmt.Errorf("parse: %w", err)
 		}
 		qnt = &qn
 	}
 
-	bus := productbus.UpdateProduct{
+	bus := keybus.UpdateKey{
 		Name:     nme,
 		Cost:     cost,
 		Quantity: qnt,

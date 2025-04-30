@@ -5,8 +5,8 @@ import (
 
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus/stores/bundledb"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus/stores/productdb"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus/stores/keydb"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus/stores/usercache"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus/stores/userdb"
@@ -21,7 +21,7 @@ import (
 type BusDomain struct {
 	Delegate *delegate.Delegate
 	Bundle   *bundlebus.Business
-	Product  *productbus.Business
+	Key      *keybus.Business
 	User     *userbus.Business
 	VBundle  *vbundlebus.Business
 }
@@ -29,14 +29,14 @@ type BusDomain struct {
 func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
-	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
+	keyBus := keybus.NewBusiness(log, userBus, delegate, keydb.NewStore(log, db))
 	bundleBus := bundlebus.NewBusiness(log, userBus, delegate, bundledb.NewStore(log, db))
 	vbundleBus := vbundlebus.NewBusiness(vbundledb.NewStore(log, db))
 
 	return BusDomain{
 		Delegate: delegate,
 		Bundle:   bundleBus,
-		Product:  productBus,
+		Key:      keyBus,
 		User:     userBus,
 		VBundle:  vbundleBus,
 	}

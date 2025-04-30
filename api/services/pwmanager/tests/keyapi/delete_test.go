@@ -1,26 +1,26 @@
-package product_test
+package key_test
 
 import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/google/go-cmp/cmp"
 )
 
 func delete200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "asuser",
-			URL:        fmt.Sprintf("/v1/products/%s", sd.Users[0].Products[0].ID),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusNoContent,
 		},
 		{
 			Name:       "asadmin",
-			URL:        fmt.Sprintf("/v1/products/%s", sd.Admins[0].Products[0].ID),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[0].ID),
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusNoContent,
@@ -34,7 +34,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/products/%s", sd.Users[0].Products[1].ID),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
 			Token:      "&nbsp;",
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
@@ -46,7 +46,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/products/%s", sd.Users[0].Products[1].ID),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
 			Token:      sd.Users[0].Token + "A",
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
@@ -58,7 +58,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/products/%s", sd.Admins[0].Products[1].ID),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[1].ID),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,

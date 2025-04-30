@@ -1,4 +1,4 @@
-package tranapp
+package keyapp
 
 import (
 	"net/http"
@@ -7,18 +7,13 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
-	"github.com/gradientsearch/pwmanager/business/domain/userbus"
-	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
 	"github.com/gradientsearch/pwmanager/foundation/web"
-	"github.com/jmoiron/sqlx"
 )
 
 // Config contains all the mandatory systems required by handlers.
 type Config struct {
 	Log        *logger.Logger
-	DB         *sqlx.DB
-	UserBus    *userbus.Business
 	KeyBus     *keybus.Business
 	AuthClient *authclient.Client
 }
@@ -28,10 +23,15 @@ func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
 	authen := mid.Authenticate(cfg.AuthClient)
-	transaction := mid.BeginCommitRollback(cfg.Log, sqldb.NewBeginner(cfg.DB))
-	ruleAdmin := mid.Authorize(cfg.AuthClient, auth.RuleAdminOnly)
+	ruleAny := mid.Authorize(cfg.AuthClient, auth.RuleAny)
+	ruleUserOnly := mid.Authorize(cfg.AuthClient, auth.RuleUserOnly)
+	ruleAuthorizeKey := mid.AuthorizeKey(cfg.AuthClient, cfg.KeyBus)
 
-	api := newApp(cfg.UserBus, cfg.KeyBus)
+	api := newApp(cfg.KeyBus)
 
-	app.HandlerFunc(http.MethodPost, version, "/tranexample", api.create, authen, ruleAdmin, transaction)
+	app.HandlerFunc(http.MethodGet, version, "/keys", api.query, authen, ruleAny)
+	app.HandlerFunc(http.MethodGet, version, "/keys/{key_id}", api.queryByID, authen, ruleAuthorizeKey)
+	app.HandlerFunc(http.MethodPost, version, "/keys", api.create, authen, ruleUserOnly)
+	app.HandlerFunc(http.MethodPut, version, "/keys/{key_id}", api.update, authen, ruleAuthorizeKey)
+	app.HandlerFunc(http.MethodDelete, version, "/keys/{key_id}", api.delete, authen, ruleAuthorizeKey)
 }

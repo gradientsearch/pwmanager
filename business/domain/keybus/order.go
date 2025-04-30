@@ -1,4 +1,4 @@
-package vbundlebus
+package keybus
 
 import "github.com/gradientsearch/pwmanager/business/sdk/order"
 
@@ -12,5 +12,4 @@ const (
 	OrderByName     = "name"
 	OrderByCost     = "cost"
 	OrderByQuantity = "quantity"
-	OrderByUserName = "user_name"
 )

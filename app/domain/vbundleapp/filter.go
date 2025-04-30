@@ -28,7 +28,7 @@ func parseQueryParams(r *http.Request) queryParams {
 		Page:     values.Get("page"),
 		Rows:     values.Get("rows"),
 		OrderBy:  values.Get("orderBy"),
-		ID:       values.Get("product_id"),
+		ID:       values.Get("key_id"),
 		Name:     values.Get("name"),
 		Cost:     values.Get("cost"),
 		Quantity: values.Get("quantity"),
@@ -48,7 +48,7 @@ func parseFilter(qp queryParams) (vbundlebus.QueryFilter, error) {
 		case nil:
 			filter.ID = &id
 		default:
-			fieldErrors.Add("product_id", err)
+			fieldErrors.Add("key_id", err)
 		}
 	}
 

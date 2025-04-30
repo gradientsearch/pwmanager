@@ -11,7 +11,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
@@ -103,36 +103,36 @@ func AuthorizeUser(client *authclient.Client, userBus *userbus.Business, rule st
 	return m
 }
 
-// AuthorizeProduct executes the specified role and extracts the specified
-// product from the DB if a product id is specified in the call. Depending on
+// AuthorizeKey executes the specified role and extracts the specified
+// key from the DB if a key id is specified in the call. Depending on
 // the rule specified, the userid from the claims may be compared with the
-// specified user id from the product.
-func AuthorizeProduct(client *authclient.Client, productBus *productbus.Business) web.MidFunc {
+// specified user id from the key.
+func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFunc {
 	m := func(next web.HandlerFunc) web.HandlerFunc {
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
-			id := web.Param(r, "product_id")
+			id := web.Param(r, "key_id")
 
 			var userID uuid.UUID
 
 			if id != "" {
 				var err error
-				productID, err := uuid.Parse(id)
+				keyID, err := uuid.Parse(id)
 				if err != nil {
 					return errs.New(errs.Unauthenticated, ErrInvalidID)
 				}
 
-				prd, err := productBus.QueryByID(ctx, productID)
+				prd, err := keyBus.QueryByID(ctx, keyID)
 				if err != nil {
 					switch {
-					case errors.Is(err, productbus.ErrNotFound):
+					case errors.Is(err, keybus.ErrNotFound):
 						return errs.New(errs.Unauthenticated, err)
 					default:
-						return errs.Newf(errs.Internal, "querybyid: productID[%s]: %s", productID, err)
+						return errs.Newf(errs.Internal, "querybyid: keyID[%s]: %s", keyID, err)
 					}
 				}
 
 				userID = prd.UserID
-				ctx = setProduct(ctx, prd)
+				ctx = setKey(ctx, prd)
 			}
 
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)

@@ -1,18 +1,18 @@
-package productdb
+package keydb
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/types/money"
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/quantity"
-	"github.com/google/uuid"
 )
 
-type product struct {
-	ID          uuid.UUID `db:"product_id"`
+type key struct {
+	ID          uuid.UUID `db:"key_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Name        string    `db:"name"`
 	Cost        float64   `db:"cost"`
@@ -21,8 +21,8 @@ type product struct {
 	DateUpdated time.Time `db:"date_updated"`
 }
 
-func toDBProduct(bus productbus.Product) product {
-	db := product{
+func toDBKey(bus keybus.Key) key {
+	db := key{
 		ID:          bus.ID,
 		UserID:      bus.UserID,
 		Name:        bus.Name.String(),
@@ -35,23 +35,23 @@ func toDBProduct(bus productbus.Product) product {
 	return db
 }
 
-func toBusProduct(db product) (productbus.Product, error) {
+func toBusKey(db key) (keybus.Key, error) {
 	name, err := name.Parse(db.Name)
 	if err != nil {
-		return productbus.Product{}, fmt.Errorf("parse name: %w", err)
+		return keybus.Key{}, fmt.Errorf("parse name: %w", err)
 	}
 
 	cost, err := money.Parse(db.Cost)
 	if err != nil {
-		return productbus.Product{}, fmt.Errorf("parse cost: %w", err)
+		return keybus.Key{}, fmt.Errorf("parse cost: %w", err)
 	}
 
 	quantity, err := quantity.Parse(db.Quantity)
 	if err != nil {
-		return productbus.Product{}, fmt.Errorf("parse quantity: %w", err)
+		return keybus.Key{}, fmt.Errorf("parse quantity: %w", err)
 	}
 
-	bus := productbus.Product{
+	bus := keybus.Key{
 		ID:          db.ID,
 		UserID:      db.UserID,
 		Name:        name,
@@ -64,12 +64,12 @@ func toBusProduct(db product) (productbus.Product, error) {
 	return bus, nil
 }
 
-func toBusProducts(dbs []product) ([]productbus.Product, error) {
-	bus := make([]productbus.Product, len(dbs))
+func toBusKeys(dbs []key) ([]keybus.Key, error) {
+	bus := make([]keybus.Key, len(dbs))
 
 	for i, db := range dbs {
 		var err error
-		bus[i], err = toBusProduct(db)
+		bus[i], err = toBusKey(db)
 		if err != nil {
 			return nil, err
 		}

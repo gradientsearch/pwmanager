@@ -4,7 +4,7 @@ package crud
 import (
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
-	"github.com/gradientsearch/pwmanager/app/domain/productapp"
+	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
@@ -32,14 +32,14 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
-	productapp.Routes(app, productapp.Config{
-		ProductBus: cfg.BusConfig.ProductBus,
+	keyapp.Routes(app, keyapp.Config{
+		KeyBus:     cfg.BusConfig.KeyBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
 	tranapp.Routes(app, tranapp.Config{
 		UserBus:    cfg.BusConfig.UserBus,
-		ProductBus: cfg.BusConfig.ProductBus,
+		KeyBus:     cfg.BusConfig.KeyBus,
 		Log:        cfg.Log,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 		DB:         cfg.DB,

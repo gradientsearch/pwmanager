@@ -1,19 +1,19 @@
-package productdb
+package keydb
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
 
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 )
 
-func (s *Store) applyFilter(filter productbus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
+func (s *Store) applyFilter(filter keybus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
 	var wc []string
 
 	if filter.ID != nil {
-		data["product_id"] = *filter.ID
-		wc = append(wc, "product_id = :product_id")
+		data["key_id"] = *filter.ID
+		wc = append(wc, "key_id = :key_id")
 	}
 
 	if filter.Name != nil {

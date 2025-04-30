@@ -1,4 +1,4 @@
-// Package vbundledb provides access to the product view.
+// Package vbundledb provides access to the key view.
 package vbundledb
 
 import (
@@ -14,7 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// Store manages the set of APIs for product view database access.
+// Store manages the set of APIs for key view database access.
 type Store struct {
 	log *logger.Logger
 	db  sqlx.ExtContext
@@ -28,8 +28,8 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	}
 }
 
-// Query retrieves a list of existing products from the database.
-func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderBy order.By, page page.Page) ([]vbundlebus.Product, error) {
+// Query retrieves a list of existing keys from the database.
+func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderBy order.By, page page.Page) ([]vbundlebus.Key, error) {
 	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),
 		"rows_per_page": page.RowsPerPage(),
@@ -37,7 +37,7 @@ func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderB
 
 	const q = `
 	SELECT
-		product_id,
+		key_id,
 		user_id,
 		name,
 		cost,
@@ -46,7 +46,7 @@ func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderB
 		date_updated,
 		user_name
 	FROM
-		view_products`
+		view_keys`
 
 	buf := bytes.NewBufferString(q)
 	s.applyFilter(filter, data, buf)
@@ -59,12 +59,12 @@ func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderB
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dnPrd []product
+	var dnPrd []key
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dnPrd); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	prd, err := toBusProducts(dnPrd)
+	prd, err := toBusKeys(dnPrd)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderB
 	return prd, nil
 }
 
-// Count returns the total number of products in the DB.
+// Count returns the total number of keys in the DB.
 func (s *Store) Count(ctx context.Context, filter vbundlebus.QueryFilter) (int, error) {
 	data := map[string]any{}
 
@@ -80,7 +80,7 @@ func (s *Store) Count(ctx context.Context, filter vbundlebus.QueryFilter) (int, 
 	SELECT
 		count(1)
 	FROM
-		view_products`
+		view_keys`
 
 	buf := bytes.NewBufferString(q)
 	s.applyFilter(filter, data, buf)

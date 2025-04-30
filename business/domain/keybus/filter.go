@@ -1,8 +1,8 @@
-package productbus
+package keybus
 
 import (
-	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/business/types/name"
 )
 
 // QueryFilter holds the available fields a query can be filtered on.

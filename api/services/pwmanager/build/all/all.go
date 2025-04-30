@@ -4,7 +4,7 @@ package all
 import (
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
-	"github.com/gradientsearch/pwmanager/app/domain/productapp"
+	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/domain/rawapp"
 	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
@@ -35,9 +35,9 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
-	productapp.Routes(app, productapp.Config{
+	keyapp.Routes(app, keyapp.Config{
 		Log:        cfg.Log,
-		ProductBus: cfg.BusConfig.ProductBus,
+		KeyBus:     cfg.BusConfig.KeyBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
@@ -47,7 +47,7 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		Log:        cfg.Log,
 		DB:         cfg.DB,
 		UserBus:    cfg.BusConfig.UserBus,
-		ProductBus: cfg.BusConfig.ProductBus,
+		KeyBus:     cfg.BusConfig.KeyBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 

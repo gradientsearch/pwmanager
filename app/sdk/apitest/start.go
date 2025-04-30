@@ -49,7 +49,7 @@ func New(t *testing.T, testName string) *Test {
 		DB:  db.DB,
 		BusConfig: mux.BusConfig{
 			UserBus:    db.BusDomain.User,
-			ProductBus: db.BusDomain.Product,
+			KeyBus:     db.BusDomain.Key,
 			BundleBus:  db.BusDomain.Bundle,
 			VBundleBus: db.BusDomain.VBundle,
 		},

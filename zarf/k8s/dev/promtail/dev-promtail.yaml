@@ -28,7 +28,7 @@ data:
       filename: /run/promtail/positions.yaml
 
     scrape_configs:
-      # See also https://github.com/grafana/loki/blob/master/production/ksonnet/promtail/scrape_config.libsonnet for reference
+      # See also https://github.com/grafana/loki/blob/master/keyion/ksonnet/promtail/scrape_config.libsonnet for reference
       - job_name: kubernetes-pods
         pipeline_stages:
           - cri: {}

@@ -1,4 +1,4 @@
-package productbus_test
+package keybus_test
 
 import (
 	"context"
@@ -7,7 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/google/go-cmp/cmp"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
 	"github.com/gradientsearch/pwmanager/business/sdk/page"
@@ -16,13 +17,12 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/quantity"
 	"github.com/gradientsearch/pwmanager/business/types/role"
-	"github.com/google/go-cmp/cmp"
 )
 
-func Test_Product(t *testing.T) {
+func Test_Key(t *testing.T) {
 	t.Parallel()
 
-	db := dbtest.New(t, "Test_Product")
+	db := dbtest.New(t, "Test_Key")
 
 	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {
@@ -47,14 +47,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
 	if err != nil {
-		return unitest.SeedData{}, fmt.Errorf("seeding products : %w", err)
+		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu1 := unitest.User{
-		User:     usrs[0],
-		Products: prds,
+		User: usrs[0],
+		Keys: prds,
 	}
 
 	// -------------------------------------------------------------------------
@@ -64,14 +64,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
 	if err != nil {
-		return unitest.SeedData{}, fmt.Errorf("seeding products : %w", err)
+		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := unitest.User{
-		User:     usrs[0],
-		Products: prds,
+		User: usrs[0],
+		Keys: prds,
 	}
 
 	// -------------------------------------------------------------------------
@@ -87,9 +87,9 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 // =============================================================================
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	prds := make([]productbus.Product, 0, len(sd.Admins[0].Products)+len(sd.Users[0].Products))
-	prds = append(prds, sd.Admins[0].Products...)
-	prds = append(prds, sd.Users[0].Products...)
+	prds := make([]keybus.Key, 0, len(sd.Admins[0].Keys)+len(sd.Users[0].Keys))
+	prds = append(prds, sd.Admins[0].Keys...)
+	prds = append(prds, sd.Users[0].Keys...)
 
 	sort.Slice(prds, func(i, j int) bool {
 		return prds[i].ID.String() <= prds[j].ID.String()
@@ -100,11 +100,11 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name:    "all",
 			ExpResp: prds,
 			ExcFunc: func(ctx context.Context) any {
-				filter := productbus.QueryFilter{
+				filter := keybus.QueryFilter{
 					Name: dbtest.NamePointer("Name"),
 				}
 
-				resp, err := busDomain.Product.Query(ctx, filter, productbus.DefaultOrderBy, page.MustParse("1", "10"))
+				resp, err := busDomain.Key.Query(ctx, filter, keybus.DefaultOrderBy, page.MustParse("1", "10"))
 				if err != nil {
 					return err
 				}
@@ -112,12 +112,12 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.([]productbus.Product)
+				gotResp, exists := got.([]keybus.Key)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.([]productbus.Product)
+				expResp := exp.([]keybus.Key)
 
 				for i := range gotResp {
 					if gotResp[i].DateCreated.Format(time.RFC3339) == expResp[i].DateCreated.Format(time.RFC3339) {
@@ -134,9 +134,9 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 		},
 		{
 			Name:    "byid",
-			ExpResp: sd.Users[0].Products[0],
+			ExpResp: sd.Users[0].Keys[0],
 			ExcFunc: func(ctx context.Context) any {
-				resp, err := busDomain.Product.QueryByID(ctx, sd.Users[0].Products[0].ID)
+				resp, err := busDomain.Key.QueryByID(ctx, sd.Users[0].Keys[0].ID)
 				if err != nil {
 					return err
 				}
@@ -144,12 +144,12 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(productbus.Product)
+				gotResp, exists := got.(keybus.Key)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(productbus.Product)
+				expResp := exp.(keybus.Key)
 
 				if gotResp.DateCreated.Format(time.RFC3339) == expResp.DateCreated.Format(time.RFC3339) {
 					expResp.DateCreated = gotResp.DateCreated
@@ -171,21 +171,21 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	table := []unitest.Table{
 		{
 			Name: "basic",
-			ExpResp: productbus.Product{
+			ExpResp: keybus.Key{
 				UserID:   sd.Users[0].ID,
 				Name:     name.MustParse("Guitar"),
 				Cost:     money.MustParse(10.34),
 				Quantity: quantity.MustParse(10),
 			},
 			ExcFunc: func(ctx context.Context) any {
-				np := productbus.NewProduct{
+				np := keybus.NewKey{
 					UserID:   sd.Users[0].ID,
 					Name:     name.MustParse("Guitar"),
 					Cost:     money.MustParse(10.34),
 					Quantity: quantity.MustParse(10),
 				}
 
-				resp, err := busDomain.Product.Create(ctx, np)
+				resp, err := busDomain.Key.Create(ctx, np)
 				if err != nil {
 					return err
 				}
@@ -193,12 +193,12 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(productbus.Product)
+				gotResp, exists := got.(keybus.Key)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(productbus.Product)
+				expResp := exp.(keybus.Key)
 
 				expResp.ID = gotResp.ID
 				expResp.DateCreated = gotResp.DateCreated
@@ -216,23 +216,23 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	table := []unitest.Table{
 		{
 			Name: "basic",
-			ExpResp: productbus.Product{
-				ID:          sd.Users[0].Products[0].ID,
+			ExpResp: keybus.Key{
+				ID:          sd.Users[0].Keys[0].ID,
 				UserID:      sd.Users[0].ID,
 				Name:        name.MustParse("Guitar"),
 				Cost:        money.MustParse(10.34),
 				Quantity:    quantity.MustParse(10),
-				DateCreated: sd.Users[0].Products[0].DateCreated,
-				DateUpdated: sd.Users[0].Products[0].DateCreated,
+				DateCreated: sd.Users[0].Keys[0].DateCreated,
+				DateUpdated: sd.Users[0].Keys[0].DateCreated,
 			},
 			ExcFunc: func(ctx context.Context) any {
-				up := productbus.UpdateProduct{
+				up := keybus.UpdateKey{
 					Name:     dbtest.NamePointer("Guitar"),
 					Cost:     dbtest.MoneyPointer(10.34),
 					Quantity: dbtest.QuantityPointer(10),
 				}
 
-				resp, err := busDomain.Product.Update(ctx, sd.Users[0].Products[0], up)
+				resp, err := busDomain.Key.Update(ctx, sd.Users[0].Keys[0], up)
 				if err != nil {
 					return err
 				}
@@ -240,12 +240,12 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(productbus.Product)
+				gotResp, exists := got.(keybus.Key)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(productbus.Product)
+				expResp := exp.(keybus.Key)
 
 				expResp.DateUpdated = gotResp.DateUpdated
 
@@ -263,7 +263,7 @@ func delete(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name:    "user",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := busDomain.Product.Delete(ctx, sd.Users[0].Products[1]); err != nil {
+				if err := busDomain.Key.Delete(ctx, sd.Users[0].Keys[1]); err != nil {
 					return err
 				}
 
@@ -277,7 +277,7 @@ func delete(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name:    "admin",
 			ExpResp: nil,
 			ExcFunc: func(ctx context.Context) any {
-				if err := busDomain.Product.Delete(ctx, sd.Admins[0].Products[1]); err != nil {
+				if err := busDomain.Key.Delete(ctx, sd.Admins[0].Keys[1]); err != nil {
 					return err
 				}
 

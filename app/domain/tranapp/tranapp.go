@@ -8,20 +8,20 @@ import (
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
 
 type app struct {
-	userBus    *userbus.Business
-	productBus *productbus.Business
+	userBus *userbus.Business
+	keyBus  *keybus.Business
 }
 
-func newApp(userBus *userbus.Business, productBus *productbus.Business) *app {
+func newApp(userBus *userbus.Business, keyBus *keybus.Business) *app {
 	return &app{
-		userBus:    userBus,
-		productBus: productBus,
+		userBus: userBus,
+		keyBus:  keyBus,
 	}
 }
 
@@ -38,14 +38,14 @@ func (a *app) newWithTx(ctx context.Context) (*app, error) {
 		return nil, err
 	}
 
-	productBus, err := a.productBus.NewWithTx(tx)
+	keyBus, err := a.keyBus.NewWithTx(tx)
 	if err != nil {
 		return nil, err
 	}
 
 	app := app{
-		userBus:    userBus,
-		productBus: productBus,
+		userBus: userBus,
+		keyBus:  keyBus,
 	}
 
 	return &app, nil
@@ -62,7 +62,7 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.New(errs.Internal, err)
 	}
 
-	np, err := toBusNewProduct(app.Product)
+	np, err := toBusNewKey(app.Key)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -82,10 +82,10 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 
 	np.UserID = usr.ID
 
-	prd, err := a.productBus.Create(ctx, np)
+	prd, err := a.keyBus.Create(ctx, np)
 	if err != nil {
 		return errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
-	return toAppProduct(prd)
+	return toAppKey(prd)
 }

@@ -7,9 +7,9 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 )
 
-// Product represents information about an individual product with
+// Key represents information about an individual key with
 // extended information.
-type Product struct {
+type Key struct {
 	ID          string  `json:"id"`
 	UserID      string  `json:"userID"`
 	Name        string  `json:"name"`
@@ -21,13 +21,13 @@ type Product struct {
 }
 
 // Encode implements the encoder interface.
-func (app Product) Encode() ([]byte, string, error) {
+func (app Key) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
 	return data, "application/json", err
 }
 
-func toAppProduct(prd vbundlebus.Product) Product {
-	return Product{
+func toAppKey(prd vbundlebus.Key) Key {
+	return Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name.String(),
@@ -39,10 +39,10 @@ func toAppProduct(prd vbundlebus.Product) Product {
 	}
 }
 
-func toAppProducts(prds []vbundlebus.Product) []Product {
-	app := make([]Product, len(prds))
+func toAppKeys(prds []vbundlebus.Key) []Key {
+	app := make([]Key, len(prds))
 	for i, prd := range prds {
-		app[i] = toAppProduct(prd)
+		app[i] = toAppKey(prd)
 	}
 
 	return app

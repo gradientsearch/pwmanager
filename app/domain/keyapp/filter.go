@@ -1,13 +1,13 @@
-package productapp
+package keyapp
 
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
-	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/app/sdk/errs"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
+	"github.com/gradientsearch/pwmanager/business/types/name"
 )
 
 type queryParams struct {
@@ -27,7 +27,7 @@ func parseQueryParams(r *http.Request) queryParams {
 		Page:     values.Get("page"),
 		Rows:     values.Get("rows"),
 		OrderBy:  values.Get("orderBy"),
-		ID:       values.Get("product_id"),
+		ID:       values.Get("key_id"),
 		Name:     values.Get("name"),
 		Cost:     values.Get("cost"),
 		Quantity: values.Get("quantity"),
@@ -36,9 +36,9 @@ func parseQueryParams(r *http.Request) queryParams {
 	return filter
 }
 
-func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
+func parseFilter(qp queryParams) (keybus.QueryFilter, error) {
 	var fieldErrors errs.FieldErrors
-	var filter productbus.QueryFilter
+	var filter keybus.QueryFilter
 
 	if qp.ID != "" {
 		id, err := uuid.Parse(qp.ID)
@@ -46,7 +46,7 @@ func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
 		case nil:
 			filter.ID = &id
 		default:
-			fieldErrors.Add("product_id", err)
+			fieldErrors.Add("key_id", err)
 		}
 	}
 
@@ -82,7 +82,7 @@ func parseFilter(qp queryParams) (productbus.QueryFilter, error) {
 	}
 
 	if fieldErrors != nil {
-		return productbus.QueryFilter{}, fieldErrors.ToError()
+		return keybus.QueryFilter{}, fieldErrors.ToError()
 	}
 
 	return filter, nil

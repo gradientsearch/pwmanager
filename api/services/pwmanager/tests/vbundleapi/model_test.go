@@ -4,12 +4,12 @@ import (
 	"time"
 
 	"github.com/gradientsearch/pwmanager/app/domain/vbundleapp"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 )
 
-func toAppVBundle(usr userbus.User, prd productbus.Product) vbundleapp.Product {
-	return vbundleapp.Product{
+func toAppVBundle(usr userbus.User, prd keybus.Key) vbundleapp.Key {
+	return vbundleapp.Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
 		Name:        prd.Name.String(),
@@ -21,8 +21,8 @@ func toAppVBundle(usr userbus.User, prd productbus.Product) vbundleapp.Product {
 	}
 }
 
-func toAppVBundles(usr userbus.User, prds []productbus.Product) []vbundleapp.Product {
-	items := make([]vbundleapp.Product, len(prds))
+func toAppVBundles(usr userbus.User, prds []keybus.Key) []vbundleapp.Key {
+	items := make([]vbundleapp.Key, len(prds))
 	for i, prd := range prds {
 		items[i] = toAppVBundle(usr, prd)
 	}

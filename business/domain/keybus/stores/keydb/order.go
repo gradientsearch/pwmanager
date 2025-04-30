@@ -1,18 +1,18 @@
-package productdb
+package keydb
 
 import (
 	"fmt"
 
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/sdk/order"
 )
 
 var orderByFields = map[string]string{
-	productbus.OrderByProductID: "product_id",
-	productbus.OrderByUserID:    "user_id",
-	productbus.OrderByName:      "name",
-	productbus.OrderByCost:      "cost",
-	productbus.OrderByQuantity:  "quantity",
+	keybus.OrderByKeyID:    "key_id",
+	keybus.OrderByUserID:   "user_id",
+	keybus.OrderByName:     "name",
+	keybus.OrderByCost:     "cost",
+	keybus.OrderByQuantity: "quantity",
 }
 
 func orderByClause(orderBy order.By) (string, error) {

@@ -8,12 +8,12 @@ import (
 )
 
 var orderByFields = map[string]string{
-	vbundlebus.OrderByProductID: "product_id",
-	vbundlebus.OrderByUserID:    "user_id",
-	vbundlebus.OrderByName:      "name",
-	vbundlebus.OrderByCost:      "cost",
-	vbundlebus.OrderByQuantity:  "quantity",
-	vbundlebus.OrderByUserName:  "user_name",
+	vbundlebus.OrderByKeyID:    "key_id",
+	vbundlebus.OrderByUserID:   "user_id",
+	vbundlebus.OrderByName:     "name",
+	vbundlebus.OrderByCost:     "cost",
+	vbundlebus.OrderByQuantity: "quantity",
+	vbundlebus.OrderByUserName: "user_name",
 }
 
 func orderByClause(orderBy order.By) (string, error) {

@@ -3,10 +3,10 @@ package tran_test
 import (
 	"net/http"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/google/go-cmp/cmp"
 )
 
 func create200(sd apitest.SeedData) []apitest.Table {
@@ -18,7 +18,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &tranapp.NewTran{
-				Product: tranapp.NewProduct{
+				Key: tranapp.NewKey{
 					Name:     "Guitar",
 					Cost:     10.34,
 					Quantity: 10,
@@ -32,19 +32,19 @@ func create200(sd apitest.SeedData) []apitest.Table {
 					PasswordConfirm: "123",
 				},
 			},
-			GotResp: &tranapp.Product{},
-			ExpResp: &tranapp.Product{
+			GotResp: &tranapp.Key{},
+			ExpResp: &tranapp.Key{
 				Name:     "Guitar",
 				Cost:     10.34,
 				Quantity: 10,
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*tranapp.Product)
+				gotResp, exists := got.(*tranapp.Key)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*tranapp.Product)
+				expResp := exp.(*tranapp.Key)
 
 				expResp.ID = gotResp.ID
 				expResp.UserID = gotResp.UserID
@@ -81,7 +81,7 @@ func create400(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input: &tranapp.NewTran{
-				Product: tranapp.NewProduct{
+				Key: tranapp.NewKey{
 					Name:     "Gu",
 					Cost:     10.34,
 					Quantity: 10,

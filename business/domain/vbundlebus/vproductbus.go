@@ -1,4 +1,4 @@
-// Package vbundlebus provides business access to view product domain.
+// Package vbundlebus provides business access to view key domain.
 package vbundlebus
 
 import (
@@ -13,11 +13,11 @@ import (
 // Storer interface declares the behavior this package needs to persist and
 // retrieve data.
 type Storer interface {
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error)
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 }
 
-// Business manages the set of APIs for view product access.
+// Business manages the set of APIs for view key access.
 type Business struct {
 	storer Storer
 }
@@ -29,8 +29,8 @@ func NewBusiness(storer Storer) *Business {
 	}
 }
 
-// Query retrieves a list of existing products.
-func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error) {
+// Query retrieves a list of existing keys.
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error) {
 	ctx, span := otel.AddSpan(ctx, "business.vbundlebus.query")
 	defer span.End()
 
@@ -42,7 +42,7 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 	return users, nil
 }
 
-// Count returns the total number of products.
+// Count returns the total number of keys.
 func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	ctx, span := otel.AddSpan(ctx, "business.vbundlebus.count")
 	defer span.End()

@@ -1,5 +1,5 @@
-// Package productapp maintains the app layer api for the product domain.
-package productapp
+// Package keyapp maintains the app layer api for the key domain.
+package keyapp
 
 import (
 	"context"
@@ -8,73 +8,73 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/app/sdk/query"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/sdk/order"
 	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
 
 type app struct {
-	productBus *productbus.Business
+	keyBus *keybus.Business
 }
 
-func newApp(productBus *productbus.Business) *app {
+func newApp(keyBus *keybus.Business) *app {
 	return &app{
-		productBus: productBus,
+		keyBus: keyBus,
 	}
 }
 
 func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
-	var app NewProduct
+	var app NewKey
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	np, err := toBusNewProduct(ctx, app)
+	np, err := toBusNewKey(ctx, app)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	prd, err := a.productBus.Create(ctx, np)
+	prd, err := a.keyBus.Create(ctx, np)
 	if err != nil {
 		return errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
 	}
 
-	return toAppProduct(prd)
+	return toAppKey(prd)
 }
 
 func (a *app) update(ctx context.Context, r *http.Request) web.Encoder {
-	var app UpdateProduct
+	var app UpdateKey
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	up, err := toBusUpdateProduct(app)
+	up, err := toBusUpdateKey(app)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	prd, err := mid.GetProduct(ctx)
+	prd, err := mid.GetKey(ctx)
 	if err != nil {
-		return errs.Newf(errs.Internal, "product missing in context: %s", err)
+		return errs.Newf(errs.Internal, "key missing in context: %s", err)
 	}
 
-	updPrd, err := a.productBus.Update(ctx, prd, up)
+	updPrd, err := a.keyBus.Update(ctx, prd, up)
 	if err != nil {
-		return errs.Newf(errs.Internal, "update: productID[%s] up[%+v]: %s", prd.ID, app, err)
+		return errs.Newf(errs.Internal, "update: keyID[%s] up[%+v]: %s", prd.ID, app, err)
 	}
 
-	return toAppProduct(updPrd)
+	return toAppKey(updPrd)
 }
 
 func (a *app) delete(ctx context.Context, _ *http.Request) web.Encoder {
-	prd, err := mid.GetProduct(ctx)
+	prd, err := mid.GetKey(ctx)
 	if err != nil {
-		return errs.Newf(errs.Internal, "productID missing in context: %s", err)
+		return errs.Newf(errs.Internal, "keyID missing in context: %s", err)
 	}
 
-	if err := a.productBus.Delete(ctx, prd); err != nil {
-		return errs.Newf(errs.Internal, "delete: productID[%s]: %s", prd.ID, err)
+	if err := a.keyBus.Delete(ctx, prd); err != nil {
+		return errs.Newf(errs.Internal, "delete: keyID[%s]: %s", prd.ID, err)
 	}
 
 	return nil
@@ -93,29 +93,29 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return err.(*errs.Error)
 	}
 
-	orderBy, err := order.Parse(orderByFields, qp.OrderBy, productbus.DefaultOrderBy)
+	orderBy, err := order.Parse(orderByFields, qp.OrderBy, keybus.DefaultOrderBy)
 	if err != nil {
 		return errs.NewFieldErrors("order", err)
 	}
 
-	prds, err := a.productBus.Query(ctx, filter, orderBy, page)
+	prds, err := a.keyBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return errs.Newf(errs.Internal, "query: %s", err)
 	}
 
-	total, err := a.productBus.Count(ctx, filter)
+	total, err := a.keyBus.Count(ctx, filter)
 	if err != nil {
 		return errs.Newf(errs.Internal, "count: %s", err)
 	}
 
-	return query.NewResult(toAppProducts(prds), total, page)
+	return query.NewResult(toAppKeys(prds), total, page)
 }
 
 func (a *app) queryByID(ctx context.Context, r *http.Request) web.Encoder {
-	prd, err := mid.GetProduct(ctx)
+	prd, err := mid.GetKey(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
-	return toAppProduct(prd)
+	return toAppKey(prd)
 }

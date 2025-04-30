@@ -12,8 +12,8 @@ func (s *Store) applyFilter(filter vbundlebus.QueryFilter, data map[string]any, 
 	var wc []string
 
 	if filter.ID != nil {
-		data["product_id"] = *filter.ID
-		wc = append(wc, "product_id = :product_id")
+		data["key_id"] = *filter.ID
+		wc = append(wc, "key_id = :key_id")
 	}
 
 	if filter.Name != nil {

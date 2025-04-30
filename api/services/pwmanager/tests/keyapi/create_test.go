@@ -1,41 +1,41 @@
-package product_test
+package key_test
 
 import (
 	"net/http"
 
-	"github.com/gradientsearch/pwmanager/app/domain/productapp"
+	"github.com/google/go-cmp/cmp"
+	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/google/go-cmp/cmp"
 )
 
 func create200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        "/v1/products",
+			URL:        "/v1/keys",
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
-			Input: &productapp.NewProduct{
+			Input: &keyapp.NewKey{
 				Name:     "Guitar",
 				Cost:     10.34,
 				Quantity: 10,
 			},
-			GotResp: &productapp.Product{},
-			ExpResp: &productapp.Product{
+			GotResp: &keyapp.Key{},
+			ExpResp: &keyapp.Key{
 				Name:     "Guitar",
 				UserID:   sd.Users[0].ID.String(),
 				Cost:     10.34,
 				Quantity: 10,
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*productapp.Product)
+				gotResp, exists := got.(*keyapp.Key)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*productapp.Product)
+				expResp := exp.(*keyapp.Key)
 
 				expResp.ID = gotResp.ID
 				expResp.DateCreated = gotResp.DateCreated
@@ -53,11 +53,11 @@ func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "missing-input",
-			URL:        "/v1/products",
+			URL:        "/v1/keys",
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input:      &productapp.NewProduct{},
+			Input:      &keyapp.NewKey{},
 			GotResp:    &errs.Error{},
 			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {
@@ -73,7 +73,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        "/v1/products",
+			URL:        "/v1/keys",
 			Token:      "&nbsp;",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -85,7 +85,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badtoken",
-			URL:        "/v1/products",
+			URL:        "/v1/keys",
 			Token:      sd.Admins[0].Token[:10],
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -97,7 +97,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        "/v1/products",
+			URL:        "/v1/keys",
 			Token:      sd.Admins[0].Token + "A",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -109,7 +109,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        "/v1/products",
+			URL:        "/v1/keys",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,

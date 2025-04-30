@@ -1,5 +1,5 @@
-// Package productbus provides business access to product domain.
-package productbus
+// Package keybus provides business access to key domain.
+package keybus
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/delegate"
 	"github.com/gradientsearch/pwmanager/business/sdk/order"
@@ -14,12 +15,11 @@ import (
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
 	"github.com/gradientsearch/pwmanager/foundation/otel"
-	"github.com/google/uuid"
 )
 
 // Set of error variables for CRUD operations.
 var (
-	ErrNotFound     = errors.New("product not found")
+	ErrNotFound     = errors.New("key not found")
 	ErrUserDisabled = errors.New("user disabled")
 	ErrInvalidCost  = errors.New("cost not valid")
 )
@@ -28,16 +28,16 @@ var (
 // retrieve data.
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
-	Create(ctx context.Context, prd Product) error
-	Update(ctx context.Context, prd Product) error
-	Delete(ctx context.Context, prd Product) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error)
+	Create(ctx context.Context, prd Key) error
+	Update(ctx context.Context, prd Key) error
+	Delete(ctx context.Context, prd Key) error
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
-	QueryByID(ctx context.Context, productID uuid.UUID) (Product, error)
-	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Product, error)
+	QueryByID(ctx context.Context, keyID uuid.UUID) (Key, error)
+	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, error)
 }
 
-// Business manages the set of APIs for product access.
+// Business manages the set of APIs for key access.
 type Business struct {
 	log      *logger.Logger
 	userBus  *userbus.Business
@@ -45,7 +45,7 @@ type Business struct {
 	storer   Storer
 }
 
-// NewBusiness constructs a product business API for use.
+// NewBusiness constructs a key business API for use.
 func NewBusiness(log *logger.Logger, userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
 	b := Business{
 		log:      log,
@@ -82,23 +82,23 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 	return &bus, nil
 }
 
-// Create adds a new product to the system.
-func (b *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
-	ctx, span := otel.AddSpan(ctx, "business.productbus.create")
+// Create adds a new key to the system.
+func (b *Business) Create(ctx context.Context, np NewKey) (Key, error) {
+	ctx, span := otel.AddSpan(ctx, "business.keybus.create")
 	defer span.End()
 
 	usr, err := b.userBus.QueryByID(ctx, np.UserID)
 	if err != nil {
-		return Product{}, fmt.Errorf("user.querybyid: %s: %w", np.UserID, err)
+		return Key{}, fmt.Errorf("user.querybyid: %s: %w", np.UserID, err)
 	}
 
 	if !usr.Enabled {
-		return Product{}, ErrUserDisabled
+		return Key{}, ErrUserDisabled
 	}
 
 	now := time.Now()
 
-	prd := Product{
+	prd := Key{
 		ID:          uuid.New(),
 		Name:        np.Name,
 		Cost:        np.Cost,
@@ -109,15 +109,15 @@ func (b *Business) Create(ctx context.Context, np NewProduct) (Product, error) {
 	}
 
 	if err := b.storer.Create(ctx, prd); err != nil {
-		return Product{}, fmt.Errorf("create: %w", err)
+		return Key{}, fmt.Errorf("create: %w", err)
 	}
 
 	return prd, nil
 }
 
-// Update modifies information about a product.
-func (b *Business) Update(ctx context.Context, prd Product, up UpdateProduct) (Product, error) {
-	ctx, span := otel.AddSpan(ctx, "business.productbus.update")
+// Update modifies information about a key.
+func (b *Business) Update(ctx context.Context, prd Key, up UpdateKey) (Key, error) {
+	ctx, span := otel.AddSpan(ctx, "business.keybus.update")
 	defer span.End()
 
 	if up.Name != nil {
@@ -135,15 +135,15 @@ func (b *Business) Update(ctx context.Context, prd Product, up UpdateProduct) (P
 	prd.DateUpdated = time.Now()
 
 	if err := b.storer.Update(ctx, prd); err != nil {
-		return Product{}, fmt.Errorf("update: %w", err)
+		return Key{}, fmt.Errorf("update: %w", err)
 	}
 
 	return prd, nil
 }
 
-// Delete removes the specified product.
-func (b *Business) Delete(ctx context.Context, prd Product) error {
-	ctx, span := otel.AddSpan(ctx, "business.productbus.delete")
+// Delete removes the specified key.
+func (b *Business) Delete(ctx context.Context, prd Key) error {
+	ctx, span := otel.AddSpan(ctx, "business.keybus.delete")
 	defer span.End()
 
 	if err := b.storer.Delete(ctx, prd); err != nil {
@@ -153,9 +153,9 @@ func (b *Business) Delete(ctx context.Context, prd Product) error {
 	return nil
 }
 
-// Query retrieves a list of existing products.
-func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error) {
-	ctx, span := otel.AddSpan(ctx, "business.productbus.query")
+// Query retrieves a list of existing keys.
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error) {
+	ctx, span := otel.AddSpan(ctx, "business.keybus.query")
 	defer span.End()
 
 	prds, err := b.storer.Query(ctx, filter, orderBy, page)
@@ -166,30 +166,30 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 	return prds, nil
 }
 
-// Count returns the total number of products.
+// Count returns the total number of keys.
 func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
-	ctx, span := otel.AddSpan(ctx, "business.productbus.count")
+	ctx, span := otel.AddSpan(ctx, "business.keybus.count")
 	defer span.End()
 
 	return b.storer.Count(ctx, filter)
 }
 
-// QueryByID finds the product by the specified ID.
-func (b *Business) QueryByID(ctx context.Context, productID uuid.UUID) (Product, error) {
-	ctx, span := otel.AddSpan(ctx, "business.productbus.querybyid")
+// QueryByID finds the key by the specified ID.
+func (b *Business) QueryByID(ctx context.Context, keyID uuid.UUID) (Key, error) {
+	ctx, span := otel.AddSpan(ctx, "business.keybus.querybyid")
 	defer span.End()
 
-	prd, err := b.storer.QueryByID(ctx, productID)
+	prd, err := b.storer.QueryByID(ctx, keyID)
 	if err != nil {
-		return Product{}, fmt.Errorf("query: productID[%s]: %w", productID, err)
+		return Key{}, fmt.Errorf("query: keyID[%s]: %w", keyID, err)
 	}
 
 	return prd, nil
 }
 
-// QueryByUserID finds the products by a specified User ID.
-func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Product, error) {
-	ctx, span := otel.AddSpan(ctx, "business.productbus.querybyuserid")
+// QueryByUserID finds the keys by a specified User ID.
+func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, error) {
+	ctx, span := otel.AddSpan(ctx, "business.keybus.querybyuserid")
 	defer span.End()
 
 	prds, err := b.storer.QueryByUserID(ctx, userID)

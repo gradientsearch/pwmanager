@@ -10,7 +10,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
@@ -64,7 +64,7 @@ type AuthConfig struct {
 
 type BusConfig struct {
 	UserBus    *userbus.Business
-	ProductBus *productbus.Business
+	KeyBus     *keybus.Business
 	BundleBus  *bundlebus.Business
 	VBundleBus *vbundlebus.Business
 }

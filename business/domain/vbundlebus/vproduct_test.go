@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
@@ -20,7 +20,7 @@ import (
 func Test_VBundle(t *testing.T) {
 	t.Parallel()
 
-	db := dbtest.New(t, "Test_Product")
+	db := dbtest.New(t, "Test_Key")
 
 	sd, err := insertSeedData(db.BusDomain)
 	if err != nil {
@@ -42,14 +42,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
 	if err != nil {
-		return unitest.SeedData{}, fmt.Errorf("seeding products : %w", err)
+		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu1 := unitest.User{
-		User:     usrs[0],
-		Products: prds,
+		User: usrs[0],
+		Keys: prds,
 	}
 
 	// -------------------------------------------------------------------------
@@ -59,14 +59,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = productbus.TestGenerateSeedProducts(ctx, 2, busDomain.Product, usrs[0].ID)
+	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
 	if err != nil {
-		return unitest.SeedData{}, fmt.Errorf("seeding products : %w", err)
+		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := unitest.User{
-		User:     usrs[0],
-		Products: prds,
+		User: usrs[0],
+		Keys: prds,
 	}
 
 	// -------------------------------------------------------------------------
@@ -81,8 +81,8 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 // =============================================================================
 
-func toVBundle(usr userbus.User, prd productbus.Product) vbundlebus.Product {
-	return vbundlebus.Product{
+func toVBundle(usr userbus.User, prd keybus.Key) vbundlebus.Key {
+	return vbundlebus.Key{
 		ID:          prd.ID,
 		UserID:      prd.UserID,
 		Name:        prd.Name,
@@ -94,8 +94,8 @@ func toVBundle(usr userbus.User, prd productbus.Product) vbundlebus.Product {
 	}
 }
 
-func toVBundles(usr userbus.User, prds []productbus.Product) []vbundlebus.Product {
-	items := make([]vbundlebus.Product, len(prds))
+func toVBundles(usr userbus.User, prds []keybus.Key) []vbundlebus.Key {
+	items := make([]vbundlebus.Key, len(prds))
 	for i, prd := range prds {
 		items[i] = toVBundle(usr, prd)
 	}
@@ -106,8 +106,8 @@ func toVBundles(usr userbus.User, prds []productbus.Product) []vbundlebus.Produc
 // =============================================================================
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	prds := toVBundles(sd.Admins[0].User, sd.Admins[0].Products)
-	prds = append(prds, toVBundles(sd.Users[0].User, sd.Users[0].Products)...)
+	prds := toVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
+	prds = append(prds, toVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
 
 	sort.Slice(prds, func(i, j int) bool {
 		return prds[i].ID.String() <= prds[j].ID.String()
@@ -130,12 +130,12 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.([]vbundlebus.Product)
+				gotResp, exists := got.([]vbundlebus.Key)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.([]vbundlebus.Product)
+				expResp := exp.([]vbundlebus.Key)
 
 				for i := range gotResp {
 					if gotResp[i].DateCreated.Format(time.RFC3339) == expResp[i].DateCreated.Format(time.RFC3339) {

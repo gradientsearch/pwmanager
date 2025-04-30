@@ -11,8 +11,8 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/quantity"
 )
 
-type product struct {
-	ID          uuid.UUID `db:"product_id"`
+type key struct {
+	ID          uuid.UUID `db:"key_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Name        string    `db:"name"`
 	Cost        float64   `db:"cost"`
@@ -22,28 +22,28 @@ type product struct {
 	UserName    string    `db:"user_name"`
 }
 
-func toBusProduct(db product) (vbundlebus.Product, error) {
+func toBusKey(db key) (vbundlebus.Key, error) {
 	userName, err := name.Parse(db.UserName)
 	if err != nil {
-		return vbundlebus.Product{}, fmt.Errorf("parse user name: %w", err)
+		return vbundlebus.Key{}, fmt.Errorf("parse user name: %w", err)
 	}
 
 	name, err := name.Parse(db.Name)
 	if err != nil {
-		return vbundlebus.Product{}, fmt.Errorf("parse name: %w", err)
+		return vbundlebus.Key{}, fmt.Errorf("parse name: %w", err)
 	}
 
 	cost, err := money.Parse(db.Cost)
 	if err != nil {
-		return vbundlebus.Product{}, fmt.Errorf("parse cost: %w", err)
+		return vbundlebus.Key{}, fmt.Errorf("parse cost: %w", err)
 	}
 
 	quantity, err := quantity.Parse(db.Quantity)
 	if err != nil {
-		return vbundlebus.Product{}, fmt.Errorf("parse quantity: %w", err)
+		return vbundlebus.Key{}, fmt.Errorf("parse quantity: %w", err)
 	}
 
-	bus := vbundlebus.Product{
+	bus := vbundlebus.Key{
 		ID:          db.ID,
 		UserID:      db.UserID,
 		Name:        name,
@@ -57,12 +57,12 @@ func toBusProduct(db product) (vbundlebus.Product, error) {
 	return bus, nil
 }
 
-func toBusProducts(dbPrds []product) ([]vbundlebus.Product, error) {
-	bus := make([]vbundlebus.Product, len(dbPrds))
+func toBusKeys(dbPrds []key) ([]vbundlebus.Key, error) {
+	bus := make([]vbundlebus.Key, len(dbPrds))
 
 	for i, dbPrd := range dbPrds {
 		var err error
-		bus[i], err = toBusProduct(dbPrd)
+		bus[i], err = toBusKey(dbPrd)
 		if err != nil {
 			return nil, err
 		}
