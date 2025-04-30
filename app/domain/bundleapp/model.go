@@ -12,24 +12,13 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/bundletype"
 )
 
-// Address represents information about an individual address.
-type Address struct {
-	Address1 string `json:"address1"`
-	Address2 string `json:"address2"`
-	ZipCode  string `json:"zipCode"`
-	City     string `json:"city"`
-	State    string `json:"state"`
-	Country  string `json:"country"`
-}
-
 // Bundle represents information about an individual bundle.
 type Bundle struct {
-	ID          string  `json:"id"`
-	UserID      string  `json:"userID"`
-	Type        string  `json:"type"`
-	Address     Address `json:"address"`
-	DateCreated string  `json:"dateCreated"`
-	DateUpdated string  `json:"dateUpdated"`
+	ID          string `json:"id"`
+	UserID      string `json:"userID"`
+	Type        string `json:"type"`
+	DateCreated string `json:"dateCreated"`
+	DateUpdated string `json:"dateUpdated"`
 }
 
 // Encode implements the encoder interface.
@@ -100,20 +89,9 @@ func toBusNewBundle(ctx context.Context, app NewBundle) (bundlebus.NewBundle, er
 
 // =============================================================================
 
-// UpdateAddress defines the data needed to update an address.
-type UpdateAddress struct {
-	Address1 *string `json:"address1" validate:"omitempty,min=1,max=70"`
-	Address2 *string `json:"address2" validate:"omitempty,max=70"`
-	ZipCode  *string `json:"zipCode" validate:"omitempty,numeric"`
-	City     *string `json:"city"`
-	State    *string `json:"state" validate:"omitempty,min=1,max=48"`
-	Country  *string `json:"country" validate:"omitempty,iso3166_1_alpha2"`
-}
-
 // UpdateBundle defines the data needed to update a bundle.
 type UpdateBundle struct {
-	Type    *string        `json:"type"`
-	Address *UpdateAddress `json:"address"`
+	Type *string `json:"type"`
 }
 
 // Decode implements the decoder interface.

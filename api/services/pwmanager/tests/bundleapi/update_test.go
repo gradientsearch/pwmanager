@@ -22,28 +22,12 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.UpdateBundle{
 				Type: dbtest.StringPointer("PERSONAL"),
-				Address: &bundleapp.UpdateAddress{
-					Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
-					Address2: dbtest.StringPointer("apt 105"),
-					ZipCode:  dbtest.StringPointer("35810"),
-					City:     dbtest.StringPointer("Huntsville"),
-					State:    dbtest.StringPointer("AL"),
-					Country:  dbtest.StringPointer("US"),
-				},
 			},
 			GotResp: &bundleapp.Bundle{},
 			ExpResp: &bundleapp.Bundle{
-				ID:     sd.Users[0].Bundles[0].ID.String(),
-				UserID: sd.Users[0].ID.String(),
-				Type:   "PERSONAL",
-				Address: bundleapp.Address{
-					Address1: "123 Mocking Bird Lane",
-					Address2: "apt 105",
-					ZipCode:  "35810",
-					City:     "Huntsville",
-					State:    "AL",
-					Country:  "US",
-				},
+				ID:          sd.Users[0].Bundles[0].ID.String(),
+				UserID:      sd.Users[0].ID.String(),
+				Type:        "PERSONAL",
 				DateCreated: sd.Users[0].Bundles[0].DateCreated.Format(time.RFC3339),
 				DateUpdated: sd.Users[0].Bundles[0].DateCreated.Format(time.RFC3339),
 			},
@@ -67,36 +51,13 @@ func update200(sd apitest.SeedData) []apitest.Table {
 func update400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "bad-input",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
-			Method:     http.MethodPut,
-			StatusCode: http.StatusBadRequest,
-			Input: &bundleapp.UpdateBundle{
-				Address: &bundleapp.UpdateAddress{
-					Address1: dbtest.StringPointer(""),
-					Address2: dbtest.StringPointer(""),
-					ZipCode:  dbtest.StringPointer(""),
-					City:     dbtest.StringPointer(""),
-					State:    dbtest.StringPointer(""),
-					Country:  dbtest.StringPointer(""),
-				},
-			},
-			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"address1\",\"error\":\"address1 must be at least 1 character in length\"},{\"field\":\"zipCode\",\"error\":\"zipCode must be a valid numeric value\"},{\"field\":\"state\",\"error\":\"state must be at least 1 character in length\"},{\"field\":\"country\",\"error\":\"Key: 'UpdateBundle.address.country' Error:Field validation for 'country' failed on the 'iso3166_1_alpha2' tag\"}]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-		{
 			Name:       "bad-type",
 			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
 			Input: &bundleapp.UpdateBundle{
-				Type:    dbtest.StringPointer("BAD TYPE"),
-				Address: &bundleapp.UpdateAddress{},
+				Type: dbtest.StringPointer("BAD TYPE"),
 			},
 			GotResp: &errs.Error{},
 			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid bundle type \"BAD TYPE\""),
@@ -143,14 +104,6 @@ func update401(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusUnauthorized,
 			Input: &bundleapp.UpdateBundle{
 				Type: dbtest.StringPointer("PERSONAL"),
-				Address: &bundleapp.UpdateAddress{
-					Address1: dbtest.StringPointer("123 Mocking Bird Lane"),
-					Address2: dbtest.StringPointer("apt 105"),
-					ZipCode:  dbtest.StringPointer("35810"),
-					City:     dbtest.StringPointer("Huntsville"),
-					State:    dbtest.StringPointer("AL"),
-					Country:  dbtest.StringPointer("US"),
-				},
 			},
 			GotResp: &errs.Error{},
 			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),

@@ -24,13 +24,6 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &bundleapp.Bundle{
 				UserID: sd.Users[0].ID.String(),
 				Type:   "PERSONAL",
-				Address: bundleapp.Address{
-					Address1: "123 Mocking Bird Lane",
-					ZipCode:  "35810",
-					City:     "Huntsville",
-					State:    "AL",
-					Country:  "US",
-				},
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*bundleapp.Bundle)
@@ -54,19 +47,6 @@ func create200(sd apitest.SeedData) []apitest.Table {
 
 func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
-		{
-			Name:       "missing-input",
-			URL:        "/v1/bundles",
-			Token:      sd.Users[0].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusBadRequest,
-			Input:      &bundleapp.NewBundle{},
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"type\",\"error\":\"type is a required field\"},{\"field\":\"address1\",\"error\":\"address1 is a required field\"},{\"field\":\"zipCode\",\"error\":\"zipCode is a required field\"},{\"field\":\"city\",\"error\":\"city is a required field\"},{\"field\":\"state\",\"error\":\"state is a required field\"},{\"field\":\"country\",\"error\":\"country is a required field\"}]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
 		{
 			Name:       "bad-type",
 			URL:        "/v1/bundles",
