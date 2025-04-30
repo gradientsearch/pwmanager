@@ -39,9 +39,9 @@ func toAppKey(prd keybus.Key) Key {
 	}
 }
 
-func toAppKeys(prds []keybus.Key) []Key {
-	app := make([]Key, len(prds))
-	for i, prd := range prds {
+func toAppKeys(keys []keybus.Key) []Key {
+	app := make([]Key, len(keys))
+	for i, prd := range keys {
 		app[i] = toAppKey(prd)
 	}
 

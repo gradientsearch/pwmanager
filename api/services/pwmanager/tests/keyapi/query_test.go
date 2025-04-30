@@ -14,12 +14,12 @@ import (
 )
 
 func query200(sd apitest.SeedData) []apitest.Table {
-	prds := make([]keybus.Key, 0, len(sd.Admins[0].Keys)+len(sd.Users[0].Keys))
-	prds = append(prds, sd.Admins[0].Keys...)
-	prds = append(prds, sd.Users[0].Keys...)
+	keys := make([]keybus.Key, 0, len(sd.Admins[0].Keys)+len(sd.Users[0].Keys))
+	keys = append(keys, sd.Admins[0].Keys...)
+	keys = append(keys, sd.Users[0].Keys...)
 
-	sort.Slice(prds, func(i, j int) bool {
-		return prds[i].ID.String() <= prds[j].ID.String()
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].ID.String() <= keys[j].ID.String()
 	})
 
 	table := []apitest.Table{
@@ -33,8 +33,8 @@ func query200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &query.Result[keyapp.Key]{
 				Page:        1,
 				RowsPerPage: 10,
-				Total:       len(prds),
-				Items:       toAppKeys(prds),
+				Total:       len(keys),
+				Items:       toAppKeys(keys),
 			},
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
@@ -49,12 +49,12 @@ func query400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "bad-query-filter",
-			URL:        "/v1/keys?page=1&rows=10&name=$#!",
+			URL:        "/v1/keys?page=1&rows=10&key_id=$#!",
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusBadRequest,
 			Method:     http.MethodGet,
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "[{\"field\":\"name\",\"error\":\"invalid name \\\"$#!\\\"\"}]"),
+			ExpResp:    errs.Newf(errs.InvalidArgument, "[{\"field\":\"key_id\",\"error\":\"invalid UUID length: 3\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},

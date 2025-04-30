@@ -149,12 +149,12 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 	ctx, span := otel.AddSpan(ctx, "business.keybus.query")
 	defer span.End()
 
-	prds, err := b.storer.Query(ctx, filter, orderBy, page)
+	keys, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return prds, nil
+	return keys, nil
 }
 
 // Count returns the total number of keys.
@@ -183,10 +183,10 @@ func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, 
 	ctx, span := otel.AddSpan(ctx, "business.keybus.querybyuserid")
 	defer span.End()
 
-	prds, err := b.storer.QueryByUserID(ctx, userID)
+	keys, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return prds, nil
+	return keys, nil
 }

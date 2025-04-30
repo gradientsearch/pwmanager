@@ -22,9 +22,9 @@ func toAppKeyPtr(prd keybus.Key) *keyapp.Key {
 	return &appPrd
 }
 
-func toAppKeys(prds []keybus.Key) []keyapp.Key {
-	items := make([]keyapp.Key, len(prds))
-	for i, prd := range prds {
+func toAppKeys(keys []keybus.Key) []keyapp.Key {
+	items := make([]keyapp.Key, len(keys))
+	for i, prd := range keys {
 		items[i] = toAppKey(prd)
 	}
 

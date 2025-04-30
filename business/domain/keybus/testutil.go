@@ -33,15 +33,15 @@ func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID) []NewKey {
 func TestGenerateSeedKeys(ctx context.Context, n int, api *Business, userID uuid.UUID, bids []uuid.UUID) ([]Key, error) {
 	newPrds := TestGenerateNewKeys(n, userID, bids)
 
-	prds := make([]Key, len(newPrds))
+	keys := make([]Key, len(newPrds))
 	for i, np := range newPrds {
 		prd, err := api.Create(ctx, np)
 		if err != nil {
 			return nil, fmt.Errorf("seeding key: idx: %d : %w", i, err)
 		}
 
-		prds[i] = prd
+		keys[i] = prd
 	}
 
-	return prds, nil
+	return keys, nil
 }

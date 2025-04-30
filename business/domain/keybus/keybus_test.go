@@ -57,14 +57,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		bids = append(bids, v.ID)
 	}
 
-	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	keys, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu1 := unitest.User{
 		User:    usrs[0],
-		Keys:    prds,
+		Keys:    keys,
 		Bundles: bdls,
 	}
 
@@ -85,14 +85,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		bids = append(bids, v.ID)
 	}
 
-	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := unitest.User{
 		User:    usrs[0],
-		Keys:    prds,
+		Keys:    keys,
 		Bundles: bdls,
 	}
 
@@ -109,18 +109,18 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 // =============================================================================
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	prds := make([]keybus.Key, 0, len(sd.Admins[0].Keys)+len(sd.Users[0].Keys))
-	//prds = append(prds, sd.Admins[0].Keys...)
-	prds = append(prds, sd.Users[0].Keys...)
+	keys := make([]keybus.Key, 0, len(sd.Admins[0].Keys)+len(sd.Users[0].Keys))
+	//keys = append(keys, sd.Admins[0].Keys...)
+	keys = append(keys, sd.Users[0].Keys...)
 
-	sort.Slice(prds, func(i, j int) bool {
-		return prds[i].ID.String() <= prds[j].ID.String()
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].ID.String() <= keys[j].ID.String()
 	})
 
 	table := []unitest.Table{
 		{
 			Name:    "all",
-			ExpResp: prds,
+			ExpResp: keys,
 			ExcFunc: func(ctx context.Context) any {
 				filter := keybus.QueryFilter{
 					UserID: &sd.Users[0].ID,

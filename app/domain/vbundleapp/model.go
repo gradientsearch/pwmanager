@@ -33,9 +33,9 @@ func toAppKey(prd vbundlebus.Key) Key {
 	}
 }
 
-func toAppKeys(prds []vbundlebus.Key) []Key {
-	app := make([]Key, len(prds))
-	for i, prd := range prds {
+func toAppKeys(keys []vbundlebus.Key) []Key {
+	app := make([]Key, len(keys))
+	for i, prd := range keys {
 		app[i] = toAppKey(prd)
 	}
 

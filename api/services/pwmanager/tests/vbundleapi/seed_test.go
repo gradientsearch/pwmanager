@@ -33,14 +33,14 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		bids = append(bids, v.ID)
 	}
 
-	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	keys, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu1 := apitest.User{
 		User:  usrs[0],
-		Keys:  prds,
+		Keys:  keys,
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
@@ -61,14 +61,14 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		bids = append(bids, v.ID)
 	}
 
-	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := apitest.User{
 		User:  usrs[0],
-		Keys:  prds,
+		Keys:  keys,
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
