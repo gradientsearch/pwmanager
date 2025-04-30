@@ -1,4 +1,4 @@
-package vproduct_test
+package vbundle_test
 
 import (
 	"context"

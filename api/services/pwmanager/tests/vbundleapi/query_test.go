@@ -1,19 +1,19 @@
-package vproduct_test
+package vbundle_test
 
 import (
 	"net/http"
 	"sort"
 
-	"github.com/gradientsearch/pwmanager/app/domain/vproductapp"
+	"github.com/google/go-cmp/cmp"
+	"github.com/gradientsearch/pwmanager/app/domain/vbundleapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/query"
-	"github.com/google/go-cmp/cmp"
 )
 
 func query200(sd apitest.SeedData) []apitest.Table {
-	prds := toAppVProducts(sd.Admins[0].User, sd.Admins[0].Products)
-	prds = append(prds, toAppVProducts(sd.Users[0].User, sd.Users[0].Products)...)
+	prds := toAppVBundles(sd.Admins[0].User, sd.Admins[0].Products)
+	prds = append(prds, toAppVBundles(sd.Users[0].User, sd.Users[0].Products)...)
 
 	sort.Slice(prds, func(i, j int) bool {
 		return prds[i].ID <= prds[j].ID
@@ -22,12 +22,12 @@ func query200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        "/v1/vproducts?page=1&rows=10&orderBy=product_id,ASC",
+			URL:        "/v1/vbundles?page=1&rows=10&orderBy=product_id,ASC",
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &query.Result[vproductapp.Product]{},
-			ExpResp: &query.Result[vproductapp.Product]{
+			GotResp:    &query.Result[vbundleapp.Product]{},
+			ExpResp: &query.Result[vbundleapp.Product]{
 				Page:        1,
 				RowsPerPage: 10,
 				Total:       len(prds),
@@ -46,7 +46,7 @@ func query400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "bad-query-filter",
-			URL:        "/v1/vproducts?page=1&rows=10&name=$#!",
+			URL:        "/v1/vbundles?page=1&rows=10&name=$#!",
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusBadRequest,
 			Method:     http.MethodGet,
@@ -58,7 +58,7 @@ func query400(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "bad-orderby-value",
-			URL:        "/v1/vproducts?page=1&rows=10&orderBy=roduct_id,ASC",
+			URL:        "/v1/vbundles?page=1&rows=10&orderBy=roduct_id,ASC",
 			Token:      sd.Admins[0].Token,
 			StatusCode: http.StatusBadRequest,
 			Method:     http.MethodGet,

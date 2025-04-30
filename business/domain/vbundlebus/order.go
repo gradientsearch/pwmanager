@@ -1,4 +1,4 @@
-package vproductbus
+package vbundlebus
 
 import "github.com/gradientsearch/pwmanager/business/sdk/order"
 

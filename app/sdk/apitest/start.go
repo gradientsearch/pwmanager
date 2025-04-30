@@ -48,10 +48,10 @@ func New(t *testing.T, testName string) *Test {
 		Log: db.Log,
 		DB:  db.DB,
 		BusConfig: mux.BusConfig{
-			UserBus:     db.BusDomain.User,
-			ProductBus:  db.BusDomain.Product,
-			BundleBus:   db.BusDomain.Bundle,
-			VProductBus: db.BusDomain.VProduct,
+			UserBus:    db.BusDomain.User,
+			ProductBus: db.BusDomain.Product,
+			BundleBus:  db.BusDomain.Bundle,
+			VBundleBus: db.BusDomain.VBundle,
 		},
 		PwManagerConfig: mux.PwManagerConfig{
 			AuthClient: authClient,

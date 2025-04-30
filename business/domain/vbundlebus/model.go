@@ -1,12 +1,12 @@
-package vproductbus
+package vbundlebus
 
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/types/money"
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/quantity"
-	"github.com/google/uuid"
 )
 
 // Product represents an individual product with extended information.

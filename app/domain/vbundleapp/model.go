@@ -1,10 +1,10 @@
-package vproductapp
+package vbundleapp
 
 import (
 	"encoding/json"
 	"time"
 
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 )
 
 // Product represents information about an individual product with
@@ -26,7 +26,7 @@ func (app Product) Encode() ([]byte, string, error) {
 	return data, "application/json", err
 }
 
-func toAppProduct(prd vproductbus.Product) Product {
+func toAppProduct(prd vbundlebus.Product) Product {
 	return Product{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
@@ -39,7 +39,7 @@ func toAppProduct(prd vproductbus.Product) Product {
 	}
 }
 
-func toAppProducts(prds []vproductbus.Product) []Product {
+func toAppProducts(prds []vbundlebus.Product) []Product {
 	app := make([]Product, len(prds))
 	for i, prd := range prds {
 		app[i] = toAppProduct(prd)

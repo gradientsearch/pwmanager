@@ -3,7 +3,7 @@ package reporting
 
 import (
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
-	"github.com/gradientsearch/pwmanager/app/domain/vproductapp"
+	"github.com/gradientsearch/pwmanager/app/domain/vbundleapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
@@ -24,9 +24,9 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		DB:    cfg.DB,
 	})
 
-	vproductapp.Routes(app, vproductapp.Config{
-		UserBus:     cfg.BusConfig.UserBus,
-		VProductBus: cfg.BusConfig.VProductBus,
-		AuthClient:  cfg.PwManagerConfig.AuthClient,
+	vbundleapp.Routes(app, vbundleapp.Config{
+		UserBus:    cfg.BusConfig.UserBus,
+		VBundleBus: cfg.BusConfig.VBundleBus,
+		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 }

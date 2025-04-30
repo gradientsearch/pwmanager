@@ -1,4 +1,4 @@
-package vproductbus_test
+package vbundlebus_test
 
 import (
 	"context"
@@ -7,17 +7,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/business/domain/productbus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
 	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/business/sdk/unitest"
 	"github.com/gradientsearch/pwmanager/business/types/role"
-	"github.com/google/go-cmp/cmp"
 )
 
-func Test_VProduct(t *testing.T) {
+func Test_VBundle(t *testing.T) {
 	t.Parallel()
 
 	db := dbtest.New(t, "Test_Product")
@@ -81,8 +81,8 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 // =============================================================================
 
-func toVProduct(usr userbus.User, prd productbus.Product) vproductbus.Product {
-	return vproductbus.Product{
+func toVBundle(usr userbus.User, prd productbus.Product) vbundlebus.Product {
+	return vbundlebus.Product{
 		ID:          prd.ID,
 		UserID:      prd.UserID,
 		Name:        prd.Name,
@@ -94,10 +94,10 @@ func toVProduct(usr userbus.User, prd productbus.Product) vproductbus.Product {
 	}
 }
 
-func toVProducts(usr userbus.User, prds []productbus.Product) []vproductbus.Product {
-	items := make([]vproductbus.Product, len(prds))
+func toVBundles(usr userbus.User, prds []productbus.Product) []vbundlebus.Product {
+	items := make([]vbundlebus.Product, len(prds))
 	for i, prd := range prds {
-		items[i] = toVProduct(usr, prd)
+		items[i] = toVBundle(usr, prd)
 	}
 
 	return items
@@ -106,8 +106,8 @@ func toVProducts(usr userbus.User, prds []productbus.Product) []vproductbus.Prod
 // =============================================================================
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	prds := toVProducts(sd.Admins[0].User, sd.Admins[0].Products)
-	prds = append(prds, toVProducts(sd.Users[0].User, sd.Users[0].Products)...)
+	prds := toVBundles(sd.Admins[0].User, sd.Admins[0].Products)
+	prds = append(prds, toVBundles(sd.Users[0].User, sd.Users[0].Products)...)
 
 	sort.Slice(prds, func(i, j int) bool {
 		return prds[i].ID.String() <= prds[j].ID.String()
@@ -118,11 +118,11 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name:    "all",
 			ExpResp: prds,
 			ExcFunc: func(ctx context.Context) any {
-				filter := vproductbus.QueryFilter{
+				filter := vbundlebus.QueryFilter{
 					Name: dbtest.NamePointer("Name"),
 				}
 
-				resp, err := busDomain.VProduct.Query(ctx, filter, vproductbus.DefaultOrderBy, page.MustParse("1", "10"))
+				resp, err := busDomain.VBundle.Query(ctx, filter, vbundlebus.DefaultOrderBy, page.MustParse("1", "10"))
 				if err != nil {
 					return err
 				}
@@ -130,12 +130,12 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.([]vproductbus.Product)
+				gotResp, exists := got.([]vbundlebus.Product)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.([]vproductbus.Product)
+				expResp := exp.([]vbundlebus.Product)
 
 				for i := range gotResp {
 					if gotResp[i].DateCreated.Format(time.RFC3339) == expResp[i].DateCreated.Format(time.RFC3339) {

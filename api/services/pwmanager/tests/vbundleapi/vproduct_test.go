@@ -1,4 +1,4 @@
-package vproduct_test
+package vbundle_test
 
 import (
 	"testing"
@@ -6,10 +6,10 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 )
 
-func Test_VProduct(t *testing.T) {
+func Test_VBundle(t *testing.T) {
 	t.Parallel()
 
-	test := apitest.New(t, "Test_VProduct")
+	test := apitest.New(t, "Test_VBundle")
 
 	// -------------------------------------------------------------------------
 

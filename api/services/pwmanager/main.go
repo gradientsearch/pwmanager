@@ -27,8 +27,8 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus/stores/usercache"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus/stores/userdb"
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus/stores/vproductdb"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus/stores/vbundledb"
 	"github.com/gradientsearch/pwmanager/business/sdk/delegate"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
@@ -200,7 +200,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Minute))
 	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
 	bundleBus := bundlebus.NewBusiness(log, userBus, delegate, bundledb.NewStore(log, db))
-	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))
+	vbundleBus := vbundlebus.NewBusiness(vbundledb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
@@ -227,10 +227,10 @@ func run(ctx context.Context, log *logger.Logger) error {
 		DB:     db,
 		Tracer: tracer,
 		BusConfig: mux.BusConfig{
-			UserBus:     userBus,
-			ProductBus:  productBus,
-			BundleBus:   bundleBus,
-			VProductBus: vproductBus,
+			UserBus:    userBus,
+			ProductBus: productBus,
+			BundleBus:  bundleBus,
+			VBundleBus: vbundleBus,
 		},
 		PwManagerConfig: mux.PwManagerConfig{
 			AuthClient: authClient,

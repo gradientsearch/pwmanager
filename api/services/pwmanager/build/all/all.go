@@ -8,7 +8,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/domain/rawapp"
 	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
-	"github.com/gradientsearch/pwmanager/app/domain/vproductapp"
+	"github.com/gradientsearch/pwmanager/app/domain/vbundleapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
@@ -57,10 +57,10 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
-	vproductapp.Routes(app, vproductapp.Config{
-		Log:         cfg.Log,
-		UserBus:     cfg.BusConfig.UserBus,
-		VProductBus: cfg.BusConfig.VProductBus,
-		AuthClient:  cfg.PwManagerConfig.AuthClient,
+	vbundleapp.Routes(app, vbundleapp.Config{
+		Log:        cfg.Log,
+		UserBus:    cfg.BusConfig.UserBus,
+		VBundleBus: cfg.BusConfig.VBundleBus,
+		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 }

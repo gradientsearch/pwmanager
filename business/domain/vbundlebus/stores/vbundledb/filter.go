@@ -1,14 +1,14 @@
-package vproductdb
+package vbundledb
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
 
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 )
 
-func (s *Store) applyFilter(filter vproductbus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
+func (s *Store) applyFilter(filter vbundlebus.QueryFilter, data map[string]any, buf *bytes.Buffer) {
 	var wc []string
 
 	if filter.ID != nil {

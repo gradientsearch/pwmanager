@@ -1,13 +1,13 @@
-package vproductapp
+package vbundleapp
 
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
-	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/app/sdk/errs"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
+	"github.com/gradientsearch/pwmanager/business/types/name"
 )
 
 type queryParams struct {
@@ -38,9 +38,9 @@ func parseQueryParams(r *http.Request) queryParams {
 	return filter
 }
 
-func parseFilter(qp queryParams) (vproductbus.QueryFilter, error) {
+func parseFilter(qp queryParams) (vbundlebus.QueryFilter, error) {
 	var fieldErrors errs.FieldErrors
-	var filter vproductbus.QueryFilter
+	var filter vbundlebus.QueryFilter
 
 	if qp.ID != "" {
 		id, err := uuid.Parse(qp.ID)
@@ -94,7 +94,7 @@ func parseFilter(qp queryParams) (vproductbus.QueryFilter, error) {
 	}
 
 	if fieldErrors != nil {
-		return vproductbus.QueryFilter{}, fieldErrors.ToError()
+		return vbundlebus.QueryFilter{}, fieldErrors.ToError()
 	}
 
 	return filter, nil

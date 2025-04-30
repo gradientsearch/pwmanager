@@ -1,12 +1,12 @@
-// Package vproductdb provides access to the product view.
-package vproductdb
+// Package vbundledb provides access to the product view.
+package vbundledb
 
 import (
 	"bytes"
 	"context"
 	"fmt"
 
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/business/sdk/order"
 	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
@@ -29,7 +29,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 }
 
 // Query retrieves a list of existing products from the database.
-func (s *Store) Query(ctx context.Context, filter vproductbus.QueryFilter, orderBy order.By, page page.Page) ([]vproductbus.Product, error) {
+func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderBy order.By, page page.Page) ([]vbundlebus.Product, error) {
 	data := map[string]any{
 		"offset":        (page.Number() - 1) * page.RowsPerPage(),
 		"rows_per_page": page.RowsPerPage(),
@@ -73,7 +73,7 @@ func (s *Store) Query(ctx context.Context, filter vproductbus.QueryFilter, order
 }
 
 // Count returns the total number of products in the DB.
-func (s *Store) Count(ctx context.Context, filter vproductbus.QueryFilter) (int, error) {
+func (s *Store) Count(ctx context.Context, filter vbundlebus.QueryFilter) (int, error) {
 	data := map[string]any{}
 
 	const q = `

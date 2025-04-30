@@ -1,5 +1,5 @@
-// Package vproductbus provides business access to view product domain.
-package vproductbus
+// Package vbundlebus provides business access to view product domain.
+package vbundlebus
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type Business struct {
 	storer Storer
 }
 
-// NewBusiness constructs a vproduct business API for use.
+// NewBusiness constructs a vbundle business API for use.
 func NewBusiness(storer Storer) *Business {
 	return &Business{
 		storer: storer,
@@ -31,7 +31,7 @@ func NewBusiness(storer Storer) *Business {
 
 // Query retrieves a list of existing products.
 func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Product, error) {
-	ctx, span := otel.AddSpan(ctx, "business.vproductbus.query")
+	ctx, span := otel.AddSpan(ctx, "business.vbundlebus.query")
 	defer span.End()
 
 	users, err := b.storer.Query(ctx, filter, orderBy, page)
@@ -44,7 +44,7 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 
 // Count returns the total number of products.
 func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
-	ctx, span := otel.AddSpan(ctx, "business.vproductbus.count")
+	ctx, span := otel.AddSpan(ctx, "business.vbundlebus.count")
 	defer span.End()
 
 	return b.storer.Count(ctx, filter)

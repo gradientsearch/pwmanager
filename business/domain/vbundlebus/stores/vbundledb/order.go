@@ -1,19 +1,19 @@
-package vproductdb
+package vbundledb
 
 import (
 	"fmt"
 
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/business/sdk/order"
 )
 
 var orderByFields = map[string]string{
-	vproductbus.OrderByProductID: "product_id",
-	vproductbus.OrderByUserID:    "user_id",
-	vproductbus.OrderByName:      "name",
-	vproductbus.OrderByCost:      "cost",
-	vproductbus.OrderByQuantity:  "quantity",
-	vproductbus.OrderByUserName:  "user_name",
+	vbundlebus.OrderByProductID: "product_id",
+	vbundlebus.OrderByUserID:    "user_id",
+	vbundlebus.OrderByName:      "name",
+	vbundlebus.OrderByCost:      "cost",
+	vbundlebus.OrderByQuantity:  "quantity",
+	vbundlebus.OrderByUserName:  "user_name",
 }
 
 func orderByClause(orderBy order.By) (string, error) {
