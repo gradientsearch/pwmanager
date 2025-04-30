@@ -9,10 +9,10 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 	"github.com/jmoiron/sqlx"
@@ -63,10 +63,10 @@ type AuthConfig struct {
 }
 
 type BusConfig struct {
-	UserBus     *userbus.Business
-	ProductBus  *productbus.Business
-	HomeBus     *homebus.Business
-	VProductBus *vproductbus.Business
+	UserBus    *userbus.Business
+	KeyBus     *keybus.Business
+	BundleBus  *bundlebus.Business
+	VBundleBus *vbundlebus.Business
 }
 
 // Config contains all the mandatory systems required by handlers.

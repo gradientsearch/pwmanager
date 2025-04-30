@@ -3,16 +3,16 @@ package unitest
 import (
 	"context"
 
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 )
 
 // User represents an app user specified for the test.
 type User struct {
 	userbus.User
-	Products []productbus.Product
-	Homes    []homebus.Home
+	Keys    []keybus.Key
+	Bundles []bundlebus.Bundle
 }
 
 // SeedData represents data that was seeded for the test.

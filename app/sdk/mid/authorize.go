@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/foundation/web"
-	"github.com/google/uuid"
 )
 
 // ErrInvalidID represents a condition where the id is not a uuid.
@@ -103,36 +103,36 @@ func AuthorizeUser(client *authclient.Client, userBus *userbus.Business, rule st
 	return m
 }
 
-// AuthorizeProduct executes the specified role and extracts the specified
-// product from the DB if a product id is specified in the call. Depending on
+// AuthorizeKey executes the specified role and extracts the specified
+// key from the DB if a key id is specified in the call. Depending on
 // the rule specified, the userid from the claims may be compared with the
-// specified user id from the product.
-func AuthorizeProduct(client *authclient.Client, productBus *productbus.Business) web.MidFunc {
+// specified user id from the key.
+func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFunc {
 	m := func(next web.HandlerFunc) web.HandlerFunc {
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
-			id := web.Param(r, "product_id")
+			id := web.Param(r, "key_id")
 
 			var userID uuid.UUID
 
 			if id != "" {
 				var err error
-				productID, err := uuid.Parse(id)
+				keyID, err := uuid.Parse(id)
 				if err != nil {
 					return errs.New(errs.Unauthenticated, ErrInvalidID)
 				}
 
-				prd, err := productBus.QueryByID(ctx, productID)
+				prd, err := keyBus.QueryByID(ctx, keyID)
 				if err != nil {
 					switch {
-					case errors.Is(err, productbus.ErrNotFound):
+					case errors.Is(err, keybus.ErrNotFound):
 						return errs.New(errs.Unauthenticated, err)
 					default:
-						return errs.Newf(errs.Internal, "querybyid: productID[%s]: %s", productID, err)
+						return errs.Newf(errs.Internal, "querybyid: keyID[%s]: %s", keyID, err)
 					}
 				}
 
 				userID = prd.UserID
-				ctx = setProduct(ctx, prd)
+				ctx = setKey(ctx, prd)
 			}
 
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -157,36 +157,36 @@ func AuthorizeProduct(client *authclient.Client, productBus *productbus.Business
 	return m
 }
 
-// AuthorizeHome executes the specified role and extracts the specified
-// home from the DB if a home id is specified in the call. Depending on
+// AuthorizeBundle executes the specified role and extracts the specified
+// bundle from the DB if a bundle id is specified in the call. Depending on
 // the rule specified, the userid from the claims may be compared with the
-// specified user id from the home.
-func AuthorizeHome(client *authclient.Client, homeBus *homebus.Business) web.MidFunc {
+// specified user id from the bundle.
+func AuthorizeBundle(client *authclient.Client, bundleBus *bundlebus.Business) web.MidFunc {
 	m := func(next web.HandlerFunc) web.HandlerFunc {
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
-			id := web.Param(r, "home_id")
+			id := web.Param(r, "bundle_id")
 
 			var userID uuid.UUID
 
 			if id != "" {
 				var err error
-				homeID, err := uuid.Parse(id)
+				bundleID, err := uuid.Parse(id)
 				if err != nil {
 					return errs.New(errs.Unauthenticated, ErrInvalidID)
 				}
 
-				hme, err := homeBus.QueryByID(ctx, homeID)
+				hme, err := bundleBus.QueryByID(ctx, bundleID)
 				if err != nil {
 					switch {
-					case errors.Is(err, homebus.ErrNotFound):
+					case errors.Is(err, bundlebus.ErrNotFound):
 						return errs.New(errs.Unauthenticated, err)
 					default:
-						return errs.Newf(errs.Unauthenticated, "querybyid: homeID[%s]: %s", homeID, err)
+						return errs.Newf(errs.Unauthenticated, "querybyid: bundleID[%s]: %s", bundleID, err)
 					}
 				}
 
 				userID = hme.UserID
-				ctx = setHome(ctx, hme)
+				ctx = setBundle(ctx, hme)
 			}
 
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)

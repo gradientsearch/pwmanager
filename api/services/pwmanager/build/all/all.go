@@ -2,13 +2,13 @@
 package all
 
 import (
+	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
-	"github.com/gradientsearch/pwmanager/app/domain/homeapp"
-	"github.com/gradientsearch/pwmanager/app/domain/productapp"
+	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/domain/rawapp"
 	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
-	"github.com/gradientsearch/pwmanager/app/domain/vproductapp"
+	"github.com/gradientsearch/pwmanager/app/domain/vbundleapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
@@ -29,15 +29,15 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		DB:    cfg.DB,
 	})
 
-	homeapp.Routes(app, homeapp.Config{
+	bundleapp.Routes(app, bundleapp.Config{
 		Log:        cfg.Log,
-		HomeBus:    cfg.BusConfig.HomeBus,
+		BundleBus:  cfg.BusConfig.BundleBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
-	productapp.Routes(app, productapp.Config{
+	keyapp.Routes(app, keyapp.Config{
 		Log:        cfg.Log,
-		ProductBus: cfg.BusConfig.ProductBus,
+		KeyBus:     cfg.BusConfig.KeyBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
@@ -47,7 +47,7 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		Log:        cfg.Log,
 		DB:         cfg.DB,
 		UserBus:    cfg.BusConfig.UserBus,
-		ProductBus: cfg.BusConfig.ProductBus,
+		KeyBus:     cfg.BusConfig.KeyBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
@@ -57,10 +57,10 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
-	vproductapp.Routes(app, vproductapp.Config{
-		Log:         cfg.Log,
-		UserBus:     cfg.BusConfig.UserBus,
-		VProductBus: cfg.BusConfig.VProductBus,
-		AuthClient:  cfg.PwManagerConfig.AuthClient,
+	vbundleapp.Routes(app, vbundleapp.Config{
+		Log:        cfg.Log,
+		UserBus:    cfg.BusConfig.UserBus,
+		VBundleBus: cfg.BusConfig.VBundleBus,
+		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 }

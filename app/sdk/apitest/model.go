@@ -1,17 +1,17 @@
 package apitest
 
 import (
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 )
 
 // User extends the dbtest user for api test support.
 type User struct {
 	userbus.User
-	Products []productbus.Product
-	Homes    []homebus.Home
-	Token    string
+	Keys    []keybus.Key
+	Bundles []bundlebus.Bundle
+	Token   string
 }
 
 // SeedData represents users for api tests.

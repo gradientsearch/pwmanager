@@ -20,15 +20,15 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/debug"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus/stores/homedb"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus"
-	"github.com/gradientsearch/pwmanager/business/domain/productbus/stores/productdb"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus/stores/bundledb"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus"
+	"github.com/gradientsearch/pwmanager/business/domain/keybus/stores/keydb"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus/stores/usercache"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus/stores/userdb"
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus"
-	"github.com/gradientsearch/pwmanager/business/domain/vproductbus/stores/vproductdb"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus/stores/vbundledb"
 	"github.com/gradientsearch/pwmanager/business/sdk/delegate"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
@@ -198,9 +198,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Minute))
-	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
-	homeBus := homebus.NewBusiness(log, userBus, delegate, homedb.NewStore(log, db))
-	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))
+	keyBus := keybus.NewBusiness(log, userBus, delegate, keydb.NewStore(log, db))
+	bundleBus := bundlebus.NewBusiness(log, userBus, delegate, bundledb.NewStore(log, db))
+	vbundleBus := vbundlebus.NewBusiness(vbundledb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
 	// Start Debug Service
@@ -227,10 +227,10 @@ func run(ctx context.Context, log *logger.Logger) error {
 		DB:     db,
 		Tracer: tracer,
 		BusConfig: mux.BusConfig{
-			UserBus:     userBus,
-			ProductBus:  productBus,
-			HomeBus:     homeBus,
-			VProductBus: vproductBus,
+			UserBus:    userBus,
+			KeyBus:     keyBus,
+			BundleBus:  bundleBus,
+			VBundleBus: vbundleBus,
 		},
 		PwManagerConfig: mux.PwManagerConfig{
 			AuthClient: authClient,
