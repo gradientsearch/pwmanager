@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
@@ -20,7 +19,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusOK,
 			Input: &keyapp.NewKey{
 				Data:     "Guitar",
-				BundleID: uuid.New().String(),
+				BundleID: sd.Users[0].Bundles[2].ID.String(),
 				UserID:   string(sd.Users[0].ID[0]),
 			},
 			GotResp: &keyapp.Key{},

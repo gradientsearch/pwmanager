@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
@@ -21,7 +23,17 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
+	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	if err != nil {
+		return apitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
+	}
+
+	bids := []uuid.UUID{}
+	for _, v := range bdls {
+		bids = append(bids, v.ID)
+	}
+
+	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
@@ -39,7 +51,17 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
+	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	if err != nil {
+		return apitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
+	}
+
+	bids = []uuid.UUID{}
+	for _, v := range bdls {
+		bids = append(bids, v.ID)
+	}
+
+	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}

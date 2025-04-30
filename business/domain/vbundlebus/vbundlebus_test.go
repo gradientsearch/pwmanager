@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
@@ -42,7 +44,17 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
+	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	if err != nil {
+		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
+	}
+
+	bids := []uuid.UUID{}
+	for _, v := range bdls {
+		bids = append(bids, v.ID)
+	}
+
+	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
@@ -59,7 +71,17 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
+	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	if err != nil {
+		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
+	}
+
+	bids = []uuid.UUID{}
+	for _, v := range bdls {
+		bids = append(bids, v.ID)
+	}
+
+	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
