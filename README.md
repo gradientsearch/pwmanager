@@ -4,4 +4,4 @@ pwmanager is a secure and user-friendly password manager featuring a single-page
 
 # Domain Diagram
 
-![domain diagram](./ddd.png)
+![domain diagram](./dddv2.png)
