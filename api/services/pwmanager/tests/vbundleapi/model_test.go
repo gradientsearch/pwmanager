@@ -12,12 +12,9 @@ func toAppVBundle(usr userbus.User, prd keybus.Key) vbundleapp.Key {
 	return vbundleapp.Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
-		Name:        prd.Name.String(),
-		Cost:        prd.Cost.Value(),
-		Quantity:    prd.Quantity.Value(),
+		Data:        prd.Data.String(),
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
 		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
-		UserName:    usr.Name.String(),
 	}
 }
 

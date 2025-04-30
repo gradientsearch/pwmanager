@@ -18,16 +18,12 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.NewKey{
-				Name:     "Guitar",
-				Cost:     10.34,
-				Quantity: 10,
+				Data: "Guitar",
 			},
 			GotResp: &keyapp.Key{},
 			ExpResp: &keyapp.Key{
-				Name:     "Guitar",
-				UserID:   sd.Users[0].ID.String(),
-				Cost:     10.34,
-				Quantity: 10,
+				Data:   "Guitar",
+				UserID: sd.Users[0].ID.String(),
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*keyapp.Key)

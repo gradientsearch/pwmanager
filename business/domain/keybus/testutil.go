@@ -6,9 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/google/uuid"
-	"github.com/gradientsearch/pwmanager/business/types/money"
-	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
+	"github.com/gradientsearch/pwmanager/business/types/key"
 )
 
 // TestGenerateNewKeys is a helper method for testing.
@@ -20,10 +18,8 @@ func TestGenerateNewKeys(n int, userID uuid.UUID) []NewKey {
 		idx++
 
 		np := NewKey{
-			Name:     name.MustParse(fmt.Sprintf("Name%d", idx)),
-			Cost:     money.MustParse(float64(rand.Intn(500))),
-			Quantity: quantity.MustParse(rand.Intn(50)),
-			UserID:   userID,
+			Data:   key.MustParse(fmt.Sprintf("Name%d", idx)),
+			UserID: userID,
 		}
 
 		newPrds[i] = np

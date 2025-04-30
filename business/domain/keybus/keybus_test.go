@@ -13,9 +13,7 @@ import (
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
 	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/business/sdk/unitest"
-	"github.com/gradientsearch/pwmanager/business/types/money"
-	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
+	"github.com/gradientsearch/pwmanager/business/types/key"
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
 
@@ -172,17 +170,13 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 		{
 			Name: "basic",
 			ExpResp: keybus.Key{
-				UserID:   sd.Users[0].ID,
-				Name:     name.MustParse("Guitar"),
-				Cost:     money.MustParse(10.34),
-				Quantity: quantity.MustParse(10),
+				UserID: sd.Users[0].ID,
+				Data:   key.MustParse("Guitar"),
 			},
 			ExcFunc: func(ctx context.Context) any {
 				np := keybus.NewKey{
-					UserID:   sd.Users[0].ID,
-					Name:     name.MustParse("Guitar"),
-					Cost:     money.MustParse(10.34),
-					Quantity: quantity.MustParse(10),
+					UserID: sd.Users[0].ID,
+					Data:   key.MustParse("Guitar"),
 				}
 
 				resp, err := busDomain.Key.Create(ctx, np)
@@ -219,17 +213,13 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			ExpResp: keybus.Key{
 				ID:          sd.Users[0].Keys[0].ID,
 				UserID:      sd.Users[0].ID,
-				Name:        name.MustParse("Guitar"),
-				Cost:        money.MustParse(10.34),
-				Quantity:    quantity.MustParse(10),
+				Data:        key.MustParse("Guitar"),
 				DateCreated: sd.Users[0].Keys[0].DateCreated,
 				DateUpdated: sd.Users[0].Keys[0].DateCreated,
 			},
 			ExcFunc: func(ctx context.Context) any {
 				up := keybus.UpdateKey{
-					Name:     dbtest.NamePointer("Guitar"),
-					Cost:     dbtest.MoneyPointer(10.34),
-					Quantity: dbtest.QuantityPointer(10),
+					Data: dbtest.KeyPointer("Guitar"),
 				}
 
 				resp, err := busDomain.Key.Update(ctx, sd.Users[0].Keys[0], up)

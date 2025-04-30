@@ -21,17 +21,13 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.UpdateKey{
-				Name:     dbtest.StringPointer("Guitar"),
-				Cost:     dbtest.FloatPointer(10.34),
-				Quantity: dbtest.IntPointer(10),
+				Data: dbtest.StringPointer("Guitar"),
 			},
 			GotResp: &keyapp.Key{},
 			ExpResp: &keyapp.Key{
 				ID:          sd.Users[0].Keys[0].ID.String(),
 				UserID:      sd.Users[0].ID.String(),
-				Name:        "Guitar",
-				Cost:        10.34,
-				Quantity:    10,
+				Data:        "Guitar",
 				DateCreated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 				DateUpdated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 			},
@@ -60,12 +56,9 @@ func update400(sd apitest.SeedData) []apitest.Table {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
-			Input: &keyapp.UpdateKey{
-				Cost:     dbtest.FloatPointer(-1.0),
-				Quantity: dbtest.IntPointer(0),
-			},
-			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"cost\",\"error\":\"cost must be 0 or greater\"},{\"field\":\"quantity\",\"error\":\"quantity must be 1 or greater\"}]"),
+			Input:      &keyapp.UpdateKey{},
+			GotResp:    &errs.Error{},
+			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"cost\",\"error\":\"cost must be 0 or greater\"},{\"field\":\"quantity\",\"error\":\"quantity must be 1 or greater\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
@@ -108,9 +101,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			Input: &keyapp.UpdateKey{
-				Name:     dbtest.StringPointer("Guitar"),
-				Cost:     dbtest.FloatPointer(10.34),
-				Quantity: dbtest.IntPointer(10),
+				Data: dbtest.StringPointer("Guitar"),
 			},
 			GotResp: &errs.Error{},
 			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),

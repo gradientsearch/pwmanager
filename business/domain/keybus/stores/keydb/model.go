@@ -6,9 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
-	"github.com/gradientsearch/pwmanager/business/types/money"
-	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
+	kt "github.com/gradientsearch/pwmanager/business/types/key"
 )
 
 type key struct {
@@ -25,9 +23,7 @@ func toDBKey(bus keybus.Key) key {
 	db := key{
 		ID:          bus.ID,
 		UserID:      bus.UserID,
-		Name:        bus.Name.String(),
-		Cost:        bus.Cost.Value(),
-		Quantity:    bus.Quantity.Value(),
+		Name:        bus.Data.String(),
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
@@ -36,27 +32,15 @@ func toDBKey(bus keybus.Key) key {
 }
 
 func toBusKey(db key) (keybus.Key, error) {
-	name, err := name.Parse(db.Name)
+	key, err := kt.Parse(db.Name)
 	if err != nil {
-		return keybus.Key{}, fmt.Errorf("parse name: %w", err)
-	}
-
-	cost, err := money.Parse(db.Cost)
-	if err != nil {
-		return keybus.Key{}, fmt.Errorf("parse cost: %w", err)
-	}
-
-	quantity, err := quantity.Parse(db.Quantity)
-	if err != nil {
-		return keybus.Key{}, fmt.Errorf("parse quantity: %w", err)
+		return keybus.Key{}, fmt.Errorf("parse key: %w", err)
 	}
 
 	bus := keybus.Key{
 		ID:          db.ID,
 		UserID:      db.UserID,
-		Name:        name,
-		Cost:        cost,
-		Quantity:    quantity,
+		Data:        key,
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
 	}

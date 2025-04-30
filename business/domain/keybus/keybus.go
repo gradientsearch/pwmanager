@@ -100,10 +100,9 @@ func (b *Business) Create(ctx context.Context, np NewKey) (Key, error) {
 
 	prd := Key{
 		ID:          uuid.New(),
-		Name:        np.Name,
-		Cost:        np.Cost,
-		Quantity:    np.Quantity,
+		Data:        np.Data,
 		UserID:      np.UserID,
+		BundleID:    np.BundleID,
 		DateCreated: now,
 		DateUpdated: now,
 	}
@@ -120,16 +119,8 @@ func (b *Business) Update(ctx context.Context, prd Key, up UpdateKey) (Key, erro
 	ctx, span := otel.AddSpan(ctx, "business.keybus.update")
 	defer span.End()
 
-	if up.Name != nil {
-		prd.Name = *up.Name
-	}
-
-	if up.Cost != nil {
-		prd.Cost = *up.Cost
-	}
-
-	if up.Quantity != nil {
-		prd.Quantity = *up.Quantity
+	if up.Data != nil {
+		prd.Data = *up.Data
 	}
 
 	prd.DateUpdated = time.Now()

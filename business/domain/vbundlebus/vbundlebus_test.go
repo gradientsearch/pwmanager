@@ -85,12 +85,9 @@ func toVBundle(usr userbus.User, prd keybus.Key) vbundlebus.Key {
 	return vbundlebus.Key{
 		ID:          prd.ID,
 		UserID:      prd.UserID,
-		Name:        prd.Name,
-		Cost:        prd.Cost,
-		Quantity:    prd.Quantity,
+		Data:        prd.Data,
 		DateCreated: prd.DateCreated,
 		DateUpdated: prd.DateUpdated,
-		UserName:    usr.Name,
 	}
 }
 
