@@ -3,8 +3,8 @@ package dbtest
 import (
 	"time"
 
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus/stores/homedb"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus/stores/bundledb"
 	"github.com/gradientsearch/pwmanager/business/domain/productbus"
 	"github.com/gradientsearch/pwmanager/business/domain/productbus/stores/productdb"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
@@ -20,7 +20,7 @@ import (
 // BusDomain represents all the business domain apis needed for testing.
 type BusDomain struct {
 	Delegate *delegate.Delegate
-	Home     *homebus.Business
+	Bundle   *bundlebus.Business
 	Product  *productbus.Business
 	User     *userbus.Business
 	VProduct *vproductbus.Business
@@ -30,12 +30,12 @@ func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
 	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
-	homeBus := homebus.NewBusiness(log, userBus, delegate, homedb.NewStore(log, db))
+	bundleBus := bundlebus.NewBusiness(log, userBus, delegate, bundledb.NewStore(log, db))
 	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))
 
 	return BusDomain{
 		Delegate: delegate,
-		Home:     homeBus,
+		Bundle:   bundleBus,
 		Product:  productBus,
 		User:     userBus,
 		VProduct: vproductBus,

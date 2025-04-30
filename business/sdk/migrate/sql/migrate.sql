@@ -47,9 +47,9 @@ JOIN
     users AS u ON u.user_id = p.user_id
 
 -- Version: 1.04
--- Description: Create table homes
-CREATE TABLE homes (
-    home_id       UUID       NOT NULL,
+-- Description: Create table bundles
+CREATE TABLE bundles (
+    bundle_id       UUID       NOT NULL,
     type          TEXT       NOT NULL,
     user_id       UUID       NOT NULL,
     address_1     TEXT       NOT NULL,
@@ -61,6 +61,6 @@ CREATE TABLE homes (
     date_created  TIMESTAMP  NOT NULL,
     date_updated  TIMESTAMP  NOT NULL,
 
-    PRIMARY KEY (home_id),
+    PRIMARY KEY (bundle_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );

@@ -2,8 +2,8 @@
 package all
 
 import (
+	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
-	"github.com/gradientsearch/pwmanager/app/domain/homeapp"
 	"github.com/gradientsearch/pwmanager/app/domain/productapp"
 	"github.com/gradientsearch/pwmanager/app/domain/rawapp"
 	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
@@ -29,9 +29,9 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		DB:    cfg.DB,
 	})
 
-	homeapp.Routes(app, homeapp.Config{
+	bundleapp.Routes(app, bundleapp.Config{
 		Log:        cfg.Log,
-		HomeBus:    cfg.BusConfig.HomeBus,
+		BundleBus:  cfg.BusConfig.BundleBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 

@@ -2,8 +2,8 @@
 package crud
 
 import (
+	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
-	"github.com/gradientsearch/pwmanager/app/domain/homeapp"
 	"github.com/gradientsearch/pwmanager/app/domain/productapp"
 	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
@@ -27,8 +27,8 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		DB:    cfg.DB,
 	})
 
-	homeapp.Routes(app, homeapp.Config{
-		HomeBus:    cfg.BusConfig.HomeBus,
+	bundleapp.Routes(app, bundleapp.Config{
+		BundleBus:  cfg.BusConfig.BundleBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 

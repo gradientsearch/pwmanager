@@ -20,8 +20,8 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/debug"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus/stores/homedb"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus/stores/bundledb"
 	"github.com/gradientsearch/pwmanager/business/domain/productbus"
 	"github.com/gradientsearch/pwmanager/business/domain/productbus/stores/productdb"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
@@ -199,7 +199,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Minute))
 	productBus := productbus.NewBusiness(log, userBus, delegate, productdb.NewStore(log, db))
-	homeBus := homebus.NewBusiness(log, userBus, delegate, homedb.NewStore(log, db))
+	bundleBus := bundlebus.NewBusiness(log, userBus, delegate, bundledb.NewStore(log, db))
 	vproductBus := vproductbus.NewBusiness(vproductdb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
@@ -229,7 +229,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		BusConfig: mux.BusConfig{
 			UserBus:     userBus,
 			ProductBus:  productBus,
-			HomeBus:     homeBus,
+			BundleBus:   bundleBus,
 			VProductBus: vproductBus,
 		},
 		PwManagerConfig: mux.PwManagerConfig{

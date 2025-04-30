@@ -27,18 +27,18 @@ SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 #
 #	Run this command to install brew on your machine. This works for Linux, Mac and Windows.
 #	The script explains what it will do and then pauses before it does it.
-#	$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+#	$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Bundlebrew/install/HEAD/install.sh)"
 #
 #	WINDOWS MACHINES
 #	These are extra things you will most likely need to do after installing brew
 #
-# 	Run these three commands in your terminal to add Homebrew to your PATH:
+# 	Run these three commands in your terminal to add Bundlebrew to your PATH:
 # 	Replace <name> with your username.
-#	$ echo '# Set PATH, MANPATH, etc., for Homebrew.' >> /home/<name>/.profile
-#	$ echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/<name>/.profile
-#	$ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#	$ echo '# Set PATH, MANPATH, etc., for Bundlebrew.' >> /bundle/<name>/.profile
+#	$ echo 'eval "$(/bundle/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /bundle/<name>/.profile
+#	$ eval "$(/bundle/linuxbrew/.linuxbrew/bin/brew shellenv)"
 #
-# 	Install Homebrew's dependencies:
+# 	Install Bundlebrew's dependencies:
 #	$ sudo apt-get install build-essential
 #
 # 	Install GCC:

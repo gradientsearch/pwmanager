@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
-	"github.com/gradientsearch/pwmanager/business/domain/homebus"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/productbus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/web"
-	"github.com/google/uuid"
 )
 
 // isError tests if the Encoder has an error inside of it.
@@ -32,7 +32,7 @@ const (
 	userIDKey
 	userKey
 	productKey
-	homeKey
+	bundleKey
 	trKey
 )
 
@@ -91,15 +91,15 @@ func GetProduct(ctx context.Context) (productbus.Product, error) {
 	return v, nil
 }
 
-func setHome(ctx context.Context, hme homebus.Home) context.Context {
-	return context.WithValue(ctx, homeKey, hme)
+func setBundle(ctx context.Context, hme bundlebus.Bundle) context.Context {
+	return context.WithValue(ctx, bundleKey, hme)
 }
 
-// GetHome returns the home from the context.
-func GetHome(ctx context.Context) (homebus.Home, error) {
-	v, ok := ctx.Value(homeKey).(homebus.Home)
+// GetBundle returns the bundle from the context.
+func GetBundle(ctx context.Context) (bundlebus.Bundle, error) {
+	v, ok := ctx.Value(bundleKey).(bundlebus.Bundle)
 	if !ok {
-		return homebus.Home{}, errors.New("home not found in context")
+		return bundlebus.Bundle{}, errors.New("bundle not found in context")
 	}
 
 	return v, nil
