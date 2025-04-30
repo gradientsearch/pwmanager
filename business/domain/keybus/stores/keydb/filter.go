@@ -2,7 +2,6 @@ package keydb
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
@@ -16,19 +15,9 @@ func (s *Store) applyFilter(filter keybus.QueryFilter, data map[string]any, buf 
 		wc = append(wc, "key_id = :key_id")
 	}
 
-	if filter.Name != nil {
-		data["name"] = fmt.Sprintf("%%%s%%", *filter.Name)
-		wc = append(wc, "name LIKE :name")
-	}
-
-	if filter.Cost != nil {
-		data["cost"] = *filter.Cost
-		wc = append(wc, "cost = :cost")
-	}
-
-	if filter.Quantity != nil {
-		data["quantity"] = *filter.Quantity
-		wc = append(wc, "quantity = :quantity")
+	if filter.UserID != nil {
+		data["user_id"] = *filter.UserID
+		wc = append(wc, "user_id = :user_id")
 	}
 
 	if len(wc) > 0 {

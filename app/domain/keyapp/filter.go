@@ -2,35 +2,29 @@ package keyapp
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
-	"github.com/gradientsearch/pwmanager/business/types/name"
 )
 
 type queryParams struct {
-	Page     string
-	Rows     string
-	OrderBy  string
-	ID       string
-	Name     string
-	Cost     string
-	Quantity string
+	Page    string
+	Rows    string
+	OrderBy string
+	ID      string
+	UserID  string
 }
 
 func parseQueryParams(r *http.Request) queryParams {
 	values := r.URL.Query()
 
 	filter := queryParams{
-		Page:     values.Get("page"),
-		Rows:     values.Get("rows"),
-		OrderBy:  values.Get("orderBy"),
-		ID:       values.Get("key_id"),
-		Name:     values.Get("name"),
-		Cost:     values.Get("cost"),
-		Quantity: values.Get("quantity"),
+		Page:    values.Get("page"),
+		Rows:    values.Get("rows"),
+		OrderBy: values.Get("orderBy"),
+		ID:      values.Get("key_id"),
+		UserID:  values.Get("user_id"),
 	}
 
 	return filter
@@ -50,34 +44,13 @@ func parseFilter(qp queryParams) (keybus.QueryFilter, error) {
 		}
 	}
 
-	if qp.Name != "" {
-		name, err := name.Parse(qp.Name)
+	if qp.UserID != "" {
+		userID, err := uuid.Parse(qp.UserID)
 		switch err {
 		case nil:
-			filter.Name = &name
+			filter.UserID = &userID
 		default:
-			fieldErrors.Add("name", err)
-		}
-	}
-
-	if qp.Cost != "" {
-		cst, err := strconv.ParseFloat(qp.Cost, 64)
-		switch err {
-		case nil:
-			filter.Cost = &cst
-		default:
-			fieldErrors.Add("cost", err)
-		}
-	}
-
-	if qp.Quantity != "" {
-		qua, err := strconv.ParseInt(qp.Quantity, 10, 64)
-		switch err {
-		case nil:
-			i := int(qua)
-			filter.Quantity = &i
-		default:
-			fieldErrors.Add("quantity", err)
+			fieldErrors.Add("user_id", err)
 		}
 	}
 

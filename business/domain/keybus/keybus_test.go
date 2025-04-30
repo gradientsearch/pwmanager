@@ -47,7 +47,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 3, busDomain.Bundle, usrs[0].ID)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
 	}
@@ -75,7 +75,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 3, busDomain.Bundle, usrs[0].ID)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
 	}
@@ -91,8 +91,9 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	}
 
 	tu2 := unitest.User{
-		User: usrs[0],
-		Keys: prds,
+		User:    usrs[0],
+		Keys:    prds,
+		Bundles: bdls,
 	}
 
 	// -------------------------------------------------------------------------
@@ -109,7 +110,7 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 	prds := make([]keybus.Key, 0, len(sd.Admins[0].Keys)+len(sd.Users[0].Keys))
-	prds = append(prds, sd.Admins[0].Keys...)
+	//prds = append(prds, sd.Admins[0].Keys...)
 	prds = append(prds, sd.Users[0].Keys...)
 
 	sort.Slice(prds, func(i, j int) bool {
@@ -122,7 +123,7 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			ExpResp: prds,
 			ExcFunc: func(ctx context.Context) any {
 				filter := keybus.QueryFilter{
-					Name: dbtest.NamePointer("Name"),
+					UserID: &sd.Users[0].ID,
 				}
 
 				resp, err := busDomain.Key.Query(ctx, filter, keybus.DefaultOrderBy, page.MustParse("1", "10"))
@@ -193,13 +194,15 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 		{
 			Name: "basic",
 			ExpResp: keybus.Key{
-				UserID: sd.Users[0].ID,
-				Data:   key.MustParse("Guitar"),
+				UserID:   sd.Users[0].ID,
+				BundleID: sd.Users[0].Bundles[2].ID,
+				Data:     key.MustParse("Guitar"),
 			},
 			ExcFunc: func(ctx context.Context) any {
 				np := keybus.NewKey{
-					UserID: sd.Users[0].ID,
-					Data:   key.MustParse("Guitar"),
+					UserID:   sd.Users[0].ID,
+					BundleID: sd.Users[0].Bundles[2].ID,
+					Data:     key.MustParse("Guitar"),
 				}
 
 				resp, err := busDomain.Key.Create(ctx, np)
@@ -235,6 +238,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name: "basic",
 			ExpResp: keybus.Key{
 				ID:          sd.Users[0].Keys[0].ID,
+				BundleID:    sd.Users[0].Bundles[0].ID,
 				UserID:      sd.Users[0].ID,
 				Data:        key.MustParse("Guitar"),
 				DateCreated: sd.Users[0].Keys[0].DateCreated,

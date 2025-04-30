@@ -5,9 +5,6 @@ import (
 )
 
 var orderByFields = map[string]string{
-	"key_id":   keybus.OrderByKeyID,
-	"name":     keybus.OrderByName,
-	"cost":     keybus.OrderByCost,
-	"quantity": keybus.OrderByQuantity,
-	"user_id":  keybus.OrderByUserID,
+	"key_id":  keybus.OrderByKeyID,
+	"user_id": keybus.OrderByUserID,
 }
