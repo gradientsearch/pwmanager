@@ -19,13 +19,6 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.NewBundle{
 				Type: "PERSONAL",
-				Address: bundleapp.NewAddress{
-					Address1: "123 Mocking Bird Lane",
-					ZipCode:  "35810",
-					City:     "Huntsville",
-					State:    "AL",
-					Country:  "US",
-				},
 			},
 			GotResp: &bundleapp.Bundle{},
 			ExpResp: &bundleapp.Bundle{
@@ -82,13 +75,6 @@ func create400(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusBadRequest,
 			Input: &bundleapp.NewBundle{
 				Type: "BAD TYPE",
-				Address: bundleapp.NewAddress{
-					Address1: "123 Mocking Bird Lane",
-					ZipCode:  "35810",
-					City:     "Huntsville",
-					State:    "AL",
-					Country:  "US",
-				},
 			},
 			GotResp: &errs.Error{},
 			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid bundle type \"BAD TYPE\""),

@@ -43,14 +43,7 @@ func toAppBundle(hme bundlebus.Bundle) Bundle {
 		ID:     hme.ID.String(),
 		UserID: hme.UserID.String(),
 		Type:   hme.Type.String(),
-		Address: Address{
-			Address1: hme.Address.Address1,
-			Address2: hme.Address.Address2,
-			ZipCode:  hme.Address.ZipCode,
-			City:     hme.Address.City,
-			State:    hme.Address.State,
-			Country:  hme.Address.Country,
-		},
+
 		DateCreated: hme.DateCreated.Format(time.RFC3339),
 		DateUpdated: hme.DateUpdated.Format(time.RFC3339),
 	}
@@ -67,20 +60,9 @@ func toAppBundles(bundles []bundlebus.Bundle) []Bundle {
 
 // =============================================================================
 
-// NewAddress defines the data needed to add a new address.
-type NewAddress struct {
-	Address1 string `json:"address1" validate:"required,min=1,max=70"`
-	Address2 string `json:"address2" validate:"omitempty,max=70"`
-	ZipCode  string `json:"zipCode" validate:"required,numeric"`
-	City     string `json:"city" validate:"required"`
-	State    string `json:"state" validate:"required,min=1,max=48"`
-	Country  string `json:"country" validate:"required,iso3166_1_alpha2"`
-}
-
 // NewBundle defines the data needed to add a new bundle.
 type NewBundle struct {
-	Type    string     `json:"type" validate:"required"`
-	Address NewAddress `json:"address"`
+	Type string `json:"type" validate:"required"`
 }
 
 // Decode implements the decoder interface.
@@ -111,14 +93,6 @@ func toBusNewBundle(ctx context.Context, app NewBundle) (bundlebus.NewBundle, er
 	bus := bundlebus.NewBundle{
 		UserID: userID,
 		Type:   typ,
-		Address: bundlebus.Address{
-			Address1: app.Address.Address1,
-			Address2: app.Address.Address2,
-			ZipCode:  app.Address.ZipCode,
-			City:     app.Address.City,
-			State:    app.Address.State,
-			Country:  app.Address.Country,
-		},
 	}
 
 	return bus, nil
@@ -168,17 +142,6 @@ func toBusUpdateBundle(app UpdateBundle) (bundlebus.UpdateBundle, error) {
 
 	bus := bundlebus.UpdateBundle{
 		Type: &t,
-	}
-
-	if app.Address != nil {
-		bus.Address = &bundlebus.UpdateAddress{
-			Address1: app.Address.Address1,
-			Address2: app.Address.Address2,
-			ZipCode:  app.Address.ZipCode,
-			City:     app.Address.City,
-			State:    app.Address.State,
-			Country:  app.Address.Country,
-		}
 	}
 
 	return bus, nil
