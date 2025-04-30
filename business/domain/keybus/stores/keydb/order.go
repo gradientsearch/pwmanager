@@ -8,11 +8,8 @@ import (
 )
 
 var orderByFields = map[string]string{
-	keybus.OrderByKeyID:    "key_id",
-	keybus.OrderByUserID:   "user_id",
-	keybus.OrderByName:     "name",
-	keybus.OrderByCost:     "cost",
-	keybus.OrderByQuantity: "quantity",
+	keybus.OrderByKeyID:  "key_id",
+	keybus.OrderByUserID: "user_id",
 }
 
 func orderByClause(orderBy order.By) (string, error) {

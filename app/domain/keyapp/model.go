@@ -6,23 +6,21 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
-	"github.com/gradientsearch/pwmanager/business/types/money"
-	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
+	"github.com/gradientsearch/pwmanager/business/types/key"
 )
 
 // Key represents information about an individual key.
 type Key struct {
-	ID          string  `json:"id"`
-	UserID      string  `json:"userID"`
-	Name        string  `json:"name"`
-	Cost        float64 `json:"cost"`
-	Quantity    int     `json:"quantity"`
-	DateCreated string  `json:"dateCreated"`
-	DateUpdated string  `json:"dateUpdated"`
+	ID          string `json:"id"`
+	UserID      string `json:"userID"`
+	BundleID    string `json:"bundleID"`
+	Data        string `json:"data"`
+	DateCreated string `json:"dateCreated"`
+	DateUpdated string `json:"dateUpdated"`
 }
 
 // Encode implements the encoder interface.
@@ -35,17 +33,15 @@ func toAppKey(prd keybus.Key) Key {
 	return Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
-		Name:        prd.Name.String(),
-		Cost:        prd.Cost.Value(),
-		Quantity:    prd.Quantity.Value(),
+		Data:        prd.Data.String(),
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
 		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
 	}
 }
 
-func toAppKeys(prds []keybus.Key) []Key {
-	app := make([]Key, len(prds))
-	for i, prd := range prds {
+func toAppKeys(keys []keybus.Key) []Key {
+	app := make([]Key, len(keys))
+	for i, prd := range keys {
 		app[i] = toAppKey(prd)
 	}
 
@@ -56,9 +52,9 @@ func toAppKeys(prds []keybus.Key) []Key {
 
 // NewKey defines the data needed to add a new key.
 type NewKey struct {
-	Name     string  `json:"name" validate:"required"`
-	Cost     float64 `json:"cost" validate:"required,gte=0"`
-	Quantity int     `json:"quantity" validate:"required,gte=1"`
+	Data     string `json:"data" validate:"required"`
+	BundleID string `json:"bundleID" validate:"required"`
+	UserID   string `json:"userID" validate:"required"`
 }
 
 // Decode implements the decoder interface.
@@ -81,26 +77,21 @@ func toBusNewKey(ctx context.Context, app NewKey) (keybus.NewKey, error) {
 		return keybus.NewKey{}, fmt.Errorf("getuserid: %w", err)
 	}
 
-	name, err := name.Parse(app.Name)
+	bundleID, err := uuid.Parse(app.BundleID)
 	if err != nil {
-		return keybus.NewKey{}, fmt.Errorf("parse name: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("getuserid: %w", err)
 	}
 
-	cost, err := money.Parse(app.Cost)
+	data, err := key.Parse(app.Data)
 	if err != nil {
-		return keybus.NewKey{}, fmt.Errorf("parse cost: %w", err)
-	}
-
-	quantity, err := quantity.Parse(app.Quantity)
-	if err != nil {
-		return keybus.NewKey{}, fmt.Errorf("parse quantity: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse data: %w", err)
 	}
 
 	bus := keybus.NewKey{
 		UserID:   userID,
-		Name:     name,
-		Cost:     cost,
-		Quantity: quantity,
+		BundleID: bundleID,
+
+		Data: data,
 	}
 
 	return bus, nil
@@ -110,9 +101,7 @@ func toBusNewKey(ctx context.Context, app NewKey) (keybus.NewKey, error) {
 
 // UpdateKey defines the data needed to update a key.
 type UpdateKey struct {
-	Name     *string  `json:"name"`
-	Cost     *float64 `json:"cost" validate:"omitempty,gte=0"`
-	Quantity *int     `json:"quantity" validate:"omitempty,gte=1"`
+	Data *string `json:"data"`
 }
 
 // Decode implements the decoder interface.
@@ -130,37 +119,17 @@ func (app UpdateKey) Validate() error {
 }
 
 func toBusUpdateKey(app UpdateKey) (keybus.UpdateKey, error) {
-	var nme *name.Name
-	if app.Name != nil {
-		nm, err := name.Parse(*app.Name)
+	var kd *key.Key
+	if app.Data != nil {
+		k, err := key.Parse(*app.Data)
 		if err != nil {
 			return keybus.UpdateKey{}, fmt.Errorf("parse: %w", err)
 		}
-		nme = &nm
-	}
-
-	var cost *money.Money
-	if app.Cost != nil {
-		cst, err := money.Parse(*app.Cost)
-		if err != nil {
-			return keybus.UpdateKey{}, fmt.Errorf("parse: %w", err)
-		}
-		cost = &cst
-	}
-
-	var qnt *quantity.Quantity
-	if app.Cost != nil {
-		qn, err := quantity.Parse(*app.Quantity)
-		if err != nil {
-			return keybus.UpdateKey{}, fmt.Errorf("parse: %w", err)
-		}
-		qnt = &qn
+		kd = &k
 	}
 
 	bus := keybus.UpdateKey{
-		Name:     nme,
-		Cost:     cost,
-		Quantity: qnt,
+		Data: kd,
 	}
 
 	return bus, nil

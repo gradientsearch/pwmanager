@@ -100,10 +100,9 @@ func (b *Business) Create(ctx context.Context, np NewKey) (Key, error) {
 
 	prd := Key{
 		ID:          uuid.New(),
-		Name:        np.Name,
-		Cost:        np.Cost,
-		Quantity:    np.Quantity,
+		Data:        np.Data,
 		UserID:      np.UserID,
+		BundleID:    np.BundleID,
 		DateCreated: now,
 		DateUpdated: now,
 	}
@@ -120,16 +119,8 @@ func (b *Business) Update(ctx context.Context, prd Key, up UpdateKey) (Key, erro
 	ctx, span := otel.AddSpan(ctx, "business.keybus.update")
 	defer span.End()
 
-	if up.Name != nil {
-		prd.Name = *up.Name
-	}
-
-	if up.Cost != nil {
-		prd.Cost = *up.Cost
-	}
-
-	if up.Quantity != nil {
-		prd.Quantity = *up.Quantity
+	if up.Data != nil {
+		prd.Data = *up.Data
 	}
 
 	prd.DateUpdated = time.Now()
@@ -158,12 +149,12 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 	ctx, span := otel.AddSpan(ctx, "business.keybus.query")
 	defer span.End()
 
-	prds, err := b.storer.Query(ctx, filter, orderBy, page)
+	keys, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return prds, nil
+	return keys, nil
 }
 
 // Count returns the total number of keys.
@@ -192,10 +183,10 @@ func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, 
 	ctx, span := otel.AddSpan(ctx, "business.keybus.querybyuserid")
 	defer span.End()
 
-	prds, err := b.storer.QueryByUserID(ctx, userID)
+	keys, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return prds, nil
+	return keys, nil
 }

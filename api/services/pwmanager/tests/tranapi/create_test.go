@@ -19,9 +19,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusOK,
 			Input: &tranapp.NewTran{
 				Key: tranapp.NewKey{
-					Name:     "Guitar",
-					Cost:     10.34,
-					Quantity: 10,
+					Data: "Guitar",
 				},
 				User: tranapp.NewUser{
 					Name:            "Bill Kennedy",
@@ -34,9 +32,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			},
 			GotResp: &tranapp.Key{},
 			ExpResp: &tranapp.Key{
-				Name:     "Guitar",
-				Cost:     10.34,
-				Quantity: 10,
+				Data: "Guitar",
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*tranapp.Key)
@@ -82,9 +78,7 @@ func create400(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusBadRequest,
 			Input: &tranapp.NewTran{
 				Key: tranapp.NewKey{
-					Name:     "Gu",
-					Cost:     10.34,
-					Quantity: 10,
+					Data: "Gu",
 				},
 				User: tranapp.NewUser{
 					Name:            "Bill Kennedy",

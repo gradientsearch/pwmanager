@@ -9,21 +9,18 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
-	"github.com/gradientsearch/pwmanager/business/types/money"
+	"github.com/gradientsearch/pwmanager/business/types/key"
 	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
 
 // Key represents an individual key.
 type Key struct {
-	ID          string  `json:"id"`
-	UserID      string  `json:"userID"`
-	Name        string  `json:"name"`
-	Cost        float64 `json:"cost"`
-	Quantity    int     `json:"quantity"`
-	DateCreated string  `json:"dateCreated"`
-	DateUpdated string  `json:"dateUpdated"`
+	ID          string `json:"id"`
+	UserID      string `json:"userID"`
+	Data        string `json:"data"`
+	DateCreated string `json:"dateCreated"`
+	DateUpdated string `json:"dateUpdated"`
 }
 
 // Encode implements the encoder interface.
@@ -36,9 +33,7 @@ func toAppKey(prd keybus.Key) Key {
 	return Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
-		Name:        prd.Name.String(),
-		Cost:        prd.Cost.Value(),
-		Quantity:    prd.Quantity.Value(),
+		Data:        prd.Data.String(),
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
 		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
 	}
@@ -124,9 +119,7 @@ func toBusNewUser(app NewUser) (userbus.NewUser, error) {
 
 // NewKey is what we require from clients when adding a Key.
 type NewKey struct {
-	Name     string  `json:"name" validate:"required"`
-	Cost     float64 `json:"cost" validate:"required,gte=0"`
-	Quantity int     `json:"quantity" validate:"required,gte=1"`
+	Data string `json:"data" validate:"required"`
 }
 
 // Validate checks the data in the model is considered clean.
@@ -139,25 +132,13 @@ func (app NewKey) Validate() error {
 }
 
 func toBusNewKey(app NewKey) (keybus.NewKey, error) {
-	name, err := name.Parse(app.Name)
+	k, err := key.Parse(app.Data)
 	if err != nil {
 		return keybus.NewKey{}, fmt.Errorf("parse: %w", err)
 	}
 
-	cost, err := money.Parse(app.Cost)
-	if err != nil {
-		return keybus.NewKey{}, fmt.Errorf("parse cost: %w", err)
-	}
-
-	quantity, err := quantity.Parse(app.Quantity)
-	if err != nil {
-		return keybus.NewKey{}, fmt.Errorf("parse quantity: %w", err)
-	}
-
 	bus := keybus.NewKey{
-		Name:     name,
-		Cost:     cost,
-		Quantity: quantity,
+		Data: k,
 	}
 
 	return bus, nil

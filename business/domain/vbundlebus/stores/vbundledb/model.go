@@ -6,9 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
-	"github.com/gradientsearch/pwmanager/business/types/money"
-	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
+	kt "github.com/gradientsearch/pwmanager/business/types/key"
 )
 
 type key struct {
@@ -23,35 +21,18 @@ type key struct {
 }
 
 func toBusKey(db key) (vbundlebus.Key, error) {
-	userName, err := name.Parse(db.UserName)
-	if err != nil {
-		return vbundlebus.Key{}, fmt.Errorf("parse user name: %w", err)
-	}
-
-	name, err := name.Parse(db.Name)
+	name, err := kt.Parse(db.Name)
 	if err != nil {
 		return vbundlebus.Key{}, fmt.Errorf("parse name: %w", err)
 	}
 
-	cost, err := money.Parse(db.Cost)
-	if err != nil {
-		return vbundlebus.Key{}, fmt.Errorf("parse cost: %w", err)
-	}
-
-	quantity, err := quantity.Parse(db.Quantity)
-	if err != nil {
-		return vbundlebus.Key{}, fmt.Errorf("parse quantity: %w", err)
-	}
-
 	bus := vbundlebus.Key{
-		ID:          db.ID,
-		UserID:      db.UserID,
-		Name:        name,
-		Cost:        cost,
-		Quantity:    quantity,
+		ID:     db.ID,
+		UserID: db.UserID,
+		Data:   name,
+
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
-		UserName:    userName,
 	}
 
 	return bus, nil

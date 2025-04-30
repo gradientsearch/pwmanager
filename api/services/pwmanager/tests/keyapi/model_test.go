@@ -11,9 +11,7 @@ func toAppKey(prd keybus.Key) keyapp.Key {
 	return keyapp.Key{
 		ID:          prd.ID.String(),
 		UserID:      prd.UserID.String(),
-		Name:        prd.Name.String(),
-		Cost:        prd.Cost.Value(),
-		Quantity:    prd.Quantity.Value(),
+		Data:        prd.Data.String(),
 		DateCreated: prd.DateCreated.Format(time.RFC3339),
 		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
 	}
@@ -24,9 +22,9 @@ func toAppKeyPtr(prd keybus.Key) *keyapp.Key {
 	return &appPrd
 }
 
-func toAppKeys(prds []keybus.Key) []keyapp.Key {
-	items := make([]keyapp.Key, len(prds))
-	for i, prd := range prds {
+func toAppKeys(keys []keybus.Key) []keyapp.Key {
+	items := make([]keyapp.Key, len(keys))
+	for i, prd := range keys {
 		items[i] = toAppKey(prd)
 	}
 

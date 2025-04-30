@@ -4,18 +4,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/gradientsearch/pwmanager/business/types/money"
-	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
+	"github.com/gradientsearch/pwmanager/business/types/key"
 )
 
 // Key represents an individual key.
 type Key struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
-	Name        name.Name
-	Cost        money.Money
-	Quantity    quantity.Quantity
+	BundleID    uuid.UUID
+	Data        key.Key
 	DateCreated time.Time
 	DateUpdated time.Time
 }
@@ -23,9 +20,8 @@ type Key struct {
 // NewKey is what we require from clients when adding a Key.
 type NewKey struct {
 	UserID   uuid.UUID
-	Name     name.Name
-	Cost     money.Money
-	Quantity quantity.Quantity
+	BundleID uuid.UUID
+	Data     key.Key
 }
 
 // UpdateKey defines what information may be provided to modify an
@@ -35,7 +31,6 @@ type NewKey struct {
 // explicitly blank. Normally we do not want to use pointers to basic types but
 // we make exceptions around marshalling/unmarshalling.
 type UpdateKey struct {
-	Name     *name.Name
-	Cost     *money.Money
-	Quantity *quantity.Quantity
+	Data   *key.Key
+	UserID *uuid.UUID
 }

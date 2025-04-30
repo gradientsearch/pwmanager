@@ -18,16 +18,14 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.NewKey{
-				Name:     "Guitar",
-				Cost:     10.34,
-				Quantity: 10,
+				Data:     "Guitar",
+				BundleID: sd.Users[0].Bundles[2].ID.String(),
+				UserID:   string(sd.Users[0].ID[0]),
 			},
 			GotResp: &keyapp.Key{},
 			ExpResp: &keyapp.Key{
-				Name:     "Guitar",
-				UserID:   sd.Users[0].ID.String(),
-				Cost:     10.34,
-				Quantity: 10,
+				Data:   "Guitar",
+				UserID: sd.Users[0].ID.String(),
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*keyapp.Key)
@@ -59,7 +57,7 @@ func create400(sd apitest.SeedData) []apitest.Table {
 			StatusCode: http.StatusBadRequest,
 			Input:      &keyapp.NewKey{},
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"}]"),
+			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"data\",\"error\":\"data is a required field\"},{\"field\":\"bundleID\",\"error\":\"bundleID is a required field\"},{\"field\":\"userID\",\"error\":\"userID is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},

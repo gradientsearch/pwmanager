@@ -41,7 +41,7 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.NewFieldErrors("order", err)
 	}
 
-	prds, err := a.vbundleBus.Query(ctx, filter, orderBy, page)
+	keys, err := a.vbundleBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return errs.Newf(errs.Internal, "query: %s", err)
 	}
@@ -51,5 +51,5 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.Newf(errs.Internal, "count: %s", err)
 	}
 
-	return query.NewResult(toAppKeys(prds), total, page)
+	return query.NewResult(toAppKeys(keys), total, page)
 }

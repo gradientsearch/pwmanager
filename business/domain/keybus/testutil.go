@@ -6,13 +6,11 @@ import (
 	"math/rand"
 
 	"github.com/google/uuid"
-	"github.com/gradientsearch/pwmanager/business/types/money"
-	"github.com/gradientsearch/pwmanager/business/types/name"
-	"github.com/gradientsearch/pwmanager/business/types/quantity"
+	"github.com/gradientsearch/pwmanager/business/types/key"
 )
 
 // TestGenerateNewKeys is a helper method for testing.
-func TestGenerateNewKeys(n int, userID uuid.UUID) []NewKey {
+func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID) []NewKey {
 	newPrds := make([]NewKey, n)
 
 	idx := rand.Intn(10000)
@@ -20,9 +18,8 @@ func TestGenerateNewKeys(n int, userID uuid.UUID) []NewKey {
 		idx++
 
 		np := NewKey{
-			Name:     name.MustParse(fmt.Sprintf("Name%d", idx)),
-			Cost:     money.MustParse(float64(rand.Intn(500))),
-			Quantity: quantity.MustParse(rand.Intn(50)),
+			Data:     key.MustParse(fmt.Sprintf("Name%d", idx)),
+			BundleID: bids[i],
 			UserID:   userID,
 		}
 
@@ -33,18 +30,18 @@ func TestGenerateNewKeys(n int, userID uuid.UUID) []NewKey {
 }
 
 // TestGenerateSeedKeys is a helper method for testing.
-func TestGenerateSeedKeys(ctx context.Context, n int, api *Business, userID uuid.UUID) ([]Key, error) {
-	newPrds := TestGenerateNewKeys(n, userID)
+func TestGenerateSeedKeys(ctx context.Context, n int, api *Business, userID uuid.UUID, bids []uuid.UUID) ([]Key, error) {
+	newPrds := TestGenerateNewKeys(n, userID, bids)
 
-	prds := make([]Key, len(newPrds))
+	keys := make([]Key, len(newPrds))
 	for i, np := range newPrds {
 		prd, err := api.Create(ctx, np)
 		if err != nil {
 			return nil, fmt.Errorf("seeding key: idx: %d : %w", i, err)
 		}
 
-		prds[i] = prd
+		keys[i] = prd
 	}
 
-	return prds, nil
+	return keys, nil
 }

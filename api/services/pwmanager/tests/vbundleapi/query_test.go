@@ -12,11 +12,11 @@ import (
 )
 
 func query200(sd apitest.SeedData) []apitest.Table {
-	prds := toAppVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
-	prds = append(prds, toAppVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
+	keys := toAppVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
+	keys = append(keys, toAppVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
 
-	sort.Slice(prds, func(i, j int) bool {
-		return prds[i].ID <= prds[j].ID
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].ID <= keys[j].ID
 	})
 
 	table := []apitest.Table{
@@ -30,8 +30,8 @@ func query200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &query.Result[vbundleapp.Key]{
 				Page:        1,
 				RowsPerPage: 10,
-				Total:       len(prds),
-				Items:       prds,
+				Total:       len(keys),
+				Items:       keys,
 			},
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)

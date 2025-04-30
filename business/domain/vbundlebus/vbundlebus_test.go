@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
@@ -42,14 +44,24 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
+	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	if err != nil {
+		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
+	}
+
+	bids := []uuid.UUID{}
+	for _, v := range bdls {
+		bids = append(bids, v.ID)
+	}
+
+	keys, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu1 := unitest.User{
 		User: usrs[0],
-		Keys: prds,
+		Keys: keys,
 	}
 
 	// -------------------------------------------------------------------------
@@ -59,14 +71,24 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	prds, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID)
+	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	if err != nil {
+		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
+	}
+
+	bids = []uuid.UUID{}
+	for _, v := range bdls {
+		bids = append(bids, v.ID)
+	}
+
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := unitest.User{
 		User: usrs[0],
-		Keys: prds,
+		Keys: keys,
 	}
 
 	// -------------------------------------------------------------------------
@@ -85,18 +107,15 @@ func toVBundle(usr userbus.User, prd keybus.Key) vbundlebus.Key {
 	return vbundlebus.Key{
 		ID:          prd.ID,
 		UserID:      prd.UserID,
-		Name:        prd.Name,
-		Cost:        prd.Cost,
-		Quantity:    prd.Quantity,
+		Data:        prd.Data,
 		DateCreated: prd.DateCreated,
 		DateUpdated: prd.DateUpdated,
-		UserName:    usr.Name,
 	}
 }
 
-func toVBundles(usr userbus.User, prds []keybus.Key) []vbundlebus.Key {
-	items := make([]vbundlebus.Key, len(prds))
-	for i, prd := range prds {
+func toVBundles(usr userbus.User, keys []keybus.Key) []vbundlebus.Key {
+	items := make([]vbundlebus.Key, len(keys))
+	for i, prd := range keys {
 		items[i] = toVBundle(usr, prd)
 	}
 
@@ -106,17 +125,17 @@ func toVBundles(usr userbus.User, prds []keybus.Key) []vbundlebus.Key {
 // =============================================================================
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	prds := toVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
-	prds = append(prds, toVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
+	keys := toVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
+	keys = append(keys, toVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
 
-	sort.Slice(prds, func(i, j int) bool {
-		return prds[i].ID.String() <= prds[j].ID.String()
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].ID.String() <= keys[j].ID.String()
 	})
 
 	table := []unitest.Table{
 		{
 			Name:    "all",
-			ExpResp: prds,
+			ExpResp: keys,
 			ExcFunc: func(ctx context.Context) any {
 				filter := vbundlebus.QueryFilter{
 					Name: dbtest.NamePointer("Name"),
