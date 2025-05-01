@@ -13,7 +13,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        "/v1/tranexample",
+			URL:        "/v1/bundles",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
@@ -21,31 +21,38 @@ func create200(sd apitest.SeedData) []apitest.Table {
 				Key: bundletxapp.NewKey{
 					Data: "Guitar",
 				},
-				User: bundletxapp.NewUser{
-					Name:            "Bill Kennedy",
-					Email:           "bill@ardanlabs.com",
-					Roles:           []string{"ADMIN"},
-					Department:      "ITO",
-					Password:        "123",
-					PasswordConfirm: "123",
+				Bundle: bundletxapp.NewBundle{
+					Type:     "PERSONAL",
+					Metadata: "Bundle Metadata",
 				},
 			},
-			GotResp: &bundletxapp.Key{},
-			ExpResp: &bundletxapp.Key{
-				Data: "Guitar",
+			GotResp: &bundletxapp.BundleTx{},
+			ExpResp: &bundletxapp.BundleTx{
+				Key: bundletxapp.Key{
+					Data: "Guitar",
+				},
+				Bundle: bundletxapp.Bundle{
+					Type:     "PERSONAL",
+					Metadata: "Bundle Metadata",
+				},
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*bundletxapp.Key)
+				gotResp, exists := got.(*bundletxapp.BundleTx)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*bundletxapp.Key)
+				expResp := exp.(*bundletxapp.BundleTx)
 
-				expResp.ID = gotResp.ID
-				expResp.UserID = gotResp.UserID
-				expResp.DateCreated = gotResp.DateCreated
-				expResp.DateUpdated = gotResp.DateUpdated
+				expResp.Bundle.ID = gotResp.Bundle.ID
+				expResp.Bundle.DateCreated = gotResp.Bundle.DateCreated
+				expResp.Bundle.DateUpdated = gotResp.Bundle.DateUpdated
+				expResp.Bundle.UserID = gotResp.Bundle.UserID
+
+				expResp.Key.ID = gotResp.Key.ID
+				expResp.Key.DateCreated = gotResp.Key.DateCreated
+				expResp.Key.DateUpdated = gotResp.Key.DateUpdated
+				expResp.Key.UserID = gotResp.Key.UserID
 
 				return cmp.Diff(gotResp, expResp)
 			},
@@ -59,7 +66,7 @@ func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "missing-input",
-			URL:        "/v1/tranexample",
+			URL:        "/v1/bundles",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
@@ -72,7 +79,7 @@ func create400(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "bad-name",
-			URL:        "/v1/tranexample",
+			URL:        "/v1/bundles",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
@@ -80,13 +87,9 @@ func create400(sd apitest.SeedData) []apitest.Table {
 				Key: bundletxapp.NewKey{
 					Data: "Gu",
 				},
-				User: bundletxapp.NewUser{
-					Name:            "Bill Kennedy",
-					Email:           "bill@ardanlabs.com",
-					Roles:           []string{"ADMIN"},
-					Department:      "ITO",
-					Password:        "123",
-					PasswordConfirm: "123",
+				Bundle: bundletxapp.NewBundle{
+					Type:     "PERSONAL",
+					Metadata: "Bundle Metadata",
 				},
 			},
 			GotResp: &errs.Error{},

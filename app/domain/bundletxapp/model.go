@@ -51,7 +51,6 @@ func toAppKey(k keybus.Key) Key {
 type NewBundleTx struct {
 	Bundle NewBundle `json:"bundle"`
 	Key    NewKey    `json:"key"`
-	User   NewUser   `json:"user"`
 }
 
 // Validate checks the data in the model is considered clean.
