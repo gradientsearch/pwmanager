@@ -1,14 +1,19 @@
-package tranapp
+package bundletxapp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/mail"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
+	"github.com/gradientsearch/pwmanager/app/sdk/mid"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
+	"github.com/gradientsearch/pwmanager/business/types/bundletype"
 	"github.com/gradientsearch/pwmanager/business/types/key"
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/role"
@@ -41,15 +46,15 @@ func toAppKey(k keybus.Key) Key {
 
 // =============================================================================
 
-// NewTran represents an example of cross domain transaction at the
+// NewBundleTx represents an example of cross domain transaction at the
 // application layer.
-type NewTran struct {
-	Key  NewKey  `json:"key"`
-	User NewUser `json:"user"`
+type NewBundleTx struct {
+	Bundle NewBundle `json:"bundle" validate:"required"`
+	Key    NewKey    `json:"key" validate:"required"`
 }
 
 // Validate checks the data in the model is considered clean.
-func (app NewTran) Validate() error {
+func (app NewBundleTx) Validate() error {
 	if err := errs.Check(app); err != nil {
 		return fmt.Errorf("validate: %w", err)
 	}
@@ -58,12 +63,34 @@ func (app NewTran) Validate() error {
 }
 
 // Decode implements the decoder interface.
-func (app *NewTran) Decode(data []byte) error {
+func (app *NewBundleTx) Decode(data []byte) error {
 	return json.Unmarshal(data, app)
 }
 
 // =============================================================================
 
+// BundleTx defines the data needed associated with a bundle transaction.
+type BundleTx struct {
+	Bundle Bundle
+	Key    Key
+}
+
+func toAppBundleTx(b bundlebus.Bundle, k keybus.Key) BundleTx {
+	return BundleTx{
+		Bundle: toAppBundle(b),
+		Key:    toAppKey(k),
+	}
+}
+
+// Encode implements the encoder interface.
+func (app BundleTx) Encode() ([]byte, string, error) {
+	data, err := json.Marshal(app)
+	return data, "application/json", err
+}
+
+// =============================================================================
+
+// =============================================================================
 // NewUser contains information needed to create a new user.
 type NewUser struct {
 	Name            string   `json:"name" validate:"required"`
@@ -131,15 +158,86 @@ func (app NewKey) Validate() error {
 	return nil
 }
 
-func toBusNewKey(app NewKey) (keybus.NewKey, error) {
+func toBusNewKey(ctx context.Context, app NewKey, bundleID uuid.UUID) (keybus.NewKey, error) {
+	userID, err := mid.GetUserID(ctx)
+	if err != nil {
+		return keybus.NewKey{}, fmt.Errorf("getuserid: %w", err)
+	}
+
 	k, err := key.Parse(app.Data)
 	if err != nil {
 		return keybus.NewKey{}, fmt.Errorf("parse: %w", err)
 	}
 
 	bus := keybus.NewKey{
-		Data: k,
+		UserID:   userID,
+		BundleID: bundleID,
+		Data:     k,
 	}
 
 	return bus, nil
+}
+
+// =============================================================================
+
+// NewBundle defines the data needed to add a new bundle.
+type NewBundle struct {
+	Type     string `json:"type" validate:"required"`
+	Metadata string `json:"metadata" validate:"required"`
+}
+
+// Decode implements the decoder interface.
+func (app *NewBundle) Decode(data []byte) error {
+	return json.Unmarshal(data, app)
+}
+
+// Validate checks if the data in the model is considered clean.
+func (app NewBundle) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return fmt.Errorf("validate: %w", err)
+	}
+
+	return nil
+}
+
+func toBusNewBundle(ctx context.Context, app NewBundle) (bundlebus.NewBundle, error) {
+	userID, err := mid.GetUserID(ctx)
+	if err != nil {
+		return bundlebus.NewBundle{}, fmt.Errorf("getuserid: %w", err)
+	}
+
+	typ, err := bundletype.Parse(app.Type)
+	if err != nil {
+		return bundlebus.NewBundle{}, fmt.Errorf("parse: %w", err)
+	}
+
+	bus := bundlebus.NewBundle{
+		UserID:   userID,
+		Type:     typ,
+		Metadata: app.Metadata,
+	}
+
+	return bus, nil
+}
+
+// =============================================================================
+// Bundle defines the data needed to add a new bundle.
+type Bundle struct {
+	ID          string `json:"id"`
+	UserID      string `json:"userID"`
+	Type        string `json:"type"`
+	Metadata    string `json:"metadata"`
+	DateCreated string `json:"dateCreated"`
+	DateUpdated string `json:"dateUpdated"`
+}
+
+func toAppBundle(b bundlebus.Bundle) Bundle {
+	return Bundle{
+		ID:          b.ID.String(),
+		UserID:      b.UserID.String(),
+		Type:        b.Type.String(),
+		Metadata:    b.Metadata,
+		DateCreated: b.DateCreated.String(),
+		DateUpdated: b.DateUpdated.String(),
+	}
 }

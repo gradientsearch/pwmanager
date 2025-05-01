@@ -3,9 +3,9 @@ package crud
 
 import (
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
+	"github.com/gradientsearch/pwmanager/app/domain/bundletxapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
 	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
-	"github.com/gradientsearch/pwmanager/app/domain/tranapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
 	"github.com/gradientsearch/pwmanager/foundation/web"
@@ -37,7 +37,7 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
-	tranapp.Routes(app, tranapp.Config{
+	bundletxapp.Routes(app, bundletxapp.Config{
 		UserBus:    cfg.BusConfig.UserBus,
 		KeyBus:     cfg.BusConfig.KeyBus,
 		Log:        cfg.Log,

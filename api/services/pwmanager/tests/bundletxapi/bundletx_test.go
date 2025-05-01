@@ -1,4 +1,4 @@
-package tran_test
+package bundletx_test
 
 import (
 	"testing"
@@ -6,10 +6,10 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 )
 
-func Test_Tran(t *testing.T) {
+func Test_BundleTx(t *testing.T) {
 	t.Parallel()
 
-	test := apitest.New(t, "Test_VBundle")
+	test := apitest.New(t, "Test_BundleTx")
 
 	// -------------------------------------------------------------------------
 
