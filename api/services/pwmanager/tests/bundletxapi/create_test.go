@@ -1,4 +1,4 @@
-package tran_test
+package bundletx_test
 
 import (
 	"net/http"
@@ -65,37 +65,48 @@ func create200(sd apitest.SeedData) []apitest.Table {
 func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "missing-input",
-			URL:        "/v1/bundles",
-			Token:      sd.Admins[0].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusBadRequest,
-			Input:      &bundletxapp.NewBundleTx{},
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"cost\",\"error\":\"cost is a required field\"},{\"field\":\"quantity\",\"error\":\"quantity is a required field\"},{\"field\":\"name\",\"error\":\"name is a required field\"},{\"field\":\"email\",\"error\":\"email is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"},{\"field\":\"password\",\"error\":\"password is a required field\"}]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-		{
-			Name:       "bad-name",
+			Name:       "bad-type",
 			URL:        "/v1/bundles",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input: &bundletxapp.NewBundleTx{
-				Key: bundletxapp.NewKey{
-					Data: "Gu",
-				},
 				Bundle: bundletxapp.NewBundle{
-					Type:     "PERSONAL",
-					Metadata: "Bundle Metadata",
+					Type:     "SPACE",
+					Metadata: "BUNDLE METADATA",
+				},
+				Key: bundletxapp.NewKey{
+					Data: "ENCRYPTED SYMMETRIC KEY",
 				},
 			},
 			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid name \"Gu\""),
+			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid bundle type \"SPACE\""),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       "missing-input",
+			URL:        "/v1/bundles",
+			Token:      sd.Admins[0].Token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusBadRequest,
+			Input: &bundletxapp.NewBundleTx{
+				Bundle: bundletxapp.NewBundle{
+					Type: "PERSONAL",
+				},
+			},
+			GotResp: &errs.Error{},
+
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"bundle\",\"error\":\"bundle is a required field\"},{\"field\":\"key\",\"error\":\"key is a required field\"}]"),
+			CmpFunc: func(got any, exp any) string {
+				expResp := exp.(*errs.Error)
+				gotResp := exp.(*errs.Error)
+
+				expResp.FuncName = gotResp.FuncName
+				expResp.FileName = gotResp.FileName
+
+				return cmp.Diff(gotResp, expResp)
 			},
 		},
 	}

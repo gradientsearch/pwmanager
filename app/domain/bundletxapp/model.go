@@ -49,8 +49,8 @@ func toAppKey(k keybus.Key) Key {
 // NewBundleTx represents an example of cross domain transaction at the
 // application layer.
 type NewBundleTx struct {
-	Bundle NewBundle `json:"bundle"`
-	Key    NewKey    `json:"key"`
+	Bundle NewBundle `json:"bundle" validate:"required"`
+	Key    NewKey    `json:"key" validate:"required"`
 }
 
 // Validate checks the data in the model is considered clean.
