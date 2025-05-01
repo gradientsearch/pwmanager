@@ -17,6 +17,7 @@ type Bundle struct {
 	ID          string `json:"id"`
 	UserID      string `json:"userID"`
 	Type        string `json:"type"`
+	Metadata    string `json:"metadata"`
 	DateCreated string `json:"dateCreated"`
 	DateUpdated string `json:"dateUpdated"`
 }
@@ -27,21 +28,22 @@ func (app Bundle) Encode() ([]byte, string, error) {
 	return data, "application/json", err
 }
 
-func toAppBundle(hme bundlebus.Bundle) Bundle {
+func toAppBundle(b bundlebus.Bundle) Bundle {
 	return Bundle{
-		ID:     hme.ID.String(),
-		UserID: hme.UserID.String(),
-		Type:   hme.Type.String(),
+		ID:       b.ID.String(),
+		UserID:   b.UserID.String(),
+		Type:     b.Type.String(),
+		Metadata: b.Metadata,
 
-		DateCreated: hme.DateCreated.Format(time.RFC3339),
-		DateUpdated: hme.DateUpdated.Format(time.RFC3339),
+		DateCreated: b.DateCreated.Format(time.RFC3339),
+		DateUpdated: b.DateUpdated.Format(time.RFC3339),
 	}
 }
 
 func toAppBundles(bundles []bundlebus.Bundle) []Bundle {
 	app := make([]Bundle, len(bundles))
-	for i, hme := range bundles {
-		app[i] = toAppBundle(hme)
+	for i, b := range bundles {
+		app[i] = toAppBundle(b)
 	}
 
 	return app
@@ -51,7 +53,8 @@ func toAppBundles(bundles []bundlebus.Bundle) []Bundle {
 
 // NewBundle defines the data needed to add a new bundle.
 type NewBundle struct {
-	Type string `json:"type" validate:"required"`
+	Type     string `json:"type" validate:"required"`
+	Metadata string `json:"metadata" validate:"required"`
 }
 
 // Decode implements the decoder interface.
@@ -80,8 +83,9 @@ func toBusNewBundle(ctx context.Context, app NewBundle) (bundlebus.NewBundle, er
 	}
 
 	bus := bundlebus.NewBundle{
-		UserID: userID,
-		Type:   typ,
+		UserID:   userID,
+		Type:     typ,
+		Metadata: app.Metadata,
 	}
 
 	return bus, nil
@@ -91,7 +95,8 @@ func toBusNewBundle(ctx context.Context, app NewBundle) (bundlebus.NewBundle, er
 
 // UpdateBundle defines the data needed to update a bundle.
 type UpdateBundle struct {
-	Type *string `json:"type"`
+	Type     *string `json:"type"` // TODO may not want to allow updating bundle type 🤔
+	Metadata *string `json:"metadata"`
 }
 
 // Decode implements the decoder interface.
@@ -119,7 +124,8 @@ func toBusUpdateBundle(app UpdateBundle) (bundlebus.UpdateBundle, error) {
 	}
 
 	bus := bundlebus.UpdateBundle{
-		Type: &t,
+		Type:     &t,
+		Metadata: app.Metadata,
 	}
 
 	return bus, nil

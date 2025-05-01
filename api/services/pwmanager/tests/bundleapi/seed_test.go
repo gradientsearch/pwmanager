@@ -21,14 +21,14 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	hmes, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
 	}
 
 	tu1 := apitest.User{
 		User:    usrs[0],
-		Bundles: hmes,
+		Bundles: bdls,
 		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
@@ -51,14 +51,14 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	hmes, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
 	}
 
 	tu3 := apitest.User{
 		User:    usrs[0],
-		Bundles: hmes,
+		Bundles: bdls,
 		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 

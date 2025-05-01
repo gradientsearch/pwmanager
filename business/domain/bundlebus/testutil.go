@@ -11,7 +11,7 @@ import (
 
 // TestGenerateNewBundles is a helper method for testing.
 func TestGenerateNewBundles(n int, userID uuid.UUID) []NewBundle {
-	newHmes := make([]NewBundle, n)
+	newBdls := make([]NewBundle, n)
 
 	idx := rand.Intn(10000)
 	for i := range n {
@@ -27,25 +27,25 @@ func TestGenerateNewBundles(n int, userID uuid.UUID) []NewBundle {
 			UserID: userID,
 		}
 
-		newHmes[i] = nh
+		newBdls[i] = nh
 	}
 
-	return newHmes
+	return newBdls
 }
 
 // TestGenerateSeedBundles is a helper method for testing.
 func TestGenerateSeedBundles(ctx context.Context, n int, api *Business, userID uuid.UUID) ([]Bundle, error) {
-	newHmes := TestGenerateNewBundles(n, userID)
+	newBdls := TestGenerateNewBundles(n, userID)
 
-	hmes := make([]Bundle, len(newHmes))
-	for i, nh := range newHmes {
-		hme, err := api.Create(ctx, nh)
+	bdls := make([]Bundle, len(newBdls))
+	for i, nh := range newBdls {
+		bdl, err := api.Create(ctx, nh)
 		if err != nil {
 			return nil, fmt.Errorf("seeding bundle: idx: %d : %w", i, err)
 		}
 
-		hmes[i] = hme
+		bdls[i] = bdl
 	}
 
-	return hmes, nil
+	return bdls, nil
 }

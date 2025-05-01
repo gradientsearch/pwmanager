@@ -17,6 +17,7 @@ CREATE TABLE bundles (
     bundle_id UUID NOT NULL,
     user_id UUID NOT NULL,
     type TEXT NOT NULL,
+    metadata TEXT NOT NULL,
     date_created TIMESTAMP NOT NULL,
     date_updated TIMESTAMP NOT NULL,
     PRIMARY KEY (bundle_id),

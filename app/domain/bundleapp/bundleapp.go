@@ -30,17 +30,17 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	nh, err := toBusNewBundle(ctx, app)
+	nb, err := toBusNewBundle(ctx, app)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	hme, err := a.bundleBus.Create(ctx, nh)
+	bdl, err := a.bundleBus.Create(ctx, nb)
 	if err != nil {
-		return errs.Newf(errs.Internal, "create: hme[%+v]: %s", app, err)
+		return errs.Newf(errs.Internal, "create: bdl[%+v]: %s", app, err)
 	}
 
-	return toAppBundle(hme)
+	return toAppBundle(bdl)
 }
 
 func (a *app) update(ctx context.Context, r *http.Request) web.Encoder {
@@ -54,27 +54,27 @@ func (a *app) update(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	hme, err := mid.GetBundle(ctx)
+	bdl, err := mid.GetBundle(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "bundle missing in context: %s", err)
 	}
 
-	updUsr, err := a.bundleBus.Update(ctx, hme, uh)
+	updUsr, err := a.bundleBus.Update(ctx, bdl, uh)
 	if err != nil {
-		return errs.Newf(errs.Internal, "update: bundleID[%s] uh[%+v]: %s", hme.ID, uh, err)
+		return errs.Newf(errs.Internal, "update: bundleID[%s] uh[%+v]: %s", bdl.ID, uh, err)
 	}
 
 	return toAppBundle(updUsr)
 }
 
 func (a *app) delete(ctx context.Context, _ *http.Request) web.Encoder {
-	hme, err := mid.GetBundle(ctx)
+	bdl, err := mid.GetBundle(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "bundleID missing in context: %s", err)
 	}
 
-	if err := a.bundleBus.Delete(ctx, hme); err != nil {
-		return errs.Newf(errs.Internal, "delete: bundleID[%s]: %s", hme.ID, err)
+	if err := a.bundleBus.Delete(ctx, bdl); err != nil {
+		return errs.Newf(errs.Internal, "delete: bundleID[%s]: %s", bdl.ID, err)
 	}
 
 	return nil
@@ -98,7 +98,7 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.NewFieldErrors("order", err)
 	}
 
-	hmes, err := a.bundleBus.Query(ctx, filter, orderBy, page)
+	bdls, err := a.bundleBus.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return errs.Newf(errs.Internal, "query: %s", err)
 	}
@@ -108,14 +108,14 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.Newf(errs.Internal, "count: %s", err)
 	}
 
-	return query.NewResult(toAppBundles(hmes), total, page)
+	return query.NewResult(toAppBundles(bdls), total, page)
 }
 
 func (a *app) queryByID(ctx context.Context, _ *http.Request) web.Encoder {
-	hme, err := mid.GetBundle(ctx)
+	bdl, err := mid.GetBundle(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
-	return toAppBundle(hme)
+	return toAppBundle(bdl)
 }

@@ -47,14 +47,14 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (bundlebus.Storer, error) {
 }
 
 // Create inserts a new bundle into the database.
-func (s *Store) Create(ctx context.Context, hme bundlebus.Bundle) error {
+func (s *Store) Create(ctx context.Context, bdl bundlebus.Bundle) error {
 	const q = `
     INSERT INTO bundles
-        (bundle_id, user_id, type, date_created, date_updated)
+        (bundle_id, user_id, type, metadata, date_created, date_updated)
     VALUES
-        (:bundle_id, :user_id, :type, :date_created, :date_updated)`
+        (:bundle_id, :user_id, :type, :metadata, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBBundle(hme)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBBundle(bdl)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -62,11 +62,11 @@ func (s *Store) Create(ctx context.Context, hme bundlebus.Bundle) error {
 }
 
 // Delete removes a bundle from the database.
-func (s *Store) Delete(ctx context.Context, hme bundlebus.Bundle) error {
+func (s *Store) Delete(ctx context.Context, bdl bundlebus.Bundle) error {
 	data := struct {
 		ID string `db:"bundle_id"`
 	}{
-		ID: hme.ID.String(),
+		ID: bdl.ID.String(),
 	}
 
 	const q = `
@@ -83,17 +83,18 @@ func (s *Store) Delete(ctx context.Context, hme bundlebus.Bundle) error {
 }
 
 // Update replaces a bundle document in the database.
-func (s *Store) Update(ctx context.Context, hme bundlebus.Bundle) error {
+func (s *Store) Update(ctx context.Context, bdl bundlebus.Bundle) error {
 	const q = `
     UPDATE
         bundles
     SET
         "type"          = :type,
+		"metadata"      = :metadata,
         "date_updated"  = :date_updated
     WHERE
         bundle_id = :bundle_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBBundle(hme)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBBundle(bdl)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -109,7 +110,7 @@ func (s *Store) Query(ctx context.Context, filter bundlebus.QueryFilter, orderBy
 
 	const q = `
     SELECT
-	    bundle_id, user_id, type, date_created, date_updated
+	    bundle_id, user_id, type, metadata, date_created, date_updated
 	FROM
 	  	bundles`
 
@@ -124,17 +125,17 @@ func (s *Store) Query(ctx context.Context, filter bundlebus.QueryFilter, orderBy
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbHmes []bundle
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbHmes); err != nil {
+	var dbBdls []bundle
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbBdls); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	hmes, err := toBusBundles(dbHmes)
+	bdls, err := toBusBundles(dbBdls)
 	if err != nil {
 		return nil, err
 	}
 
-	return hmes, nil
+	return bdls, nil
 }
 
 // Count returns the total number of bundles in the DB.
@@ -170,21 +171,21 @@ func (s *Store) QueryByID(ctx context.Context, bundleID uuid.UUID) (bundlebus.Bu
 
 	const q = `
     SELECT
-	  	bundle_id, user_id, type, date_created, date_updated
+	  	bundle_id, user_id, type, metadata, date_created, date_updated
     FROM
         bundles
     WHERE
         bundle_id = :bundle_id`
 
-	var dbHme bundle
-	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbHme); err != nil {
+	var dbBdl bundle
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbBdl); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return bundlebus.Bundle{}, fmt.Errorf("db: %w", bundlebus.ErrNotFound)
 		}
 		return bundlebus.Bundle{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toBusBundle(dbHme)
+	return toBusBundle(dbBdl)
 }
 
 // QueryByUserID gets the specified bundle from the database by user id.
@@ -197,16 +198,16 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]bundlebu
 
 	const q = `
 	SELECT
-	    bundle_id, user_id, type, date_created, date_updated
+	    bundle_id, user_id, type, metadata, date_created, date_updated
 	FROM
 		bundles
 	WHERE
 		user_id = :user_id`
 
-	var dbHmes []bundle
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbHmes); err != nil {
+	var dbBdls []bundle
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbBdls); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
-	return toBusBundles(dbHmes)
+	return toBusBundles(dbBdls)
 }

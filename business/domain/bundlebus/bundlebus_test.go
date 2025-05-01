@@ -45,14 +45,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	hmes, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
 	}
 
 	tu1 := unitest.User{
 		User:    usrs[0],
-		Bundles: hmes,
+		Bundles: bdls,
 	}
 
 	// -------------------------------------------------------------------------
@@ -73,14 +73,14 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	hmes, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
 	}
 
 	tu3 := unitest.User{
 		User:    usrs[0],
-		Bundles: hmes,
+		Bundles: bdls,
 	}
 
 	// -------------------------------------------------------------------------
@@ -107,18 +107,18 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 // =============================================================================
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	hmes := make([]bundlebus.Bundle, 0, len(sd.Admins[0].Bundles)+len(sd.Users[0].Bundles))
-	hmes = append(hmes, sd.Admins[0].Bundles...)
-	hmes = append(hmes, sd.Users[0].Bundles...)
+	bdls := make([]bundlebus.Bundle, 0, len(sd.Admins[0].Bundles)+len(sd.Users[0].Bundles))
+	bdls = append(bdls, sd.Admins[0].Bundles...)
+	bdls = append(bdls, sd.Users[0].Bundles...)
 
-	sort.Slice(hmes, func(i, j int) bool {
-		return hmes[i].ID.String() <= hmes[j].ID.String()
+	sort.Slice(bdls, func(i, j int) bool {
+		return bdls[i].ID.String() <= bdls[j].ID.String()
 	})
 
 	table := []unitest.Table{
 		{
 			Name:    "all",
-			ExpResp: hmes,
+			ExpResp: bdls,
 			ExcFunc: func(ctx context.Context) any {
 				resp, err := busDomain.Bundle.Query(ctx, bundlebus.QueryFilter{}, bundlebus.DefaultOrderBy, page.MustParse("1", "10"))
 				if err != nil {
@@ -188,13 +188,15 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 		{
 			Name: "basic",
 			ExpResp: bundlebus.Bundle{
-				UserID: sd.Users[0].ID,
-				Type:   bundletype.Personal,
+				UserID:   sd.Users[0].ID,
+				Type:     bundletype.Personal,
+				Metadata: "BUNDLE METADATA",
 			},
 			ExcFunc: func(ctx context.Context) any {
 				nh := bundlebus.NewBundle{
-					UserID: sd.Users[0].ID,
-					Type:   bundletype.Personal,
+					UserID:   sd.Users[0].ID,
+					Type:     bundletype.Personal,
+					Metadata: "BUNDLE METADATA",
 				}
 
 				resp, err := busDomain.Bundle.Create(ctx, nh)

@@ -27,9 +27,9 @@ var (
 // retrieve data.
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
-	Create(ctx context.Context, hme Bundle) error
-	Update(ctx context.Context, hme Bundle) error
-	Delete(ctx context.Context, hme Bundle) error
+	Create(ctx context.Context, bdl Bundle) error
+	Update(ctx context.Context, bdl Bundle) error
+	Delete(ctx context.Context, bdl Bundle) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Bundle, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, bundleID uuid.UUID) (Bundle, error)
@@ -93,45 +93,46 @@ func (b *Business) Create(ctx context.Context, nh NewBundle) (Bundle, error) {
 
 	now := time.Now()
 
-	hme := Bundle{
+	bdl := Bundle{
 		ID:          uuid.New(),
 		Type:        nh.Type,
 		UserID:      nh.UserID,
+		Metadata:    nh.Metadata,
 		DateCreated: now,
 		DateUpdated: now,
 	}
 
-	if err := b.storer.Create(ctx, hme); err != nil {
+	if err := b.storer.Create(ctx, bdl); err != nil {
 		return Bundle{}, fmt.Errorf("create: %w", err)
 	}
 
-	return hme, nil
+	return bdl, nil
 }
 
 // Update modifies information about a bundle.
-func (b *Business) Update(ctx context.Context, hme Bundle, uh UpdateBundle) (Bundle, error) {
+func (b *Business) Update(ctx context.Context, bdl Bundle, uh UpdateBundle) (Bundle, error) {
 	ctx, span := otel.AddSpan(ctx, "business.bundlebus.update")
 	defer span.End()
 
 	if uh.Type != nil {
-		hme.Type = *uh.Type
+		bdl.Type = *uh.Type
 	}
 
-	hme.DateUpdated = time.Now()
+	bdl.DateUpdated = time.Now()
 
-	if err := b.storer.Update(ctx, hme); err != nil {
+	if err := b.storer.Update(ctx, bdl); err != nil {
 		return Bundle{}, fmt.Errorf("update: %w", err)
 	}
 
-	return hme, nil
+	return bdl, nil
 }
 
 // Delete removes the specified bundle.
-func (b *Business) Delete(ctx context.Context, hme Bundle) error {
+func (b *Business) Delete(ctx context.Context, bdl Bundle) error {
 	ctx, span := otel.AddSpan(ctx, "business.bundlebus.delete")
 	defer span.End()
 
-	if err := b.storer.Delete(ctx, hme); err != nil {
+	if err := b.storer.Delete(ctx, bdl); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 
@@ -143,12 +144,12 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 	ctx, span := otel.AddSpan(ctx, "business.bundlebus.query")
 	defer span.End()
 
-	hmes, err := b.storer.Query(ctx, filter, orderBy, page)
+	bdls, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return hmes, nil
+	return bdls, nil
 }
 
 // Count returns the total number of bundles.
@@ -164,12 +165,12 @@ func (b *Business) QueryByID(ctx context.Context, bundleID uuid.UUID) (Bundle, e
 	ctx, span := otel.AddSpan(ctx, "business.bundlebus.querybyid")
 	defer span.End()
 
-	hme, err := b.storer.QueryByID(ctx, bundleID)
+	bdl, err := b.storer.QueryByID(ctx, bundleID)
 	if err != nil {
 		return Bundle{}, fmt.Errorf("query: bundleID[%s]: %w", bundleID, err)
 	}
 
-	return hme, nil
+	return bdl, nil
 }
 
 // QueryByUserID finds the bundles by a specified User ID.
@@ -177,10 +178,10 @@ func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Bundl
 	ctx, span := otel.AddSpan(ctx, "business.bundlebus.querybyuserid")
 	defer span.End()
 
-	hmes, err := b.storer.QueryByUserID(ctx, userID)
+	bdls, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return hmes, nil
+	return bdls, nil
 }
