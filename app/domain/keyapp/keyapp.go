@@ -30,17 +30,17 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	np, err := toBusNewKey(ctx, app)
+	nk, err := toBusNewKey(ctx, app)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	prd, err := a.keyBus.Create(ctx, np)
+	k, err := a.keyBus.Create(ctx, nk)
 	if err != nil {
-		return errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
+		return errs.Newf(errs.Internal, "create: k[%+v]: %s", k, err)
 	}
 
-	return toAppKey(prd)
+	return toAppKey(k)
 }
 
 func (a *app) update(ctx context.Context, r *http.Request) web.Encoder {
@@ -49,32 +49,32 @@ func (a *app) update(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	up, err := toBusUpdateKey(app)
+	uk, err := toBusUpdateKey(app)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	prd, err := mid.GetKey(ctx)
+	k, err := mid.GetKey(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "key missing in context: %s", err)
 	}
 
-	updPrd, err := a.keyBus.Update(ctx, prd, up)
+	updKey, err := a.keyBus.Update(ctx, k, uk)
 	if err != nil {
-		return errs.Newf(errs.Internal, "update: keyID[%s] up[%+v]: %s", prd.ID, app, err)
+		return errs.Newf(errs.Internal, "update: keyID[%s] uk[%+v]: %s", k.ID, app, err)
 	}
 
-	return toAppKey(updPrd)
+	return toAppKey(updKey)
 }
 
 func (a *app) delete(ctx context.Context, _ *http.Request) web.Encoder {
-	prd, err := mid.GetKey(ctx)
+	k, err := mid.GetKey(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "keyID missing in context: %s", err)
 	}
 
-	if err := a.keyBus.Delete(ctx, prd); err != nil {
-		return errs.Newf(errs.Internal, "delete: keyID[%s]: %s", prd.ID, err)
+	if err := a.keyBus.Delete(ctx, k); err != nil {
+		return errs.Newf(errs.Internal, "delete: keyID[%s]: %s", k.ID, err)
 	}
 
 	return nil
@@ -112,10 +112,10 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 }
 
 func (a *app) queryByID(ctx context.Context, r *http.Request) web.Encoder {
-	prd, err := mid.GetKey(ctx)
+	k, err := mid.GetKey(ctx)
 	if err != nil {
 		return errs.Newf(errs.Internal, "querybyid: %s", err)
 	}
 
-	return toAppKey(prd)
+	return toAppKey(k)
 }

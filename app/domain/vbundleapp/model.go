@@ -23,20 +23,20 @@ func (app Key) Encode() ([]byte, string, error) {
 	return data, "application/json", err
 }
 
-func toAppKey(prd vbundlebus.Key) Key {
+func toAppKey(k vbundlebus.Key) Key {
 	return Key{
-		ID:          prd.ID.String(),
-		UserID:      prd.UserID.String(),
-		Data:        prd.Data.String(),
-		DateCreated: prd.DateCreated.Format(time.RFC3339),
-		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
+		ID:          k.ID.String(),
+		UserID:      k.UserID.String(),
+		Data:        k.Data.String(),
+		DateCreated: k.DateCreated.Format(time.RFC3339),
+		DateUpdated: k.DateUpdated.Format(time.RFC3339),
 	}
 }
 
 func toAppKeys(keys []vbundlebus.Key) []Key {
 	app := make([]Key, len(keys))
-	for i, prd := range keys {
-		app[i] = toAppKey(prd)
+	for i, k := range keys {
+		app[i] = toAppKey(k)
 	}
 
 	return app

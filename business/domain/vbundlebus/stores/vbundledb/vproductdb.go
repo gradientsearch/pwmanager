@@ -59,17 +59,17 @@ func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderB
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dnPrd []key
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dnPrd); err != nil {
+	var dnKey []key
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dnKey); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	prd, err := toBusKeys(dnPrd)
+	k, err := toBusKeys(dnKey)
 	if err != nil {
 		return nil, err
 	}
 
-	return prd, nil
+	return k, nil
 }
 
 // Count returns the total number of keys in the DB.

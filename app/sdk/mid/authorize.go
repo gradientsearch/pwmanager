@@ -121,7 +121,7 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 					return errs.New(errs.Unauthenticated, ErrInvalidID)
 				}
 
-				prd, err := keyBus.QueryByID(ctx, keyID)
+				k, err := keyBus.QueryByID(ctx, keyID)
 				if err != nil {
 					switch {
 					case errors.Is(err, keybus.ErrNotFound):
@@ -131,8 +131,8 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 					}
 				}
 
-				userID = prd.UserID
-				ctx = setKey(ctx, prd)
+				userID = k.UserID
+				ctx = setKey(ctx, k)
 			}
 
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)

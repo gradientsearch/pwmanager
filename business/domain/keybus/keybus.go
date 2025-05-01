@@ -28,9 +28,9 @@ var (
 // retrieve data.
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
-	Create(ctx context.Context, prd Key) error
-	Update(ctx context.Context, prd Key) error
-	Delete(ctx context.Context, prd Key) error
+	Create(ctx context.Context, k Key) error
+	Update(ctx context.Context, k Key) error
+	Delete(ctx context.Context, k Key) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, keyID uuid.UUID) (Key, error)
@@ -83,13 +83,13 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 }
 
 // Create adds a new key to the system.
-func (b *Business) Create(ctx context.Context, np NewKey) (Key, error) {
+func (b *Business) Create(ctx context.Context, nk NewKey) (Key, error) {
 	ctx, span := otel.AddSpan(ctx, "business.keybus.create")
 	defer span.End()
 
-	usr, err := b.userBus.QueryByID(ctx, np.UserID)
+	usr, err := b.userBus.QueryByID(ctx, nk.UserID)
 	if err != nil {
-		return Key{}, fmt.Errorf("user.querybyid: %s: %w", np.UserID, err)
+		return Key{}, fmt.Errorf("user.querybyid: %s: %w", nk.UserID, err)
 	}
 
 	if !usr.Enabled {
@@ -98,46 +98,46 @@ func (b *Business) Create(ctx context.Context, np NewKey) (Key, error) {
 
 	now := time.Now()
 
-	prd := Key{
+	k := Key{
 		ID:          uuid.New(),
-		Data:        np.Data,
-		UserID:      np.UserID,
-		BundleID:    np.BundleID,
+		Data:        nk.Data,
+		UserID:      nk.UserID,
+		BundleID:    nk.BundleID,
 		DateCreated: now,
 		DateUpdated: now,
 	}
 
-	if err := b.storer.Create(ctx, prd); err != nil {
+	if err := b.storer.Create(ctx, k); err != nil {
 		return Key{}, fmt.Errorf("create: %w", err)
 	}
 
-	return prd, nil
+	return k, nil
 }
 
 // Update modifies information about a key.
-func (b *Business) Update(ctx context.Context, prd Key, up UpdateKey) (Key, error) {
+func (b *Business) Update(ctx context.Context, k Key, uk UpdateKey) (Key, error) {
 	ctx, span := otel.AddSpan(ctx, "business.keybus.update")
 	defer span.End()
 
-	if up.Data != nil {
-		prd.Data = *up.Data
+	if uk.Data != nil {
+		k.Data = *uk.Data
 	}
 
-	prd.DateUpdated = time.Now()
+	k.DateUpdated = time.Now()
 
-	if err := b.storer.Update(ctx, prd); err != nil {
+	if err := b.storer.Update(ctx, k); err != nil {
 		return Key{}, fmt.Errorf("update: %w", err)
 	}
 
-	return prd, nil
+	return k, nil
 }
 
 // Delete removes the specified key.
-func (b *Business) Delete(ctx context.Context, prd Key) error {
+func (b *Business) Delete(ctx context.Context, k Key) error {
 	ctx, span := otel.AddSpan(ctx, "business.keybus.delete")
 	defer span.End()
 
-	if err := b.storer.Delete(ctx, prd); err != nil {
+	if err := b.storer.Delete(ctx, k); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 
@@ -170,12 +170,12 @@ func (b *Business) QueryByID(ctx context.Context, keyID uuid.UUID) (Key, error) 
 	ctx, span := otel.AddSpan(ctx, "business.keybus.querybyid")
 	defer span.End()
 
-	prd, err := b.storer.QueryByID(ctx, keyID)
+	k, err := b.storer.QueryByID(ctx, keyID)
 	if err != nil {
 		return Key{}, fmt.Errorf("query: keyID[%s]: %w", keyID, err)
 	}
 
-	return prd, nil
+	return k, nil
 }
 
 // QueryByUserID finds the keys by a specified User ID.

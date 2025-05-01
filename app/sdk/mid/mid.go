@@ -77,8 +77,8 @@ func GetUser(ctx context.Context) (userbus.User, error) {
 	return v, nil
 }
 
-func setKey(ctx context.Context, prd keybus.Key) context.Context {
-	return context.WithValue(ctx, keyKey, prd)
+func setKey(ctx context.Context, k keybus.Key) context.Context {
+	return context.WithValue(ctx, keyKey, k)
 }
 
 // GetKey returns the key from the context.

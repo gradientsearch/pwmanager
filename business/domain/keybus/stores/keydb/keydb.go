@@ -48,14 +48,14 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (keybus.Storer, error) {
 
 // Create adds a Key to the sqldb. It returns the created Key with
 // fields like ID and DateCreated populated.
-func (s *Store) Create(ctx context.Context, prd keybus.Key) error {
+func (s *Store) Create(ctx context.Context, k keybus.Key) error {
 	const q = `
 	INSERT INTO keys
 		(key_id, user_id, bundle_id, data, date_created, date_updated)
 	VALUES
 		(:key_id, :user_id, :bundle_id, :data, :date_created, :date_updated)`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBKey(prd)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBKey(k)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -64,7 +64,7 @@ func (s *Store) Create(ctx context.Context, prd keybus.Key) error {
 
 // Update modifies data about a keybus. It will error if the specified ID is
 // invalid or does not reference an existing keybus.
-func (s *Store) Update(ctx context.Context, prd keybus.Key) error {
+func (s *Store) Update(ctx context.Context, k keybus.Key) error {
 	const q = `
 	UPDATE
 		keys
@@ -74,7 +74,7 @@ func (s *Store) Update(ctx context.Context, prd keybus.Key) error {
 	WHERE
 		key_id = :key_id`
 
-	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBKey(prd)); err != nil {
+	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBKey(k)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -82,11 +82,11 @@ func (s *Store) Update(ctx context.Context, prd keybus.Key) error {
 }
 
 // Delete removes the key identified by a given ID.
-func (s *Store) Delete(ctx context.Context, prd keybus.Key) error {
+func (s *Store) Delete(ctx context.Context, k keybus.Key) error {
 	data := struct {
 		ID string `db:"key_id"`
 	}{
-		ID: prd.ID.String(),
+		ID: k.ID.String(),
 	}
 
 	const q = `
@@ -126,12 +126,12 @@ func (s *Store) Query(ctx context.Context, filter keybus.QueryFilter, orderBy or
 	buf.WriteString(orderByClause)
 	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
 
-	var dbPrds []key
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbPrds); err != nil {
+	var dbKeys []key
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbKeys); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toBusKeys(dbPrds)
+	return toBusKeys(dbKeys)
 }
 
 // Count returns the total number of users in the DB.
@@ -175,15 +175,15 @@ func (s *Store) QueryByID(ctx context.Context, keyID uuid.UUID) (keybus.Key, err
 	WHERE
 		key_id = :key_id`
 
-	var dbPrd key
-	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbPrd); err != nil {
+	var dbKey key
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbKey); err != nil {
 		if errors.Is(err, sqldb.ErrDBNotFound) {
 			return keybus.Key{}, fmt.Errorf("db: %w", keybus.ErrNotFound)
 		}
 		return keybus.Key{}, fmt.Errorf("db: %w", err)
 	}
 
-	return toBusKey(dbPrd)
+	return toBusKey(dbKey)
 }
 
 // QueryByUserID finds the key identified by a given User ID.
@@ -202,10 +202,10 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]keybus.K
 	WHERE
 		user_id = :user_id`
 
-	var dbPrds []key
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbPrds); err != nil {
+	var dbKeys []key
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dbKeys); err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 
-	return toBusKeys(dbPrds)
+	return toBusKeys(dbKeys)
 }
