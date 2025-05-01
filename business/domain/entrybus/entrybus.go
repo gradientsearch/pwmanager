@@ -1,5 +1,5 @@
-// Package keybus provides business access to key domain.
-package keybus
+// Package entrybus provides business access to entry domain.
+package entrybus
 
 import (
 	"context"
@@ -19,7 +19,7 @@ import (
 
 // Set of error variables for CRUD operations.
 var (
-	ErrNotFound     = errors.New("key not found")
+	ErrNotFound     = errors.New("entry not found")
 	ErrUserDisabled = errors.New("user disabled")
 )
 
@@ -27,16 +27,16 @@ var (
 // retrieve data.
 type Storer interface {
 	NewWithTx(tx sqldb.CommitRollbacker) (Storer, error)
-	Create(ctx context.Context, k Key) error
-	Update(ctx context.Context, k Key) error
-	Delete(ctx context.Context, k Key) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error)
+	Create(ctx context.Context, k Entry) error
+	Update(ctx context.Context, k Entry) error
+	Delete(ctx context.Context, k Entry) error
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Entry, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
-	QueryByID(ctx context.Context, keyID uuid.UUID) (Key, error)
-	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, error)
+	QueryByID(ctx context.Context, entryID uuid.UUID) (Entry, error)
+	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Entry, error)
 }
 
-// Business manages the set of APIs for key access.
+// Business manages the set of APIs for entry access.
 type Business struct {
 	log      *logger.Logger
 	userBus  *userbus.Business
@@ -44,7 +44,7 @@ type Business struct {
 	storer   Storer
 }
 
-// NewBusiness constructs a key business API for use.
+// NewBusiness constructs a entry business API for use.
 func NewBusiness(log *logger.Logger, userBus *userbus.Business, delegate *delegate.Delegate, storer Storer) *Business {
 	b := Business{
 		log:      log,
@@ -81,23 +81,23 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 	return &bus, nil
 }
 
-// Create adds a new key to the system.
-func (b *Business) Create(ctx context.Context, nk NewKey) (Key, error) {
-	ctx, span := otel.AddSpan(ctx, "business.keybus.create")
+// Create adds a new entry to the system.
+func (b *Business) Create(ctx context.Context, nk NewEntry) (Entry, error) {
+	ctx, span := otel.AddSpan(ctx, "business.entrybus.create")
 	defer span.End()
 
 	usr, err := b.userBus.QueryByID(ctx, nk.UserID)
 	if err != nil {
-		return Key{}, fmt.Errorf("user.querybyid: %s: %w", nk.UserID, err)
+		return Entry{}, fmt.Errorf("user.querybyid: %s: %w", nk.UserID, err)
 	}
 
 	if !usr.Enabled {
-		return Key{}, ErrUserDisabled
+		return Entry{}, ErrUserDisabled
 	}
 
 	now := time.Now()
 
-	k := Key{
+	k := Entry{
 		ID:          uuid.New(),
 		Data:        nk.Data,
 		UserID:      nk.UserID,
@@ -107,15 +107,15 @@ func (b *Business) Create(ctx context.Context, nk NewKey) (Key, error) {
 	}
 
 	if err := b.storer.Create(ctx, k); err != nil {
-		return Key{}, fmt.Errorf("create: %w", err)
+		return Entry{}, fmt.Errorf("create: %w", err)
 	}
 
 	return k, nil
 }
 
-// Update modifies information about a key.
-func (b *Business) Update(ctx context.Context, k Key, uk UpdateKey) (Key, error) {
-	ctx, span := otel.AddSpan(ctx, "business.keybus.update")
+// Update modifies information about a entry.
+func (b *Business) Update(ctx context.Context, k Entry, uk UpdateEntry) (Entry, error) {
+	ctx, span := otel.AddSpan(ctx, "business.entrybus.update")
 	defer span.End()
 
 	if uk.Data != nil {
@@ -125,15 +125,15 @@ func (b *Business) Update(ctx context.Context, k Key, uk UpdateKey) (Key, error)
 	k.DateUpdated = time.Now()
 
 	if err := b.storer.Update(ctx, k); err != nil {
-		return Key{}, fmt.Errorf("update: %w", err)
+		return Entry{}, fmt.Errorf("update: %w", err)
 	}
 
 	return k, nil
 }
 
-// Delete removes the specified key.
-func (b *Business) Delete(ctx context.Context, k Key) error {
-	ctx, span := otel.AddSpan(ctx, "business.keybus.delete")
+// Delete removes the specified entry.
+func (b *Business) Delete(ctx context.Context, k Entry) error {
+	ctx, span := otel.AddSpan(ctx, "business.entrybus.delete")
 	defer span.End()
 
 	if err := b.storer.Delete(ctx, k); err != nil {
@@ -143,49 +143,49 @@ func (b *Business) Delete(ctx context.Context, k Key) error {
 	return nil
 }
 
-// Query retrieves a list of existing keys.
-func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error) {
-	ctx, span := otel.AddSpan(ctx, "business.keybus.query")
+// Query retrieves a list of existing entries.
+func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Entry, error) {
+	ctx, span := otel.AddSpan(ctx, "business.entrybus.query")
 	defer span.End()
 
-	keys, err := b.storer.Query(ctx, filter, orderBy, page)
+	entries, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return keys, nil
+	return entries, nil
 }
 
-// Count returns the total number of keys.
+// Count returns the total number of entries.
 func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
-	ctx, span := otel.AddSpan(ctx, "business.keybus.count")
+	ctx, span := otel.AddSpan(ctx, "business.entrybus.count")
 	defer span.End()
 
 	return b.storer.Count(ctx, filter)
 }
 
-// QueryByID finds the key by the specified ID.
-func (b *Business) QueryByID(ctx context.Context, keyID uuid.UUID) (Key, error) {
-	ctx, span := otel.AddSpan(ctx, "business.keybus.querybyid")
+// QueryByID finds the entry by the specified ID.
+func (b *Business) QueryByID(ctx context.Context, entryID uuid.UUID) (Entry, error) {
+	ctx, span := otel.AddSpan(ctx, "business.entrybus.querybyid")
 	defer span.End()
 
-	k, err := b.storer.QueryByID(ctx, keyID)
+	k, err := b.storer.QueryByID(ctx, entryID)
 	if err != nil {
-		return Key{}, fmt.Errorf("query: keyID[%s]: %w", keyID, err)
+		return Entry{}, fmt.Errorf("query: entryID[%s]: %w", entryID, err)
 	}
 
 	return k, nil
 }
 
-// QueryByUserID finds the keys by a specified User ID.
-func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, error) {
-	ctx, span := otel.AddSpan(ctx, "business.keybus.querybyuserid")
+// QueryByUserID finds the entries by a specified User ID.
+func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Entry, error) {
+	ctx, span := otel.AddSpan(ctx, "business.entrybus.querybyuserid")
 	defer span.End()
 
-	keys, err := b.storer.QueryByUserID(ctx, userID)
+	entries, err := b.storer.QueryByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
 
-	return keys, nil
+	return entries, nil
 }

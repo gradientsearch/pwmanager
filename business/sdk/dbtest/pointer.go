@@ -1,6 +1,7 @@
 package dbtest
 
 import (
+	"github.com/gradientsearch/pwmanager/business/types/entry"
 	"github.com/gradientsearch/pwmanager/business/types/key"
 	"github.com/gradientsearch/pwmanager/business/types/money"
 	"github.com/gradientsearch/pwmanager/business/types/name"
@@ -65,6 +66,22 @@ func KeyPointer(value string) *key.Key {
 func KeyNullPointer(value string) *key.Null {
 	key := key.MustParseNull(value)
 	return &key
+}
+
+// EntryPointer is a helper to get a *Entry from a string. It's in the tests
+// package because we normally don't want to deal with pointers to basic types
+// but it's useful in some tests.
+func EntryPointer(value string) *entry.Entry {
+	entry := entry.MustParse(value)
+	return &entry
+}
+
+// EntryNullPointer is a helper to get a *EmptyEntry from a string. It's in the tests
+// package because we normally don't want to deal with pointers to basic types
+// but it's useful in some tests.
+func EntryNullPointer(value string) *entry.Null {
+	entry := entry.MustParseNull(value)
+	return &entry
 }
 
 // MoneyPointer is a helper to get a *Money from a float. It's in the tests

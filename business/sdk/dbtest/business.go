@@ -5,6 +5,7 @@ import (
 
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus/stores/bundledb"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus/stores/keydb"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
@@ -22,6 +23,7 @@ type BusDomain struct {
 	Delegate *delegate.Delegate
 	Bundle   *bundlebus.Business
 	Key      *keybus.Business
+	Entry    *entrybus.Business
 	User     *userbus.Business
 	VBundle  *vbundlebus.Business
 }
