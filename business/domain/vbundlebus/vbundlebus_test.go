@@ -103,20 +103,20 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 // =============================================================================
 
-func toVBundle(usr userbus.User, prd keybus.Key) vbundlebus.Key {
+func toVBundle(usr userbus.User, k keybus.Key) vbundlebus.Key {
 	return vbundlebus.Key{
-		ID:          prd.ID,
-		UserID:      prd.UserID,
-		Data:        prd.Data,
-		DateCreated: prd.DateCreated,
-		DateUpdated: prd.DateUpdated,
+		ID:          k.ID,
+		UserID:      k.UserID,
+		Data:        k.Data,
+		DateCreated: k.DateCreated,
+		DateUpdated: k.DateUpdated,
 	}
 }
 
 func toVBundles(usr userbus.User, keys []keybus.Key) []vbundlebus.Key {
 	items := make([]vbundlebus.Key, len(keys))
-	for i, prd := range keys {
-		items[i] = toVBundle(usr, prd)
+	for i, k := range keys {
+		items[i] = toVBundle(usr, k)
 	}
 
 	return items

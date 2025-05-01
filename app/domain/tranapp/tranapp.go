@@ -62,7 +62,7 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.New(errs.Internal, err)
 	}
 
-	np, err := toBusNewKey(app.Key)
+	nk, err := toBusNewKey(app.Key)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -80,12 +80,12 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
 	}
 
-	np.UserID = usr.ID
+	nk.UserID = usr.ID
 
-	prd, err := a.keyBus.Create(ctx, np)
+	k, err := a.keyBus.Create(ctx, nk)
 	if err != nil {
-		return errs.Newf(errs.Internal, "create: prd[%+v]: %s", prd, err)
+		return errs.Newf(errs.Internal, "create: k[%+v]: %s", k, err)
 	}
 
-	return toAppKey(prd)
+	return toAppKey(k)
 }

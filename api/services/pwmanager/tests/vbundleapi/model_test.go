@@ -8,20 +8,20 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 )
 
-func toAppVBundle(usr userbus.User, prd keybus.Key) vbundleapp.Key {
+func toAppVBundle(usr userbus.User, k keybus.Key) vbundleapp.Key {
 	return vbundleapp.Key{
-		ID:          prd.ID.String(),
-		UserID:      prd.UserID.String(),
-		Data:        prd.Data.String(),
-		DateCreated: prd.DateCreated.Format(time.RFC3339),
-		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
+		ID:          k.ID.String(),
+		UserID:      k.UserID.String(),
+		Data:        k.Data.String(),
+		DateCreated: k.DateCreated.Format(time.RFC3339),
+		DateUpdated: k.DateUpdated.Format(time.RFC3339),
 	}
 }
 
 func toAppVBundles(usr userbus.User, keys []keybus.Key) []vbundleapp.Key {
 	items := make([]vbundleapp.Key, len(keys))
-	for i, prd := range keys {
-		items[i] = toAppVBundle(usr, prd)
+	for i, k := range keys {
+		items[i] = toAppVBundle(usr, k)
 	}
 
 	return items

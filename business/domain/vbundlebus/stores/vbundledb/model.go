@@ -38,12 +38,12 @@ func toBusKey(db key) (vbundlebus.Key, error) {
 	return bus, nil
 }
 
-func toBusKeys(dbPrds []key) ([]vbundlebus.Key, error) {
-	bus := make([]vbundlebus.Key, len(dbPrds))
+func toBusKeys(dbKeys []key) ([]vbundlebus.Key, error) {
+	bus := make([]vbundlebus.Key, len(dbKeys))
 
-	for i, dbPrd := range dbPrds {
+	for i, dbKey := range dbKeys {
 		var err error
-		bus[i], err = toBusKey(dbPrd)
+		bus[i], err = toBusKey(dbKey)
 		if err != nil {
 			return nil, err
 		}

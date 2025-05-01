@@ -199,13 +199,13 @@ func create(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				Data:     key.MustParse("Guitar"),
 			},
 			ExcFunc: func(ctx context.Context) any {
-				np := keybus.NewKey{
+				nk := keybus.NewKey{
 					UserID:   sd.Users[0].ID,
 					BundleID: sd.Users[0].Bundles[2].ID,
 					Data:     key.MustParse("Guitar"),
 				}
 
-				resp, err := busDomain.Key.Create(ctx, np)
+				resp, err := busDomain.Key.Create(ctx, nk)
 				if err != nil {
 					return err
 				}
@@ -245,11 +245,11 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				DateUpdated: sd.Users[0].Keys[0].DateCreated,
 			},
 			ExcFunc: func(ctx context.Context) any {
-				up := keybus.UpdateKey{
+				uk := keybus.UpdateKey{
 					Data: dbtest.KeyPointer("Guitar"),
 				}
 
-				resp, err := busDomain.Key.Update(ctx, sd.Users[0].Keys[0], up)
+				resp, err := busDomain.Key.Update(ctx, sd.Users[0].Keys[0], uk)
 				if err != nil {
 					return err
 				}

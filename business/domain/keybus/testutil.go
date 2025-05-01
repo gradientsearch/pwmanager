@@ -11,36 +11,36 @@ import (
 
 // TestGenerateNewKeys is a helper method for testing.
 func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID) []NewKey {
-	newPrds := make([]NewKey, n)
+	newKeys := make([]NewKey, n)
 
 	idx := rand.Intn(10000)
 	for i := range n {
 		idx++
 
-		np := NewKey{
+		nk := NewKey{
 			Data:     key.MustParse(fmt.Sprintf("Name%d", idx)),
 			BundleID: bids[i],
 			UserID:   userID,
 		}
 
-		newPrds[i] = np
+		newKeys[i] = nk
 	}
 
-	return newPrds
+	return newKeys
 }
 
 // TestGenerateSeedKeys is a helper method for testing.
 func TestGenerateSeedKeys(ctx context.Context, n int, api *Business, userID uuid.UUID, bids []uuid.UUID) ([]Key, error) {
-	newPrds := TestGenerateNewKeys(n, userID, bids)
+	newKeys := TestGenerateNewKeys(n, userID, bids)
 
-	keys := make([]Key, len(newPrds))
-	for i, np := range newPrds {
-		prd, err := api.Create(ctx, np)
+	keys := make([]Key, len(newKeys))
+	for i, nk := range newKeys {
+		k, err := api.Create(ctx, nk)
 		if err != nil {
 			return nil, fmt.Errorf("seeding key: idx: %d : %w", i, err)
 		}
 
-		keys[i] = prd
+		keys[i] = k
 	}
 
 	return keys, nil

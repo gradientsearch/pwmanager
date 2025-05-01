@@ -7,25 +7,25 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 )
 
-func toAppKey(prd keybus.Key) keyapp.Key {
+func toAppKey(k keybus.Key) keyapp.Key {
 	return keyapp.Key{
-		ID:          prd.ID.String(),
-		UserID:      prd.UserID.String(),
-		Data:        prd.Data.String(),
-		DateCreated: prd.DateCreated.Format(time.RFC3339),
-		DateUpdated: prd.DateUpdated.Format(time.RFC3339),
+		ID:          k.ID.String(),
+		UserID:      k.UserID.String(),
+		Data:        k.Data.String(),
+		DateCreated: k.DateCreated.Format(time.RFC3339),
+		DateUpdated: k.DateUpdated.Format(time.RFC3339),
 	}
 }
 
-func toAppKeyPtr(prd keybus.Key) *keyapp.Key {
-	appPrd := toAppKey(prd)
-	return &appPrd
+func toAppKeyPtr(k keybus.Key) *keyapp.Key {
+	appKey := toAppKey(k)
+	return &appKey
 }
 
 func toAppKeys(keys []keybus.Key) []keyapp.Key {
 	items := make([]keyapp.Key, len(keys))
-	for i, prd := range keys {
-		items[i] = toAppKey(prd)
+	for i, k := range keys {
+		items[i] = toAppKey(k)
 	}
 
 	return items
