@@ -78,13 +78,13 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 }
 
 // Create adds a new bundle to the system.
-func (b *Business) Create(ctx context.Context, nh NewBundle) (Bundle, error) {
+func (b *Business) Create(ctx context.Context, nb NewBundle) (Bundle, error) {
 	ctx, span := otel.AddSpan(ctx, "business.bundlebus.create")
 	defer span.End()
 
-	usr, err := b.userBus.QueryByID(ctx, nh.UserID)
+	usr, err := b.userBus.QueryByID(ctx, nb.UserID)
 	if err != nil {
-		return Bundle{}, fmt.Errorf("user.querybyid: %s: %w", nh.UserID, err)
+		return Bundle{}, fmt.Errorf("user.querybyid: %s: %w", nb.UserID, err)
 	}
 
 	if !usr.Enabled {
@@ -95,9 +95,9 @@ func (b *Business) Create(ctx context.Context, nh NewBundle) (Bundle, error) {
 
 	bdl := Bundle{
 		ID:          uuid.New(),
-		Type:        nh.Type,
-		UserID:      nh.UserID,
-		Metadata:    nh.Metadata,
+		Type:        nb.Type,
+		UserID:      nb.UserID,
+		Metadata:    nb.Metadata,
 		DateCreated: now,
 		DateUpdated: now,
 	}

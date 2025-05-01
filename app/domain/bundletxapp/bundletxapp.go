@@ -3,7 +3,6 @@ package bundletxapp
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
@@ -61,7 +60,7 @@ func (a *app) newWithTx(ctx context.Context) (*app, error) {
 }
 
 func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
-	var app NewTran
+	var app NewBundleTx
 	if err := web.Decode(r, &app); err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
@@ -71,30 +70,25 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.New(errs.Internal, err)
 	}
 
-	nk, err := toBusNewKey(app.Key)
+	nb, err := toBusNewBundle(ctx, app.Bundle)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
 
-	nu, err := toBusNewUser(app.User)
+	b, err := a.bundleBus.Create(ctx, nb)
+	if err != nil {
+		return errs.Newf(errs.Internal, "create: bdl[%+v]: %s", b, err)
+	}
+
+	nk, err := toBusNewKey(ctx, app.Key, b.ID)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}
-
-	usr, err := a.userBus.Create(ctx, nu)
-	if err != nil {
-		if errors.Is(err, userbus.ErrUniqueEmail) {
-			return errs.New(errs.Aborted, userbus.ErrUniqueEmail)
-		}
-		return errs.Newf(errs.Internal, "create: usr[%+v]: %s", usr, err)
-	}
-
-	nk.UserID = usr.ID
 
 	k, err := a.keyBus.Create(ctx, nk)
 	if err != nil {
-		return errs.Newf(errs.Internal, "create: k[%+v]: %s", k, err)
+		return errs.Newf(errs.Internal, "create: key[%+v]: %s", k, err)
 	}
 
-	return toAppKey(k)
+	return toAppBundleTx(b, k)
 }
