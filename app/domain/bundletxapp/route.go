@@ -29,9 +29,9 @@ func Routes(app *web.App, cfg Config) {
 
 	authen := mid.Authenticate(cfg.AuthClient)
 	transaction := mid.BeginCommitRollback(cfg.Log, sqldb.NewBeginner(cfg.DB))
-	ruleAdmin := mid.Authorize(cfg.AuthClient, auth.RuleAdminOnly)
+	ruleAuthorizeUser := mid.Authorize(cfg.AuthClient, auth.RuleAdminOrSubject)
 
 	api := newApp(cfg.UserBus, cfg.KeyBus)
 
-	app.HandlerFunc(http.MethodPost, version, "/tranexample", api.create, authen, ruleAdmin, transaction)
+	app.HandlerFunc(http.MethodPost, version, "/bundles", api.create, authen, ruleAuthorizeUser, transaction)
 }
