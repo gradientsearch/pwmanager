@@ -1,5 +1,5 @@
-// Package tranapp maintains the app layer api for the tran domain.
-package tranapp
+// Package bundletxapp maintains the app layer api for the tran domain.
+package bundletxapp
 
 import (
 	"context"

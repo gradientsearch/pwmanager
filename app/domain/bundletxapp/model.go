@@ -1,4 +1,4 @@
-package tranapp
+package bundletxapp
 
 import (
 	"encoding/json"
