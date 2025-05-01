@@ -6,6 +6,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
@@ -20,6 +21,7 @@ type Config struct {
 	DB         *sqlx.DB
 	UserBus    *userbus.Business
 	KeyBus     *keybus.Business
+	BundleBus  *bundlebus.Business
 	AuthClient *authclient.Client
 }
 
@@ -31,7 +33,7 @@ func Routes(app *web.App, cfg Config) {
 	transaction := mid.BeginCommitRollback(cfg.Log, sqldb.NewBeginner(cfg.DB))
 	ruleAuthorizeUser := mid.Authorize(cfg.AuthClient, auth.RuleAdminOrSubject)
 
-	api := newApp(cfg.UserBus, cfg.KeyBus)
+	api := newApp(cfg.UserBus, cfg.KeyBus, cfg.BundleBus)
 
 	app.HandlerFunc(http.MethodPost, version, "/bundles", api.create, authen, ruleAuthorizeUser, transaction)
 }

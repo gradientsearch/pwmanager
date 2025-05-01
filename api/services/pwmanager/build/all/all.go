@@ -48,6 +48,7 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		DB:         cfg.DB,
 		UserBus:    cfg.BusConfig.UserBus,
 		KeyBus:     cfg.BusConfig.KeyBus,
+		BundleBus:  cfg.BusConfig.BundleBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 

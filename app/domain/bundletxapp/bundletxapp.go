@@ -8,20 +8,23 @@ import (
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
+	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
 
 type app struct {
-	userBus *userbus.Business
-	keyBus  *keybus.Business
+	userBus   *userbus.Business
+	keyBus    *keybus.Business
+	bundleBus *bundlebus.Business
 }
 
-func newApp(userBus *userbus.Business, keyBus *keybus.Business) *app {
+func newApp(userBus *userbus.Business, keyBus *keybus.Business, bundleBus *bundlebus.Business) *app {
 	return &app{
-		userBus: userBus,
-		keyBus:  keyBus,
+		userBus:   userBus,
+		keyBus:    keyBus,
+		bundleBus: bundleBus,
 	}
 }
 
@@ -43,9 +46,15 @@ func (a *app) newWithTx(ctx context.Context) (*app, error) {
 		return nil, err
 	}
 
+	bundleBus, err := a.bundleBus.NewWithTx(tx)
+	if err != nil {
+		return nil, err
+	}
+
 	app := app{
-		userBus: userBus,
-		keyBus:  keyBus,
+		userBus:   userBus,
+		keyBus:    keyBus,
+		bundleBus: bundleBus,
 	}
 
 	return &app, nil
