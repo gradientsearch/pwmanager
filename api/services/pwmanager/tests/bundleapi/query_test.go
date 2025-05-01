@@ -14,12 +14,12 @@ import (
 )
 
 func query200(sd apitest.SeedData) []apitest.Table {
-	hmes := make([]bundlebus.Bundle, 0, len(sd.Admins[0].Bundles)+len(sd.Users[0].Bundles))
-	hmes = append(hmes, sd.Admins[0].Bundles...)
-	hmes = append(hmes, sd.Users[0].Bundles...)
+	bdls := make([]bundlebus.Bundle, 0, len(sd.Admins[0].Bundles)+len(sd.Users[0].Bundles))
+	bdls = append(bdls, sd.Admins[0].Bundles...)
+	bdls = append(bdls, sd.Users[0].Bundles...)
 
-	sort.Slice(hmes, func(i, j int) bool {
-		return hmes[i].ID.String() <= hmes[j].ID.String()
+	sort.Slice(bdls, func(i, j int) bool {
+		return bdls[i].ID.String() <= bdls[j].ID.String()
 	})
 
 	table := []apitest.Table{
@@ -33,8 +33,8 @@ func query200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &query.Result[bundleapp.Bundle]{
 				Page:        1,
 				RowsPerPage: 10,
-				Total:       len(hmes),
-				Items:       toAppBundles(hmes),
+				Total:       len(bdls),
+				Items:       toAppBundles(bdls),
 			},
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)

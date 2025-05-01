@@ -91,8 +91,8 @@ func GetKey(ctx context.Context) (keybus.Key, error) {
 	return v, nil
 }
 
-func setBundle(ctx context.Context, hme bundlebus.Bundle) context.Context {
-	return context.WithValue(ctx, bundleKey, hme)
+func setBundle(ctx context.Context, bdl bundlebus.Bundle) context.Context {
+	return context.WithValue(ctx, bundleKey, bdl)
 }
 
 // GetBundle returns the bundle from the context.

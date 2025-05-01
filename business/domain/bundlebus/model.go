@@ -7,29 +7,21 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/bundletype"
 )
 
-// Address represents an individual address.
-type xAddress struct {
-	Address1 string // We should create types for these fields.
-	Address2 string
-	ZipCode  string
-	City     string
-	State    string
-	Country  string
-}
-
 // Bundle represents an individual bundle.
 type Bundle struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
 	Type        bundletype.BundleType
+	Metadata    string
 	DateCreated time.Time
 	DateUpdated time.Time
 }
 
 // NewBundle is what we require from clients when adding a Bundle.
 type NewBundle struct {
-	UserID uuid.UUID
-	Type   bundletype.BundleType
+	UserID   uuid.UUID
+	Type     bundletype.BundleType
+	Metadata string
 }
 
 // UpdateBundle defines what information may be provided to modify an existing
@@ -39,5 +31,6 @@ type NewBundle struct {
 // we do not want to use pointers to basic types but we make exception around
 // marshalling/unmarshalling.
 type UpdateBundle struct {
-	Type *bundletype.BundleType
+	Type     *bundletype.BundleType
+	Metadata *string
 }

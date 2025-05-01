@@ -18,12 +18,14 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.NewBundle{
-				Type: "PERSONAL",
+				Type:     "PERSONAL",
+				Metadata: "BUNDLE METADATA",
 			},
 			GotResp: &bundleapp.Bundle{},
 			ExpResp: &bundleapp.Bundle{
-				UserID: sd.Users[0].ID.String(),
-				Type:   "PERSONAL",
+				UserID:   sd.Users[0].ID.String(),
+				Type:     "PERSONAL",
+				Metadata: "BUNDLE METADATA",
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*bundleapp.Bundle)
@@ -54,7 +56,8 @@ func create400(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input: &bundleapp.NewBundle{
-				Type: "BAD TYPE",
+				Type:     "BAD TYPE",
+				Metadata: "BUNDLE METADATA",
 			},
 			GotResp: &errs.Error{},
 			ExpResp: errs.Newf(errs.InvalidArgument, "parse: invalid bundle type \"BAD TYPE\""),

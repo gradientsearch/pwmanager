@@ -13,6 +13,7 @@ type bundle struct {
 	ID          uuid.UUID `db:"bundle_id"`
 	UserID      uuid.UUID `db:"user_id"`
 	Type        string    `db:"type"`
+	Metadata    string    `db:"metadata"`
 	DateCreated time.Time `db:"date_created"`
 	DateUpdated time.Time `db:"date_updated"`
 }
@@ -22,6 +23,7 @@ func toDBBundle(bus bundlebus.Bundle) bundle {
 		ID:          bus.ID,
 		UserID:      bus.UserID,
 		Type:        bus.Type.String(),
+		Metadata:    bus.Metadata, // TODO make metadata a type
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
@@ -39,6 +41,7 @@ func toBusBundle(db bundle) (bundlebus.Bundle, error) {
 		ID:          db.ID,
 		UserID:      db.UserID,
 		Type:        typ,
+		Metadata:    db.Metadata,
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
 	}

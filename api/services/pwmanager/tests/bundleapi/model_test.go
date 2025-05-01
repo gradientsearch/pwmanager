@@ -7,26 +7,26 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 )
 
-func toAppBundle(hme bundlebus.Bundle) bundleapp.Bundle {
+func toAppBundle(bdl bundlebus.Bundle) bundleapp.Bundle {
 	return bundleapp.Bundle{
-		ID:          hme.ID.String(),
-		UserID:      hme.UserID.String(),
-		Type:        hme.Type.String(),
-		DateCreated: hme.DateCreated.Format(time.RFC3339),
-		DateUpdated: hme.DateUpdated.Format(time.RFC3339),
+		ID:          bdl.ID.String(),
+		UserID:      bdl.UserID.String(),
+		Type:        bdl.Type.String(),
+		DateCreated: bdl.DateCreated.Format(time.RFC3339),
+		DateUpdated: bdl.DateUpdated.Format(time.RFC3339),
 	}
 }
 
 func toAppBundles(bundles []bundlebus.Bundle) []bundleapp.Bundle {
 	items := make([]bundleapp.Bundle, len(bundles))
-	for i, hme := range bundles {
-		items[i] = toAppBundle(hme)
+	for i, bdl := range bundles {
+		items[i] = toAppBundle(bdl)
 	}
 
 	return items
 }
 
-func toAppBundlePtr(hme bundlebus.Bundle) *bundleapp.Bundle {
-	appHme := toAppBundle(hme)
-	return &appHme
+func toAppBundlePtr(bdl bundlebus.Bundle) *bundleapp.Bundle {
+	appBdl := toAppBundle(bdl)
+	return &appBdl
 }

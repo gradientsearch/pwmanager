@@ -175,7 +175,7 @@ func AuthorizeBundle(client *authclient.Client, bundleBus *bundlebus.Business) w
 					return errs.New(errs.Unauthenticated, ErrInvalidID)
 				}
 
-				hme, err := bundleBus.QueryByID(ctx, bundleID)
+				bdl, err := bundleBus.QueryByID(ctx, bundleID)
 				if err != nil {
 					switch {
 					case errors.Is(err, bundlebus.ErrNotFound):
@@ -185,8 +185,8 @@ func AuthorizeBundle(client *authclient.Client, bundleBus *bundlebus.Business) w
 					}
 				}
 
-				userID = hme.UserID
-				ctx = setBundle(ctx, hme)
+				userID = bdl.UserID
+				ctx = setBundle(ctx, bdl)
 			}
 
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
