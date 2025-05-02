@@ -3,29 +3,30 @@ package entry_test
 import (
 	"time"
 
-	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
-	"github.com/gradientsearch/pwmanager/business/domain/keybus"
+	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
 )
 
-func toAppKey(k keybus.Key) keyapp.Key {
-	return keyapp.Key{
-		ID:          k.ID.String(),
-		UserID:      k.UserID.String(),
-		Data:        k.Data.String(),
-		DateCreated: k.DateCreated.Format(time.RFC3339),
-		DateUpdated: k.DateUpdated.Format(time.RFC3339),
+func toAppEntry(e entrybus.Entry) entryapp.Entry {
+	return entryapp.Entry{
+		ID:          e.ID.String(),
+		UserID:      e.UserID.String(),
+		BundleID:    e.BundleID.String(),
+		Data:        e.Data.String(),
+		DateCreated: e.DateCreated.Format(time.RFC3339),
+		DateUpdated: e.DateUpdated.Format(time.RFC3339),
 	}
 }
 
-func toAppKeyPtr(k keybus.Key) *keyapp.Key {
-	appKey := toAppKey(k)
-	return &appKey
+func toAppEntryPtr(e entrybus.Entry) *entryapp.Entry {
+	appEntry := toAppEntry(e)
+	return &appEntry
 }
 
-func toAppKeys(keys []keybus.Key) []keyapp.Key {
-	items := make([]keyapp.Key, len(keys))
-	for i, k := range keys {
-		items[i] = toAppKey(k)
+func toAppEntries(entries []entrybus.Entry) []entryapp.Entry {
+	items := make([]entryapp.Entry, len(entries))
+	for i, e := range entries {
+		items[i] = toAppEntry(e)
 	}
 
 	return items

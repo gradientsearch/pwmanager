@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
-	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 )
@@ -18,26 +17,38 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
-			Input: &entryapp.NewEntry{
-				Data: "Guitar",
-			},
-			GotResp: &entryapp.Entry{},
-			ExpResp: &entryapp.Entry{
+			Input: &entryapp.NewEntryTX{
 				Data:     "Guitar",
-				UserID:   sd.Users[0].ID.String(),
-				BundleID: sd.Users[0].Bundles[0].ID.String(),
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &entryapp.EntryTx{},
+			ExpResp: &entryapp.EntryTx{
+				Entry: entryapp.Entry{
+					Data:     "Guitar",
+					UserID:   sd.Users[0].ID.String(),
+					BundleID: sd.Users[0].Bundles[0].ID.String(),
+				},
+				Bundle: entryapp.Bundle{
+					Metadata: "UPDATED BUNDLE METADATA",
+					UserID:   sd.Users[0].ID.String(),
+					ID:       sd.Users[0].Bundles[0].ID.String(),
+				},
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*entryapp.Entry)
+				gotResp, exists := got.(*entryapp.EntryTx)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*entryapp.Entry)
+				expResp := exp.(*entryapp.EntryTx)
 
-				expResp.ID = gotResp.ID
-				expResp.DateCreated = gotResp.DateCreated
-				expResp.DateUpdated = gotResp.DateUpdated
+				expResp.Entry.ID = gotResp.Entry.ID
+				expResp.Entry.DateCreated = gotResp.Entry.DateCreated
+				expResp.Entry.DateUpdated = gotResp.Entry.DateUpdated
+
+				expResp.Bundle.Type = gotResp.Bundle.Type
+				expResp.Bundle.DateCreated = gotResp.Bundle.DateCreated
+				expResp.Bundle.DateUpdated = gotResp.Bundle.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
 			},
@@ -55,9 +66,11 @@ func create400(sd apitest.SeedData) []apitest.Table {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input:      &keyapp.NewKey{},
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"data\",\"error\":\"data is a required field\"}]"),
+			Input: &entryapp.NewEntryTX{
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &errs.Error{},
+			ExpResp: errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"data\",\"error\":\"data is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
@@ -106,7 +119,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 			},
 		},
 		{
-			Name:       "wronguser",
+			Name:       "asadmin",
 			URL:        "/v1/bundles/" + sd.Admins[0].Bundles[0].ID.String() + "/entries",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,

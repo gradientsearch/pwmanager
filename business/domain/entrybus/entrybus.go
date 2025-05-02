@@ -169,12 +169,12 @@ func (b *Business) QueryByID(ctx context.Context, entryID uuid.UUID) (Entry, err
 	ctx, span := otel.AddSpan(ctx, "business.entrybus.querybyid")
 	defer span.End()
 
-	k, err := b.storer.QueryByID(ctx, entryID)
+	e, err := b.storer.QueryByID(ctx, entryID)
 	if err != nil {
 		return Entry{}, fmt.Errorf("query: entryID[%s]: %w", entryID, err)
 	}
 
-	return k, nil
+	return e, nil
 }
 
 // QueryByUserID finds the entries by a specified User ID.

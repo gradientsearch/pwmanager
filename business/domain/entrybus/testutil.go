@@ -17,13 +17,13 @@ func TestGenerateNewEntries(n int, userID uuid.UUID, bids []uuid.UUID) []NewEntr
 	for i := range n {
 		idx++
 
-		nk := NewEntry{
+		ne := NewEntry{
 			Data:     entry.MustParse(fmt.Sprintf("Name%d", idx)),
 			BundleID: bids[i],
 			UserID:   userID,
 		}
 
-		newEntries[i] = nk
+		newEntries[i] = ne
 	}
 
 	return newEntries

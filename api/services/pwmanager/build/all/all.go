@@ -57,6 +57,8 @@ func (add) Add(app *web.App, cfg mux.Config) {
 
 	entryapp.Routes(app, entryapp.Config{
 		Log:        cfg.Log,
+		DB:         cfg.DB,
+		BundleBus:  cfg.BusConfig.BundleBus,
 		KeyBus:     cfg.BusConfig.KeyBus,
 		EntryBus:   cfg.BusConfig.EntryBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,

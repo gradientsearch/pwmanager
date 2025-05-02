@@ -116,6 +116,11 @@ func (b *Business) Update(ctx context.Context, bdl Bundle, uh UpdateBundle) (Bun
 
 	if uh.Type != nil {
 		bdl.Type = *uh.Type
+
+	}
+
+	if uh.Metadata != nil {
+		bdl.Metadata = *uh.Metadata
 	}
 
 	bdl.DateUpdated = time.Now()
