@@ -18,7 +18,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
-			Input: &entryapp.NewEntry{
+			Input: &entryapp.NewEntryTX{
 				Data: "Guitar",
 			},
 			GotResp: &entryapp.Entry{},

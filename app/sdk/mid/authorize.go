@@ -160,7 +160,7 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 
 // AuthorizeEntry executes the specified role and extracts the specified
 // key from the DB if a user_id and bundle_id is specified in the call.
-func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus *entrybus.Business) web.MidFunc {
+func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus *entrybus.Business, bundleBus *bundlebus.Business) web.MidFunc {
 	m := func(next web.HandlerFunc) web.HandlerFunc {
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
 			bundleID := web.Param(r, "bundle_id")
@@ -201,6 +201,7 @@ func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus
 					// Check WRITE ACCESS
 				}
 
+				// set the entry
 				if r.Method != http.MethodPost {
 					eID, err := uuid.Parse(entryID)
 					if err != nil {
@@ -218,6 +219,21 @@ func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus
 					}
 
 					entry = ce
+				}
+
+				// Set the bundle
+				if r.Method != "" && r.Method != http.MethodGet {
+					bdl, err := bundleBus.QueryByID(ctx, bID)
+					if err != nil {
+						switch {
+						case errors.Is(err, bundlebus.ErrNotFound):
+							return errs.New(errs.Unauthenticated, err)
+						default:
+							return errs.Newf(errs.Internal, "querybyid: bundleID[%s] : %s", bID, err)
+						}
+					}
+
+					setBundle(ctx, bdl)
 				}
 
 				ctx = setEntry(ctx, entry)
