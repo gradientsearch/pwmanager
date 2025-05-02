@@ -19,8 +19,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &entryapp.NewEntry{
-				Data:   "Guitar",
-				UserID: string(sd.Users[0].ID[0]),
+				Data: "Guitar",
 			},
 			GotResp: &entryapp.Entry{},
 			ExpResp: &entryapp.Entry{
@@ -52,13 +51,13 @@ func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "missing-input",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String(),
+			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input:      &keyapp.NewKey{},
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"data\",\"error\":\"data is a required field\"},{\"field\":\"bundleID\",\"error\":\"bundleID is a required field\"},{\"field\":\"userID\",\"error\":\"userID is a required field\"}]"),
+			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"data\",\"error\":\"data is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
@@ -72,7 +71,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String(),
+			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
 			Token:      "&nbsp;",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -84,7 +83,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badtoken",
-			URL:        "/v1/bundles/",
+			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
 			Token:      sd.Admins[0].Token[:10],
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -96,7 +95,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String(),
+			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
 			Token:      sd.Admins[0].Token + "A",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -108,7 +107,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String(),
+			URL:        "/v1/bundles/" + sd.Admins[0].Bundles[0].ID.String() + "/entries",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,

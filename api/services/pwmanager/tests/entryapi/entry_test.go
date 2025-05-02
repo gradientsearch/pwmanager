@@ -6,10 +6,10 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 )
 
-func Test_Key(t *testing.T) {
+func Test_Entry(t *testing.T) {
 	t.Parallel()
 
-	test := apitest.New(t, "Test_Key")
+	test := apitest.New(t, "Test_Entry")
 
 	// -------------------------------------------------------------------------
 

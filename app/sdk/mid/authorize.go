@@ -231,7 +231,7 @@ func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus
 			auth := authclient.Authorize{
 				UserID: userID,
 				Claims: GetClaims(ctx),
-				Rule:   auth.RuleAdminOrSubject,
+				Rule:   auth.RuleUserOnly,
 			}
 
 			if err := client.Authorize(ctx, auth); err != nil {

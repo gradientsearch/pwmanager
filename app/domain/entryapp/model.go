@@ -52,8 +52,7 @@ func toAppEntries(entries []entrybus.Entry) []Entry {
 
 // NewEntry defines the data needed to add a new entry.
 type NewEntry struct {
-	Data   string `json:"data" validate:"required"`
-	UserID string `json:"userID" validate:"required"`
+	Data string `json:"data" validate:"required"`
 }
 
 // Decode implements the decoder interface.
