@@ -10,6 +10,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 )
 
 func update200(sd apitest.SeedData) []apitest.Table {
@@ -30,6 +31,31 @@ func update200(sd apitest.SeedData) []apitest.Table {
 				Data:        "Guitar",
 				DateCreated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 				DateUpdated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp, exists := got.(*keyapp.Key)
+				if !exists {
+					return "error occurred"
+				}
+
+				expResp := exp.(*keyapp.Key)
+				gotResp.DateUpdated = expResp.DateUpdated
+
+				return cmp.Diff(gotResp, expResp)
+			},
+		},
+		{
+			Name:       "role",
+			URL:        fmt.Sprintf("/v1/keys/role/%s", sd.Users[0].ID),
+			Token:      sd.Users[0].Token,
+			Method:     http.MethodPut,
+			StatusCode: http.StatusOK,
+			Input: &keyapp.Key{
+				Roles: []string{"ADMIN", "WRITE", "READ"},
+			},
+			GotResp: &keyapp.Key{},
+			ExpResp: &keyapp.UpdateBundleRole{
+				Roles: []string{bundlerole.Admin.String(), bundlerole.Read.String(), bundlerole.Write.String()},
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*keyapp.Key)

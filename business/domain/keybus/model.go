@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/business/types/key"
 )
 
@@ -13,6 +14,7 @@ type Key struct {
 	UserID      uuid.UUID
 	BundleID    uuid.UUID
 	Data        key.Key
+	Roles       []bundlerole.Role
 	DateCreated time.Time
 	DateUpdated time.Time
 }
@@ -22,6 +24,7 @@ type NewKey struct {
 	UserID   uuid.UUID
 	BundleID uuid.UUID
 	Data     key.Key
+	Roles    []bundlerole.Role
 }
 
 // UpdateKey defines what information may be provided to modify an
@@ -33,4 +36,5 @@ type NewKey struct {
 type UpdateKey struct {
 	Data   *key.Key
 	UserID *uuid.UUID
+	Roles  []bundlerole.Role
 }
