@@ -233,7 +233,7 @@ func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus
 						}
 					}
 
-					setBundle(ctx, bdl)
+					ctx = setBundle(ctx, bdl)
 				}
 
 				ctx = setEntry(ctx, entry)
