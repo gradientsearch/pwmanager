@@ -157,6 +157,69 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 	return m
 }
 
+// AuthorizeEntry executes the specified role and extracts the specified
+// key from the DB if a user_id and bundle_id is specified in the call.
+func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business) web.MidFunc {
+	m := func(next web.HandlerFunc) web.HandlerFunc {
+		h := func(ctx context.Context, r *http.Request) web.Encoder {
+			bundleID := web.Param(r, "bundle_id")
+			entryID := web.Param(r, "entry_id")
+
+			userID, err := GetUserID(ctx)
+			if err != nil {
+				return errs.New(errs.Unauthenticated, ErrInvalidID)
+			}
+
+			if bundleID != "" && entryID != "" {
+				var err error
+				bID, err := uuid.Parse(bundleID)
+				if err != nil {
+					return errs.New(errs.Unauthenticated, ErrInvalidID)
+				}
+
+				eID, err := uuid.Parse(entryID)
+				if err != nil {
+					return errs.New(errs.Unauthenticated, ErrInvalidID)
+				}
+
+				_, err = keyBus.QueryByUserIDBundleID(ctx, userID, bID)
+				if err != nil {
+					switch {
+					case errors.Is(err, keybus.ErrNotFound):
+						return errs.New(errs.Unauthenticated, err)
+					default:
+						return errs.Newf(errs.Internal, "querybyid: userID[%s] bundleID[%s]: %s", userID, bID, err)
+					}
+				}
+
+				// TODO when roles are added to key, authorize user here
+				// Check the request METHOD.
+
+				ctx = setEntryID(ctx, eID)
+			}
+
+			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			defer cancel()
+
+			auth := authclient.Authorize{
+				UserID: userID,
+				Claims: GetClaims(ctx),
+				Rule:   auth.RuleAdminOrSubject,
+			}
+
+			if err := client.Authorize(ctx, auth); err != nil {
+				return errs.New(errs.Unauthenticated, err)
+			}
+
+			return next(ctx, r)
+		}
+
+		return h
+	}
+
+	return m
+}
+
 // AuthorizeBundle executes the specified role and extracts the specified
 // bundle from the DB if a bundle id is specified in the call. Depending on
 // the rule specified, the userid from the claims may be compared with the

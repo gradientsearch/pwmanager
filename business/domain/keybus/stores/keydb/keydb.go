@@ -196,7 +196,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]keybus.K
 
 	const q = `
 	SELECT
-	    key_id, user_id, date_created, date_updated
+	    key_id, user_id, bundle_id, date_created, date_updated
 	FROM
 		keys
 	WHERE
@@ -208,4 +208,31 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]keybus.K
 	}
 
 	return toBusKeys(dbKeys)
+}
+
+// QueryByUserIDBundleID finds the key identified by a given User ID and Bundle ID .
+func (s *Store) QueryByUserIDBundleID(ctx context.Context, userID uuid.UUID, bundleID uuid.UUID) (keybus.Key, error) {
+	data := struct {
+		UserID   string `db:"user_id"`
+		BundleID string `db:"bundle_id"`
+	}{
+		UserID:   userID.String(),
+		BundleID: bundleID.String(),
+	}
+
+	const q = `
+	SELECT
+	    key_id, user_id, bundle_id, date_created, date_updated
+	FROM
+		keys
+	WHERE
+		user_id = :user_id 
+		AND bundle_id = :bundle_id`
+
+	var dbKey key
+	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbKey); err != nil {
+		return keybus.Key{}, fmt.Errorf("db: %w", err)
+	}
+
+	return toBusKey(dbKey)
 }
