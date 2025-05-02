@@ -6,6 +6,7 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus/stores/bundledb"
 	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus/stores/entrydb"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus/stores/keydb"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
@@ -32,6 +33,7 @@ func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Hour))
 	keyBus := keybus.NewBusiness(log, userBus, delegate, keydb.NewStore(log, db))
+	entryBus := entrybus.NewBusiness(log, userBus, delegate, entrydb.NewStore(log, db))
 	bundleBus := bundlebus.NewBusiness(log, userBus, delegate, bundledb.NewStore(log, db))
 	vbundleBus := vbundlebus.NewBusiness(vbundledb.NewStore(log, db))
 
@@ -39,6 +41,7 @@ func newBusDomains(log *logger.Logger, db *sqlx.DB) BusDomain {
 		Delegate: delegate,
 		Bundle:   bundleBus,
 		Key:      keyBus,
+		Entry:    entryBus,
 		User:     userBus,
 		VBundle:  vbundleBus,
 	}

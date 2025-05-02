@@ -222,7 +222,7 @@ func (s *Store) QueryByUserIDBundleID(ctx context.Context, userID uuid.UUID, bun
 
 	const q = `
 	SELECT
-	    key_id, user_id, bundle_id, date_created, date_updated
+	    key_id, user_id, bundle_id, data, date_created, date_updated
 	FROM
 		keys
 	WHERE

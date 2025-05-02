@@ -28,13 +28,14 @@ func (app Entry) Encode() ([]byte, string, error) {
 	return data, "application/json", err
 }
 
-func toAppEntry(k entrybus.Entry) Entry {
+func toAppEntry(e entrybus.Entry) Entry {
 	return Entry{
-		ID:          k.ID.String(),
-		UserID:      k.UserID.String(),
-		Data:        k.Data.String(),
-		DateCreated: k.DateCreated.Format(time.RFC3339),
-		DateUpdated: k.DateUpdated.Format(time.RFC3339),
+		ID:          e.ID.String(),
+		BundleID:    e.BundleID.String(),
+		UserID:      e.UserID.String(),
+		Data:        e.Data.String(),
+		DateCreated: e.DateCreated.Format(time.RFC3339),
+		DateUpdated: e.DateUpdated.Format(time.RFC3339),
 	}
 }
 

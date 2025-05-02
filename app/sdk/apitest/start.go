@@ -33,7 +33,9 @@ func New(t *testing.T, testName string) *Test {
 		Log: db.Log,
 		DB:  db.DB,
 		BusConfig: mux.BusConfig{
-			UserBus: db.BusDomain.User,
+			UserBus:  db.BusDomain.User,
+			KeyBus:   db.BusDomain.Key,
+			EntryBus: db.BusDomain.Entry,
 		},
 		AuthConfig: mux.AuthConfig{
 			Auth: auth,
@@ -49,8 +51,9 @@ func New(t *testing.T, testName string) *Test {
 		DB:  db.DB,
 		BusConfig: mux.BusConfig{
 			UserBus:    db.BusDomain.User,
-			KeyBus:     db.BusDomain.Key,
 			BundleBus:  db.BusDomain.Bundle,
+			KeyBus:     db.BusDomain.Key,
+			EntryBus:   db.BusDomain.Entry,
 			VBundleBus: db.BusDomain.VBundle,
 		},
 		PwManagerConfig: mux.PwManagerConfig{

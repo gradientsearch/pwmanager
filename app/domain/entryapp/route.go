@@ -28,8 +28,8 @@ func Routes(app *web.App, cfg Config) {
 
 	api := newApp(cfg.EntryBus)
 
-	app.HandlerFunc(http.MethodGet, version, "bundles/{bundle_id}/entries/{entry_id}", api.queryByID, authen, ruleAuthorizeEntry)
-	app.HandlerFunc(http.MethodPost, version, "bundles/{bundle_id}/entries", api.create, authen, ruleAuthorizeEntry)
-	app.HandlerFunc(http.MethodPut, version, "bundles/{bundle_id}/entries/{entry_id}", api.update, authen, ruleAuthorizeEntry)
-	app.HandlerFunc(http.MethodDelete, version, "bundles/{bundle_id}/entries/{entry_id}", api.delete, authen, ruleAuthorizeEntry)
+	app.HandlerFunc(http.MethodGet, version, "/bundles/{bundle_id}/entries/{entry_id}", api.queryByID, authen, ruleAuthorizeEntry)
+	app.HandlerFunc(http.MethodPost, version, "/bundles/{bundle_id}/entries", api.create, authen, ruleAuthorizeEntry)
+	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}/entries/{entry_id}", api.update, authen, ruleAuthorizeEntry)
+	app.HandlerFunc(http.MethodDelete, version, "/bundles/{bundle_id}/entries/{entry_id}", api.delete, authen, ruleAuthorizeEntry)
 }

@@ -36,6 +36,19 @@ CREATE TABLE keys (
     FOREIGN KEY (bundle_id) REFERENCES bundles(bundle_id) ON DELETE CASCADE
 );
 
+CREATE TABLE entries (
+    entry_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    bundle_id UUID NOT NULL,
+    data TEXT NOT NULL,
+    date_created TIMESTAMP NOT NULL,
+    date_updated TIMESTAMP NOT NULL,
+    PRIMARY KEY (user_id, bundle_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (bundle_id) REFERENCES bundles(bundle_id) ON DELETE CASCADE
+);
+
+
 CREATE
 OR REPLACE VIEW view_keys AS
 SELECT

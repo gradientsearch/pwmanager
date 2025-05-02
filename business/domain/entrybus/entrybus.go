@@ -97,7 +97,7 @@ func (b *Business) Create(ctx context.Context, ne NewEntry) (Entry, error) {
 
 	now := time.Now()
 
-	k := Entry{
+	e := Entry{
 		ID:          uuid.New(),
 		Data:        ne.Data,
 		UserID:      ne.UserID,
@@ -106,11 +106,11 @@ func (b *Business) Create(ctx context.Context, ne NewEntry) (Entry, error) {
 		DateUpdated: now,
 	}
 
-	if err := b.storer.Create(ctx, k); err != nil {
+	if err := b.storer.Create(ctx, e); err != nil {
 		return Entry{}, fmt.Errorf("create: %w", err)
 	}
 
-	return k, nil
+	return e, nil
 }
 
 // Update modifies information about a entry.
