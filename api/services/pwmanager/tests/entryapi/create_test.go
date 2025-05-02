@@ -119,7 +119,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 			},
 		},
 		{
-			Name:       "wronguser",
+			Name:       "asadmin",
 			URL:        "/v1/bundles/" + sd.Admins[0].Bundles[0].ID.String() + "/entries",
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPost,

@@ -132,7 +132,7 @@ func toBusNewEntry(ctx context.Context, app NewEntryTX) (entrybus.NewEntry, erro
 // UpdateEntry defines the data needed to update a entry.
 type UpdateEntry struct {
 	Data     *string `json:"data" validate:"required"`
-	Metadata string  `json:"metadatadata" validate:"required"`
+	Metadata string  `json:"metadata" validate:"required"`
 }
 
 // Decode implements the decoder interface.
@@ -150,17 +150,17 @@ func (app UpdateEntry) Validate() error {
 }
 
 func toBusUpdateEntry(app UpdateEntry) (entrybus.UpdateEntry, error) {
-	var kd *entry.Entry
+	var e *entry.Entry
 	if app.Data != nil {
 		k, err := entry.Parse(*app.Data)
 		if err != nil {
 			return entrybus.UpdateEntry{}, fmt.Errorf("parse: %w", err)
 		}
-		kd = &k
+		e = &k
 	}
 
 	bus := entrybus.UpdateEntry{
-		Data: kd,
+		Data: e,
 	}
 
 	return bus, nil
@@ -170,7 +170,7 @@ func toBusUpdateEntry(app UpdateEntry) (entrybus.UpdateEntry, error) {
 
 // DeleteEntry defines the data needed to update a bundle metadata after deleting a password entry.
 type DeleteEntry struct {
-	Metadata string `json:"metadatadata" validate:"required"`
+	Metadata string `json:"metadata" validate:"required"`
 }
 
 // Decode implements the decoder interface.

@@ -171,6 +171,16 @@ func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus
 				return errs.New(errs.Unauthenticated, ErrInvalidID)
 			}
 
+			auth := authclient.Authorize{
+				UserID: userID,
+				Claims: GetClaims(ctx),
+				Rule:   auth.RuleUserOnly,
+			}
+
+			if err := client.Authorize(ctx, auth); err != nil {
+				return errs.New(errs.Unauthenticated, err)
+			}
+
 			entry := entrybus.Entry{
 				UserID: userID,
 			}
@@ -243,16 +253,6 @@ func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus
 
 			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			defer cancel()
-
-			auth := authclient.Authorize{
-				UserID: userID,
-				Claims: GetClaims(ctx),
-				Rule:   auth.RuleUserOnly,
-			}
-
-			if err := client.Authorize(ctx, auth); err != nil {
-				return errs.New(errs.Unauthenticated, err)
-			}
 
 			return next(ctx, r)
 		}

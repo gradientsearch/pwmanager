@@ -31,18 +31,6 @@ func delete200(sd apitest.SeedData) []apitest.Table {
 				return cmp.Diff(gotMetadata, expMetadata)
 			},
 		},
-		{
-			Name:       "asadmin",
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[0].ID),
-			Token:      sd.Admins[0].Token,
-			Method:     http.MethodDelete,
-			StatusCode: http.StatusForbidden,
-			GotResp:    &errs.Error{},
-			ExpResp:    &errs.Error{},
-			CmpFunc: func(got any, exp any) string {
-				return ""
-			},
-		},
 	}
 
 	return table
@@ -77,12 +65,14 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:       "wronguser",
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[1].ID),
-			Token:      sd.Admins[0].Token,
+			Token:      sd.Users[1].Token,
 			Method:     http.MethodDelete,
-			StatusCode: http.StatusForbidden,
+			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
-
-			ExpResp: errs.Newf(errs.Unauthenticated, "query: bundleID[c6ce40ab-8447-4bc4-b36f-cc53b90027f4] userID[36d7dc4f-00d8-4a2d-abad-d044ddfa3340]: db: entry not found"),
+			Input: &entryapp.DeleteEntry{
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			CmpFunc: func(got any, exp any) string {
 				gotResp := got.(*errs.Error)
 				if strings.Contains(gotResp.Message, "db: entry not found") {
@@ -91,30 +81,18 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 				return cmp.Diff(got, exp)
 			},
 		},
-	}
-	return table
-}
-
-func delete403(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
 		{
-			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[1].ID),
+			Name:       "asadmin",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[0].ID),
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodDelete,
-			StatusCode: http.StatusForbidden,
+			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
-
-			ExpResp: errs.Newf(errs.Unauthenticated, "query: bundleID[c6ce40ab-8447-4bc4-b36f-cc53b90027f4] userID[36d7dc4f-00d8-4a2d-abad-d044ddfa3340]: db: entry not found"),
+			ExpResp:    &errs.Error{},
 			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*errs.Error)
-				if strings.Contains(gotResp.Message, "db: entry not found") {
-					return ""
-				}
-				return cmp.Diff(got, exp)
+				return ""
 			},
 		},
 	}
-
 	return table
 }
