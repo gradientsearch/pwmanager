@@ -34,7 +34,6 @@ const (
 	userKey
 	keyKey
 	entryKey
-	entryIDKey
 	bundleKey
 	trKey
 )
@@ -89,20 +88,6 @@ func GetKey(ctx context.Context) (keybus.Key, error) {
 	v, ok := ctx.Value(keyKey).(keybus.Key)
 	if !ok {
 		return keybus.Key{}, errors.New("key not found in context")
-	}
-
-	return v, nil
-}
-
-func setEntryID(ctx context.Context, entryID uuid.UUID) context.Context {
-	return context.WithValue(ctx, entryIDKey, entryID)
-}
-
-// GetEntryID returns the entry id from the context.
-func GetEntryID(ctx context.Context) (uuid.UUID, error) {
-	v, ok := ctx.Value(entryIDKey).(uuid.UUID)
-	if !ok {
-		return uuid.UUID{}, errors.New("entry id not found in context")
 	}
 
 	return v, nil

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
@@ -39,7 +38,7 @@ func toAppEntry(k entrybus.Entry) Entry {
 	}
 }
 
-func toAppEntrys(entries []entrybus.Entry) []Entry {
+func toAppEntries(entries []entrybus.Entry) []Entry {
 	app := make([]Entry, len(entries))
 	for i, k := range entries {
 		app[i] = toAppEntry(k)
@@ -52,9 +51,8 @@ func toAppEntrys(entries []entrybus.Entry) []Entry {
 
 // NewEntry defines the data needed to add a new entry.
 type NewEntry struct {
-	Data     string `json:"data" validate:"required"`
-	BundleID string `json:"bundleID" validate:"required"`
-	UserID   string `json:"userID" validate:"required"`
+	Data   string `json:"data" validate:"required"`
+	UserID string `json:"userID" validate:"required"`
 }
 
 // Decode implements the decoder interface.
@@ -72,14 +70,9 @@ func (app NewEntry) Validate() error {
 }
 
 func toBusNewEntry(ctx context.Context, app NewEntry) (entrybus.NewEntry, error) {
-	userID, err := mid.GetUserID(ctx)
+	ne, err := mid.GetEntry(ctx)
 	if err != nil {
-		return entrybus.NewEntry{}, fmt.Errorf("getuserid: %w", err)
-	}
-
-	bundleID, err := uuid.Parse(app.BundleID)
-	if err != nil {
-		return entrybus.NewEntry{}, fmt.Errorf("getuserid: %w", err)
+		return entrybus.NewEntry{}, fmt.Errorf("getentry: %w", err)
 	}
 
 	data, err := entry.Parse(app.Data)
@@ -88,10 +81,9 @@ func toBusNewEntry(ctx context.Context, app NewEntry) (entrybus.NewEntry, error)
 	}
 
 	bus := entrybus.NewEntry{
-		UserID:   userID,
-		BundleID: bundleID,
-
-		Data: data,
+		UserID:   ne.UserID,
+		BundleID: ne.BundleID,
+		Data:     data,
 	}
 
 	return bus, nil

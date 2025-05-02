@@ -82,13 +82,13 @@ func (b *Business) NewWithTx(tx sqldb.CommitRollbacker) (*Business, error) {
 }
 
 // Create adds a new entry to the system.
-func (b *Business) Create(ctx context.Context, nk NewEntry) (Entry, error) {
+func (b *Business) Create(ctx context.Context, ne NewEntry) (Entry, error) {
 	ctx, span := otel.AddSpan(ctx, "business.entrybus.create")
 	defer span.End()
 
-	usr, err := b.userBus.QueryByID(ctx, nk.UserID)
+	usr, err := b.userBus.QueryByID(ctx, ne.UserID)
 	if err != nil {
-		return Entry{}, fmt.Errorf("user.querybyid: %s: %w", nk.UserID, err)
+		return Entry{}, fmt.Errorf("user.querybyid: %s: %w", ne.UserID, err)
 	}
 
 	if !usr.Enabled {
@@ -99,9 +99,9 @@ func (b *Business) Create(ctx context.Context, nk NewEntry) (Entry, error) {
 
 	k := Entry{
 		ID:          uuid.New(),
-		Data:        nk.Data,
-		UserID:      nk.UserID,
-		BundleID:    nk.BundleID,
+		Data:        ne.Data,
+		UserID:      ne.UserID,
+		BundleID:    ne.BundleID,
 		DateCreated: now,
 		DateUpdated: now,
 	}
@@ -114,29 +114,29 @@ func (b *Business) Create(ctx context.Context, nk NewEntry) (Entry, error) {
 }
 
 // Update modifies information about a entry.
-func (b *Business) Update(ctx context.Context, k Entry, uk UpdateEntry) (Entry, error) {
+func (b *Business) Update(ctx context.Context, e Entry, ue UpdateEntry) (Entry, error) {
 	ctx, span := otel.AddSpan(ctx, "business.entrybus.update")
 	defer span.End()
 
-	if uk.Data != nil {
-		k.Data = *uk.Data
+	if ue.Data != nil {
+		e.Data = *ue.Data
 	}
 
-	k.DateUpdated = time.Now()
+	e.DateUpdated = time.Now()
 
-	if err := b.storer.Update(ctx, k); err != nil {
+	if err := b.storer.Update(ctx, e); err != nil {
 		return Entry{}, fmt.Errorf("update: %w", err)
 	}
 
-	return k, nil
+	return e, nil
 }
 
 // Delete removes the specified entry.
-func (b *Business) Delete(ctx context.Context, k Entry) error {
+func (b *Business) Delete(ctx context.Context, e Entry) error {
 	ctx, span := otel.AddSpan(ctx, "business.entrybus.delete")
 	defer span.End()
 
-	if err := b.storer.Delete(ctx, k); err != nil {
+	if err := b.storer.Delete(ctx, e); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 

@@ -108,7 +108,7 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.Newf(errs.Internal, "count: %s", err)
 	}
 
-	return query.NewResult(toAppEntrys(entries), total, page)
+	return query.NewResult(toAppEntries(entries), total, page)
 }
 
 func (a *app) queryByID(ctx context.Context, r *http.Request) web.Encoder {
