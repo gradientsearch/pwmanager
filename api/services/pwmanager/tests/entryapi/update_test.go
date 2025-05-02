@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
+	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
@@ -16,28 +16,28 @@ func update200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[0].Entries[0].ID),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
-			Input: &keyapp.UpdateKey{
+			Input: &entryapp.UpdateEntry{
 				Data: dbtest.StringPointer("Guitar"),
 			},
-			GotResp: &keyapp.Key{},
-			ExpResp: &keyapp.Key{
-				ID:          sd.Users[0].Keys[0].ID.String(),
+			GotResp: &entryapp.Entry{},
+			ExpResp: &entryapp.Entry{
+				ID:          sd.Users[0].Entries[0].ID.String(),
 				UserID:      sd.Users[0].ID.String(),
 				Data:        "Guitar",
-				DateCreated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
-				DateUpdated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
+				DateCreated: sd.Users[0].Entries[0].DateCreated.Format(time.RFC3339),
+				DateUpdated: sd.Users[0].Entries[0].DateCreated.Format(time.RFC3339),
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*keyapp.Key)
+				gotResp, exists := got.(*entryapp.Entry)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*keyapp.Key)
+				expResp := exp.(*entryapp.Entry)
 				gotResp.DateUpdated = expResp.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
@@ -52,7 +52,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[0].Entries[0].ID),
 			Token:      "&nbsp;",
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
@@ -64,7 +64,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[0].Entries[0].ID),
 			Token:      sd.Users[0].Token + "A",
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
@@ -76,11 +76,11 @@ func update401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[0].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Entries[0].ID, sd.Users[0].Entries[0].ID),
+			Token:      sd.Admins[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
-			Input: &keyapp.UpdateKey{
+			Input: &entryapp.UpdateEntry{
 				Data: dbtest.StringPointer("Guitar"),
 			},
 			GotResp: &errs.Error{},

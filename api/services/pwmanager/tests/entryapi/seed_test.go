@@ -8,6 +8,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
@@ -38,12 +39,17 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
+	entries, err := entrybus.TestGenerateSeedEntries(ctx, 2, busDomain.Entry, usrs[0].ID, bids)
+	if err != nil {
+		return apitest.SeedData{}, fmt.Errorf("seeding entries : %w", err)
+	}
+
 	tu1 := apitest.User{
 		User:    usrs[0],
 		Keys:    keys,
 		Bundles: bdls,
-
-		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		Entries: entries,
+		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------

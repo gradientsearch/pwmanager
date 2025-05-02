@@ -231,6 +231,10 @@ func (s *Store) QueryByUserIDBundleID(ctx context.Context, userID uuid.UUID, bun
 
 	var dbKey key
 	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbKey); err != nil {
+		if errors.Is(err, sqldb.ErrDBNotFound) {
+			return keybus.Key{}, fmt.Errorf("db: %w", keybus.ErrNotFound)
+		}
+
 		return keybus.Key{}, fmt.Errorf("db: %w", err)
 	}
 

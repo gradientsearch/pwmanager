@@ -3,8 +3,10 @@ package entry_test
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 )
@@ -12,18 +14,34 @@ import (
 func delete200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "asuser",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
-			Token:      sd.Users[0].Token,
+			Name:  "asuser",
+			URL:   fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[0].ID),
+			Token: sd.Users[0].Token,
+			Input: &entryapp.DeleteEntry{
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
 			Method:     http.MethodDelete,
-			StatusCode: http.StatusNoContent,
+			StatusCode: http.StatusOK,
+			GotResp:    &entryapp.EntryTx{},
+			ExpResp:    &entryapp.EntryTx{},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*entryapp.EntryTx)
+				gotMetadata := gotResp.Bundle.Metadata
+				expMetadata := "UPDATED BUNDLE METADATA"
+				return cmp.Diff(gotMetadata, expMetadata)
+			},
 		},
 		{
 			Name:       "asadmin",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[0].ID),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[0].ID),
 			Token:      sd.Admins[0].Token,
 			Method:     http.MethodDelete,
-			StatusCode: http.StatusNoContent,
+			StatusCode: http.StatusForbidden,
+			GotResp:    &errs.Error{},
+			ExpResp:    &errs.Error{},
+			CmpFunc: func(got any, exp any) string {
+				return ""
+			},
 		},
 	}
 
@@ -34,7 +52,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[1].ID, sd.Users[0].Entries[1].ID),
 			Token:      "&nbsp;",
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
@@ -46,7 +64,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[1].ID, sd.Users[0].Entries[1].ID),
 			Token:      sd.Users[0].Token + "A",
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
@@ -58,13 +76,41 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[1].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[1].ID),
+			Token:      sd.Admins[0].Token,
 			Method:     http.MethodDelete,
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusForbidden,
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+
+			ExpResp: errs.Newf(errs.Unauthenticated, "query: bundleID[c6ce40ab-8447-4bc4-b36f-cc53b90027f4] userID[36d7dc4f-00d8-4a2d-abad-d044ddfa3340]: db: entry not found"),
 			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*errs.Error)
+				if strings.Contains(gotResp.Message, "db: entry not found") {
+					return ""
+				}
+				return cmp.Diff(got, exp)
+			},
+		},
+	}
+	return table
+}
+
+func delete403(sd apitest.SeedData) []apitest.Table {
+	table := []apitest.Table{
+		{
+			Name:       "wronguser",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[1].ID),
+			Token:      sd.Admins[0].Token,
+			Method:     http.MethodDelete,
+			StatusCode: http.StatusForbidden,
+			GotResp:    &errs.Error{},
+
+			ExpResp: errs.Newf(errs.Unauthenticated, "query: bundleID[c6ce40ab-8447-4bc4-b36f-cc53b90027f4] userID[36d7dc4f-00d8-4a2d-abad-d044ddfa3340]: db: entry not found"),
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*errs.Error)
+				if strings.Contains(gotResp.Message, "db: entry not found") {
+					return ""
+				}
 				return cmp.Diff(got, exp)
 			},
 		},

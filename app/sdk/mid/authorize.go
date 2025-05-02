@@ -187,7 +187,7 @@ func AuthorizeEntry(client *authclient.Client, keyBus *keybus.Business, entryBus
 				if err != nil {
 					switch {
 					case errors.Is(err, keybus.ErrNotFound):
-						return errs.New(errs.Unauthenticated, err)
+						return errs.New(errs.PermissionDenied, err)
 					default:
 						return errs.Newf(errs.Internal, "querybyid: userID[%s] bundleID[%s]: %s", userID, bID, err)
 					}
