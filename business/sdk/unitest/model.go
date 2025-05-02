@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 )
@@ -13,6 +14,7 @@ type User struct {
 	userbus.User
 	Keys    []keybus.Key
 	Bundles []bundlebus.Bundle
+	Entries []entrybus.Entry
 }
 
 // SeedData represents data that was seeded for the test.

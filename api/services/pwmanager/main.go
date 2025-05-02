@@ -22,6 +22,8 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/mux"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus/stores/bundledb"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus/stores/entrydb"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus/stores/keydb"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
@@ -198,8 +200,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	delegate := delegate.New(log)
 	userBus := userbus.NewBusiness(log, delegate, usercache.NewStore(log, userdb.NewStore(log, db), time.Minute))
-	keyBus := keybus.NewBusiness(log, userBus, delegate, keydb.NewStore(log, db))
 	bundleBus := bundlebus.NewBusiness(log, userBus, delegate, bundledb.NewStore(log, db))
+	keyBus := keybus.NewBusiness(log, userBus, delegate, keydb.NewStore(log, db))
+	entryBus := entrybus.NewBusiness(log, userBus, delegate, entrydb.NewStore(log, db))
 	vbundleBus := vbundlebus.NewBusiness(vbundledb.NewStore(log, db))
 
 	// -------------------------------------------------------------------------
@@ -228,8 +231,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Tracer: tracer,
 		BusConfig: mux.BusConfig{
 			UserBus:    userBus,
-			KeyBus:     keyBus,
 			BundleBus:  bundleBus,
+			KeyBus:     keyBus,
+			EntryBus:   entryBus,
 			VBundleBus: vbundleBus,
 		},
 		PwManagerConfig: mux.PwManagerConfig{

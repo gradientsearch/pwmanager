@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
+	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
@@ -32,6 +33,7 @@ const (
 	userIDKey
 	userKey
 	keyKey
+	entryKey
 	bundleKey
 	trKey
 )
@@ -86,6 +88,20 @@ func GetKey(ctx context.Context) (keybus.Key, error) {
 	v, ok := ctx.Value(keyKey).(keybus.Key)
 	if !ok {
 		return keybus.Key{}, errors.New("key not found in context")
+	}
+
+	return v, nil
+}
+
+func setEntry(ctx context.Context, k entrybus.Entry) context.Context {
+	return context.WithValue(ctx, entryKey, k)
+}
+
+// GetEntry returns the key from the context.
+func GetEntry(ctx context.Context) (entrybus.Entry, error) {
+	v, ok := ctx.Value(entryKey).(entrybus.Entry)
+	if !ok {
+		return entrybus.Entry{}, errors.New("key not found in context")
 	}
 
 	return v, nil

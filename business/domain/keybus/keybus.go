@@ -21,7 +21,6 @@ import (
 var (
 	ErrNotFound     = errors.New("key not found")
 	ErrUserDisabled = errors.New("user disabled")
-	ErrInvalidCost  = errors.New("cost not valid")
 )
 
 // Storer interface declares the behavior this package needs to persist and
@@ -35,6 +34,7 @@ type Storer interface {
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, keyID uuid.UUID) (Key, error)
 	QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, error)
+	QueryByUserIDBundleID(ctx context.Context, bundleID uuid.UUID, userID uuid.UUID) (Key, error)
 }
 
 // Business manages the set of APIs for key access.
@@ -189,4 +189,17 @@ func (b *Business) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]Key, 
 	}
 
 	return keys, nil
+}
+
+// QueryByUserIDBundleID finds the key by the specified userID and bundleID.
+func (b *Business) QueryByUserIDBundleID(ctx context.Context, userID uuid.UUID, bundleID uuid.UUID) (Key, error) {
+	ctx, span := otel.AddSpan(ctx, "business.keybus.querybybundleidanduserid")
+	defer span.End()
+
+	k, err := b.storer.QueryByUserIDBundleID(ctx, userID, bundleID)
+	if err != nil {
+		return Key{}, fmt.Errorf("query: bundleID[%s] userID[%s]: %w", bundleID, userID, err)
+	}
+
+	return k, nil
 }

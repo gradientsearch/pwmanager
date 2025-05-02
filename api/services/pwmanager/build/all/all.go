@@ -5,6 +5,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
 	"github.com/gradientsearch/pwmanager/app/domain/bundletxapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
+	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
 	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/domain/rawapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
@@ -23,10 +24,23 @@ type add struct{}
 
 // Add implements the RouterAdder interface.
 func (add) Add(app *web.App, cfg mux.Config) {
+	// -------------------------------------------------------------------------
+	// Service
 	checkapp.Routes(app, checkapp.Config{
 		Build: cfg.Build,
 		Log:   cfg.Log,
 		DB:    cfg.DB,
+	})
+
+	rawapp.Routes(app)
+
+	// -------------------------------------------------------------------------
+	// Domains
+
+	userapp.Routes(app, userapp.Config{
+		Log:        cfg.Log,
+		UserBus:    cfg.BusConfig.UserBus,
+		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
 	bundleapp.Routes(app, bundleapp.Config{
@@ -41,7 +55,15 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
-	rawapp.Routes(app)
+	entryapp.Routes(app, entryapp.Config{
+		Log:        cfg.Log,
+		KeyBus:     cfg.BusConfig.KeyBus,
+		EntryBus:   cfg.BusConfig.EntryBus,
+		AuthClient: cfg.PwManagerConfig.AuthClient,
+	})
+
+	// -------------------------------------------------------------------------
+	// TX
 
 	bundletxapp.Routes(app, bundletxapp.Config{
 		Log:        cfg.Log,
@@ -49,12 +71,6 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		UserBus:    cfg.BusConfig.UserBus,
 		KeyBus:     cfg.BusConfig.KeyBus,
 		BundleBus:  cfg.BusConfig.BundleBus,
-		AuthClient: cfg.PwManagerConfig.AuthClient,
-	})
-
-	userapp.Routes(app, userapp.Config{
-		Log:        cfg.Log,
-		UserBus:    cfg.BusConfig.UserBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 
