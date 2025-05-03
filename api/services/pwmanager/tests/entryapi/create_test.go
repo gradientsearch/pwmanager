@@ -13,8 +13,8 @@ func create200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Users[0].Token,
+			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &entryapp.NewEntryTX{
@@ -25,13 +25,13 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &entryapp.EntryTx{
 				Entry: entryapp.Entry{
 					Data:     "Guitar",
-					UserID:   sd.Users[0].ID.String(),
-					BundleID: sd.Users[0].Bundles[0].ID.String(),
+					UserID:   sd.Users[userBundleAdmin].ID.String(),
+					BundleID: sd.Users[userBundleAdmin].Bundles[0].ID.String(),
 				},
 				Bundle: entryapp.Bundle{
 					Metadata: "UPDATED BUNDLE METADATA",
-					UserID:   sd.Users[0].ID.String(),
-					ID:       sd.Users[0].Bundles[0].ID.String(),
+					UserID:   sd.Users[userBundleAdmin].ID.String(),
+					ID:       sd.Users[userBundleAdmin].Bundles[0].ID.String(),
 				},
 			},
 			CmpFunc: func(got any, exp any) string {
@@ -62,8 +62,8 @@ func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "missing-input",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Users[0].Token,
+			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input: &entryapp.NewEntryTX{
@@ -84,7 +84,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
+			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
 			Token:      "&nbsp;",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -96,8 +96,8 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badtoken",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Admins[0].Token[:10],
+			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			Token:      sd.Users[userBundleAdmin].Token[:10],
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -108,8 +108,8 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Admins[0].Token + "A",
+			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			Token:      sd.Users[userBundleAdmin].Token + "A",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -118,19 +118,29 @@ func create401(sd apitest.SeedData) []apitest.Table {
 				return cmp.Diff(got, exp)
 			},
 		},
+	}
+
+	return table
+}
+
+func create403(sd apitest.SeedData) []apitest.Table {
+	table := []apitest.Table{
 		{
-			Name:       "asadmin",
-			URL:        "/v1/bundles/" + sd.Admins[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Admins[0].Token,
+			Name:       "shared-read-only",
+			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			Token:      sd.Users[userRead].Token,
 			Method:     http.MethodPost,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			StatusCode: http.StatusForbidden,
+			Input: &entryapp.NewEntryTX{
+				Data:     "Guitar",
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &errs.Error{},
+			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
 		},
 	}
-
 	return table
 }
