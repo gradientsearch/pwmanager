@@ -165,7 +165,7 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 
 			if r.Method == "" || r.Method == http.MethodGet {
 				if k.UserID != callerKey.UserID {
-					return errs.New(errs.PermissionDenied, err)
+					return errs.New(errs.PermissionDenied, fmt.Errorf("only users can retrieve their own keys keyid[%s]", k.ID.String()))
 				}
 			} else {
 				isAdmin := false

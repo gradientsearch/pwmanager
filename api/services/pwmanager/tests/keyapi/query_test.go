@@ -3,7 +3,6 @@ package key_test
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
@@ -31,22 +30,21 @@ func queryByID200(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
-func queryByID401(sd apitest.SeedData) []apitest.Table {
+func queryByID403(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
 			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
 			Token:      sd.Users[1].Token,
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusForbidden,
 			Method:     http.MethodGet,
 			GotResp:    &errs.Error{},
-			ExpResp:    &errs.Error{},
+			ExpResp:    errs.Newf(errs.PermissionDenied, ""),
 			CmpFunc: func(got any, exp any) string {
-				gotResp := got.(*errs.Error)
-				if !strings.Contains(gotResp.Message, "db: key not found") {
-					return "message should have contained db: key not found"
-				}
-				return ""
+				expResp := exp.(*errs.Error)
+				expResp.Message = fmt.Sprintf("only users can retrieve their own keys keyid[%s]", sd.Users[0].Keys[0].ID)
+
+				return cmp.Diff(got, expResp)
 			},
 		},
 	}
