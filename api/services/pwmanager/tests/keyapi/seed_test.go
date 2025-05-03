@@ -18,7 +18,7 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	ctx := context.Background()
 	busDomain := db.BusDomain
 
-	usrs, err := userbus.TestSeedUsers(ctx, 1, role.User, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 2, role.User, busDomain.User)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -46,6 +46,11 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
+	tu2 := apitest.User{
+		User:  usrs[1],
+		Token: apitest.Token(db.BusDomain.User, ath, usrs[1].Email.Address),
+	}
+
 	// -------------------------------------------------------------------------
 
 	usrs, err = userbus.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
@@ -70,7 +75,7 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
-	tu2 := apitest.User{
+	ta1 := apitest.User{
 		User:    usrs[0],
 		Keys:    keys,
 		Bundles: bdls,
@@ -80,8 +85,8 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	// -------------------------------------------------------------------------
 
 	sd := apitest.SeedData{
-		Admins: []apitest.User{tu2},
-		Users:  []apitest.User{tu1},
+		Admins: []apitest.User{ta1},
+		Users:  []apitest.User{tu1, tu2},
 	}
 
 	return sd, nil

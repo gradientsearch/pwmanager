@@ -52,7 +52,7 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
-	tuOther := apitest.User{
+	tu2 := apitest.User{
 		User:  usrs[1],
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
@@ -81,7 +81,7 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
-	tu2 := apitest.User{
+	ta1 := apitest.User{
 		User:    usrs[0],
 		Keys:    keys,
 		Bundles: bdls,
@@ -91,8 +91,8 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	// -------------------------------------------------------------------------
 
 	sd := apitest.SeedData{
-		Admins: []apitest.User{tu2},
-		Users:  []apitest.User{tu1, tuOther},
+		Admins: []apitest.User{ta1},
+		Users:  []apitest.User{tu1, tu2},
 	}
 
 	return sd, nil

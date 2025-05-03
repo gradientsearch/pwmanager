@@ -111,7 +111,7 @@ func (s *Store) Query(ctx context.Context, filter keybus.QueryFilter, orderBy or
 
 	const q = `
 	SELECT
-	    key_id, user_id,  bundle_id, data, date_created, date_updated
+	    key_id, user_id,  bundle_id, data, roles, date_created, date_updated
 	FROM
 		keys`
 
@@ -169,7 +169,7 @@ func (s *Store) QueryByID(ctx context.Context, keyID uuid.UUID) (keybus.Key, err
 
 	const q = `
 	SELECT
-	    key_id, user_id,  bundle_id, data, date_created, date_updated
+	    key_id, user_id, bundle_id, data, roles, date_created, date_updated
 	FROM
 		keys
 	WHERE
@@ -196,7 +196,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID) ([]keybus.K
 
 	const q = `
 	SELECT
-	    key_id, user_id, bundle_id, date_created, date_updated
+	    key_id, user_id, bundle_id, data, roles, date_created, date_updated
 	FROM
 		keys
 	WHERE
@@ -222,7 +222,7 @@ func (s *Store) QueryByUserIDBundleID(ctx context.Context, userID uuid.UUID, bun
 
 	const q = `
 	SELECT
-	    key_id, user_id, bundle_id, data, date_created, date_updated
+	    key_id, user_id, bundle_id, data, roles, date_created, date_updated
 	FROM
 		keys
 	WHERE

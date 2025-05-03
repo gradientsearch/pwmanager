@@ -5,13 +5,16 @@ import (
 
 	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 )
 
 func toAppKey(k keybus.Key) keyapp.Key {
 	return keyapp.Key{
 		ID:          k.ID.String(),
 		UserID:      k.UserID.String(),
+		BundleID:    k.BundleID.String(),
 		Data:        k.Data.String(),
+		Roles:       bundlerole.ParseToString(k.Roles),
 		DateCreated: k.DateCreated.Format(time.RFC3339),
 		DateUpdated: k.DateUpdated.Format(time.RFC3339),
 	}

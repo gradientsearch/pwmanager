@@ -28,10 +28,9 @@ func Routes(app *web.App, cfg Config) {
 
 	api := newApp(cfg.KeyBus)
 
-	app.HandlerFunc(http.MethodGet, version, "/keys", api.query, authen, ruleUserOnly)
 	app.HandlerFunc(http.MethodGet, version, "/keys/{key_id}", api.queryByID, authen, ruleAuthorizeKey)
-
 	app.HandlerFunc(http.MethodPut, version, "/keys/role/{key_id}", api.updateRole, authen, ruleAuthorizeKey)
+
 	// TODO update authorize key to include creating key. Check perms
 	app.HandlerFunc(http.MethodPost, version, "/keys", api.create, authen, ruleUserOnly)
 	app.HandlerFunc(http.MethodPut, version, "/keys/{key_id}", api.update, authen, ruleAuthorizeKey)

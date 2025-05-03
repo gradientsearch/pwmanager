@@ -14,6 +14,7 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/entrybus"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
 
@@ -113,16 +114,42 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
 			id := web.Param(r, "key_id")
 
-			var userID uuid.UUID
+			// -------------------------------------------------------------------------
+			// Validation
 
-			if id != "" {
-				var err error
-				keyID, err := uuid.Parse(id)
-				if err != nil {
-					return errs.New(errs.Unauthenticated, ErrInvalidID)
+			if id == "" {
+				return errs.New(errs.InvalidArgument, ErrInvalidID)
+			}
+
+			callerUserID, err := GetUserID(ctx)
+			if err != nil {
+				return errs.New(errs.Unauthenticated, ErrInvalidID)
+			}
+
+			keyID, err := uuid.Parse(id)
+			if err != nil {
+				return errs.New(errs.Unauthenticated, ErrInvalidID)
+			}
+
+			// -------------------------------------------------------------------------
+			// Get Key
+
+			k, err := keyBus.QueryByID(ctx, keyID)
+			if err != nil {
+				switch {
+				case errors.Is(err, keybus.ErrNotFound):
+					return errs.New(errs.Unauthenticated, err)
+				default:
+					return errs.Newf(errs.Internal, "querybyid: keyID[%s]: %s", keyID, err)
 				}
+			}
 
-				k, err := keyBus.QueryByID(ctx, keyID)
+			// -------------------------------------------------------------------------
+			// Authorize
+
+			var callerKey keybus.Key
+			if k.UserID != callerUserID {
+				callerKey, err = keyBus.QueryByUserIDBundleID(ctx, callerUserID, k.BundleID)
 				if err != nil {
 					switch {
 					case errors.Is(err, keybus.ErrNotFound):
@@ -131,23 +158,30 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 						return errs.Newf(errs.Internal, "querybyid: keyID[%s]: %s", keyID, err)
 					}
 				}
-
-				userID = k.UserID
-				ctx = setKey(ctx, k)
+			} else {
+				callerKey = k
 			}
 
-			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-			defer cancel()
-
-			auth := authclient.Authorize{
-				UserID: userID,
-				Claims: GetClaims(ctx),
-				Rule:   auth.RuleAdminOrSubject,
+			if r.Method == "" || r.Method == http.MethodGet {
+				if k.UserID != callerKey.UserID {
+					return errs.New(errs.PermissionDenied, err)
+				}
+			} else {
+				isAdmin := false
+				for _, r := range callerKey.Roles {
+					if r.Equal(bundlerole.Admin) {
+						isAdmin = true
+						break
+					}
+				}
+				if !isAdmin {
+					return errs.New(errs.PermissionDenied, err)
+				}
 			}
 
-			if err := client.Authorize(ctx, auth); err != nil {
-				return errs.New(errs.Unauthenticated, err)
-			}
+			// -------------------------------------------------------------------------
+
+			ctx = setKey(ctx, k)
 
 			return next(ctx, r)
 		}

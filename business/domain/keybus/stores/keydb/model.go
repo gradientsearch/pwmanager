@@ -6,18 +6,19 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
+	"github.com/gradientsearch/pwmanager/business/sdk/sqldb/dbarray"
 	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	kt "github.com/gradientsearch/pwmanager/business/types/key"
 )
 
 type key struct {
-	ID          uuid.UUID `db:"key_id"`
-	UserID      uuid.UUID `db:"user_id"`
-	BundleID    uuid.UUID `db:"bundle_id"`
-	Data        string    `db:"data"`
-	Roles       []string  `db:"roles"`
-	DateCreated time.Time `db:"date_created"`
-	DateUpdated time.Time `db:"date_updated"`
+	ID          uuid.UUID      `db:"key_id"`
+	UserID      uuid.UUID      `db:"user_id"`
+	BundleID    uuid.UUID      `db:"bundle_id"`
+	Data        string         `db:"data"`
+	Roles       dbarray.String `db:"roles"`
+	DateCreated time.Time      `db:"date_created"`
+	DateUpdated time.Time      `db:"date_updated"`
 }
 
 func toDBKey(bus keybus.Key) key {
