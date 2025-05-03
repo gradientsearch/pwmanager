@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/business/types/key"
 )
 
@@ -19,6 +20,7 @@ func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID) []NewKey {
 
 		nk := NewKey{
 			Data:     key.MustParse(fmt.Sprintf("Name%d", idx)),
+			Roles:    []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write},
 			BundleID: bids[i],
 			UserID:   userID,
 		}

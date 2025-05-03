@@ -51,9 +51,9 @@ func (s *Store) NewWithTx(tx sqldb.CommitRollbacker) (keybus.Storer, error) {
 func (s *Store) Create(ctx context.Context, k keybus.Key) error {
 	const q = `
 	INSERT INTO keys
-		(key_id, user_id, bundle_id, data, date_created, date_updated)
+		(key_id, user_id, bundle_id, data, roles, date_created, date_updated)
 	VALUES
-		(:key_id, :user_id, :bundle_id, :data, :date_created, :date_updated)`
+		(:key_id, :user_id, :bundle_id, :data, :roles, :date_created, :date_updated)`
 
 	if err := sqldb.NamedExecContext(ctx, s.log, s.db, q, toDBKey(k)); err != nil {
 		return fmt.Errorf("namedexeccontext: %w", err)

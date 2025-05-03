@@ -100,9 +100,10 @@ func (b *Business) Create(ctx context.Context, nk NewKey) (Key, error) {
 
 	k := Key{
 		ID:          uuid.New(),
-		Data:        nk.Data,
 		UserID:      nk.UserID,
 		BundleID:    nk.BundleID,
+		Data:        nk.Data,
+		Roles:       nk.Roles,
 		DateCreated: now,
 		DateUpdated: now,
 	}

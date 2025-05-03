@@ -18,14 +18,17 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.NewKey{
-				Data:     "Guitar",
 				BundleID: sd.Users[0].Bundles[2].ID.String(),
 				UserID:   string(sd.Users[0].ID[0]),
+				Data:     "Guitar",
+				Roles:    []string{"ADMIN", "WRITE", "READ"},
 			},
 			GotResp: &keyapp.Key{},
 			ExpResp: &keyapp.Key{
-				Data:   "Guitar",
-				UserID: sd.Users[0].ID.String(),
+				Data:     "Guitar",
+				UserID:   sd.Users[0].ID.String(),
+				BundleID: sd.Users[0].Bundles[2].ID.String(),
+				Roles:    []string{"ADMIN", "WRITE", "READ"},
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*keyapp.Key)
@@ -36,6 +39,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 				expResp := exp.(*keyapp.Key)
 
 				expResp.ID = gotResp.ID
+				expResp.BundleID = gotResp.BundleID
 				expResp.DateCreated = gotResp.DateCreated
 				expResp.DateUpdated = gotResp.DateUpdated
 

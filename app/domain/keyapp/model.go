@@ -35,6 +35,7 @@ func toAppKey(k keybus.Key) Key {
 	return Key{
 		ID:          k.ID.String(),
 		UserID:      k.UserID.String(),
+		BundleID:    k.BundleID.String(),
 		Data:        k.Data.String(),
 		Roles:       bundlerole.ParseToString(k.Roles),
 		DateCreated: k.DateCreated.Format(time.RFC3339),

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	kt "github.com/gradientsearch/pwmanager/business/types/key"
 )
 
@@ -14,6 +15,7 @@ type key struct {
 	UserID      uuid.UUID `db:"user_id"`
 	BundleID    uuid.UUID `db:"bundle_id"`
 	Data        string    `db:"data"`
+	Roles       []string  `db:"roles"`
 	DateCreated time.Time `db:"date_created"`
 	DateUpdated time.Time `db:"date_updated"`
 }
@@ -24,6 +26,7 @@ func toDBKey(bus keybus.Key) key {
 		UserID:      bus.UserID,
 		BundleID:    bus.BundleID,
 		Data:        bus.Data.String(),
+		Roles:       bundlerole.ParseToString(bus.Roles),
 		DateCreated: bus.DateCreated.UTC(),
 		DateUpdated: bus.DateUpdated.UTC(),
 	}
@@ -37,11 +40,17 @@ func toBusKey(db key) (keybus.Key, error) {
 		return keybus.Key{}, fmt.Errorf("parse key: %w", err)
 	}
 
+	roles, err := bundlerole.ParseMany(db.Roles)
+	if err != nil {
+		return keybus.Key{}, fmt.Errorf("parse roles: %w", err)
+	}
+
 	bus := keybus.Key{
 		ID:          db.ID,
 		UserID:      db.UserID,
 		BundleID:    db.BundleID,
 		Data:        key,
+		Roles:       roles,
 		DateCreated: db.DateCreated.In(time.Local),
 		DateUpdated: db.DateUpdated.In(time.Local),
 	}

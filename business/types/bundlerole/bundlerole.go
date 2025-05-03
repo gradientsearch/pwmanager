@@ -6,7 +6,7 @@ import "fmt"
 // The set of roles that can be used.
 var (
 	Read  = newRole("READ")
-	Write = newRole("Write")
+	Write = newRole("WRITE")
 	Admin = newRole("ADMIN")
 )
 

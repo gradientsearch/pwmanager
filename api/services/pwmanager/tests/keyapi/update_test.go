@@ -29,6 +29,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 				ID:          sd.Users[0].Keys[0].ID.String(),
 				UserID:      sd.Users[0].ID.String(),
 				Data:        "Guitar",
+				Roles:       []string{"ADMIN", "WRITE", "READ"},
 				DateCreated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 				DateUpdated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 			},
