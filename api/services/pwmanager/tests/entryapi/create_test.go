@@ -1,6 +1,7 @@
 package entry_test
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/go-cmp/cmp"
@@ -12,8 +13,8 @@ import (
 func create200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "basic",
-			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			Name:       "user-bundle-admin",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
@@ -53,6 +54,48 @@ func create200(sd apitest.SeedData) []apitest.Table {
 				return cmp.Diff(gotResp, expResp)
 			},
 		},
+		{
+			Name:       "shared-user-read-write",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      sd.Users[userReadWrite].Token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusOK,
+			Input: &entryapp.NewEntryTX{
+				Data:     "Guitar",
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &entryapp.EntryTx{},
+			ExpResp: &entryapp.EntryTx{
+				Entry: entryapp.Entry{
+					Data:     "Guitar",
+					UserID:   sd.Users[userReadWrite].ID.String(),
+					BundleID: sd.Users[userBundleAdmin].Bundles[0].ID.String(),
+				},
+				Bundle: entryapp.Bundle{
+					Metadata: "UPDATED BUNDLE METADATA",
+					UserID:   sd.Users[userBundleAdmin].ID.String(),
+					ID:       sd.Users[userBundleAdmin].Bundles[0].ID.String(),
+				},
+			},
+			CmpFunc: func(got any, exp any) string {
+				gotResp, exists := got.(*entryapp.EntryTx)
+				if !exists {
+					return "error occurred"
+				}
+
+				expResp := exp.(*entryapp.EntryTx)
+
+				expResp.Entry.ID = gotResp.Entry.ID
+				expResp.Entry.DateCreated = gotResp.Entry.DateCreated
+				expResp.Entry.DateUpdated = gotResp.Entry.DateUpdated
+
+				expResp.Bundle.Type = gotResp.Bundle.Type
+				expResp.Bundle.DateCreated = gotResp.Bundle.DateCreated
+				expResp.Bundle.DateUpdated = gotResp.Bundle.DateUpdated
+
+				return cmp.Diff(gotResp, expResp)
+			},
+		},
 	}
 
 	return table
@@ -62,7 +105,7 @@ func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "missing-input",
-			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
@@ -84,7 +127,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      "&nbsp;",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -96,7 +139,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badtoken",
-			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userBundleAdmin].Token[:10],
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -108,7 +151,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userBundleAdmin].Token + "A",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -127,7 +170,7 @@ func create403(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "shared-read-only",
-			URL:        "/v1/bundles/" + sd.Users[userBundleAdmin].Bundles[0].ID.String() + "/entries",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userRead].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusForbidden,
@@ -136,8 +179,29 @@ func create403(sd apitest.SeedData) []apitest.Table {
 				Metadata: "UPDATED BUNDLE METADATA",
 			},
 			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.PermissionDenied, ""),
 			CmpFunc: func(got any, exp any) string {
+				// &errs.Error{Code:errs.ErrCode{value:8}, Message:"must have write perms for bundle[bb459b0a-79a5-4af9-b89a-67d830ec1db9] to create an entry", FuncName:"", FileName:""}
+				expResp := exp.(*errs.Error)
+				expResp.Message = fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID)
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       "shared-no-roles",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      sd.Users[userNoRoles].Token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusForbidden,
+			Input: &entryapp.NewEntryTX{
+				Data:     "Guitar",
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &errs.Error{},
+			ExpResp: errs.Newf(errs.PermissionDenied, ""),
+			CmpFunc: func(got any, exp any) string {
+				expResp := exp.(*errs.Error)
+				expResp.Message = fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID)
 				return cmp.Diff(got, exp)
 			},
 		},

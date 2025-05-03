@@ -79,7 +79,6 @@ func queryByID403(sd apitest.SeedData) []apitest.Table {
 			ExpResp:    errs.Newf(errs.PermissionDenied, ""),
 			CmpFunc: func(got any, exp any) string {
 				expResp := exp.(*errs.Error)
-
 				expResp.Message = fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[userNoKey].ID, sd.Users[userBundleAdmin].Bundles[0].ID)
 				return cmp.Diff(got, exp)
 			},
