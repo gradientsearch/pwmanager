@@ -13,12 +13,60 @@ func queryByID200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[0].Bundles[0].ID, sd.Users[0].Entries[0].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			Token:      sd.Users[userBundleAdmin].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
 			GotResp:    &entryapp.Entry{},
-			ExpResp:    toAppEntryPtr(sd.Users[0].Entries[0]),
+			ExpResp:    toAppEntryPtr(sd.Users[userBundleAdmin].Entries[0]),
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       "userrw",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			Token:      sd.Users[userReadWrite].Token,
+			StatusCode: http.StatusOK,
+			Method:     http.MethodGet,
+			GotResp:    &entryapp.Entry{},
+			ExpResp:    toAppEntryPtr(sd.Users[userBundleAdmin].Entries[0]),
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       "shared-readonly",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			Token:      sd.Users[userRead].Token,
+			StatusCode: http.StatusOK,
+			Method:     http.MethodGet,
+			GotResp:    &entryapp.Entry{},
+			ExpResp:    toAppEntryPtr(sd.Users[userBundleAdmin].Entries[0]),
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       "shared-noroles",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			Token:      sd.Users[userNoRoles].Token,
+			StatusCode: http.StatusOK,
+			Method:     http.MethodGet,
+			GotResp:    &entryapp.Entry{},
+			ExpResp:    toAppEntryPtr(sd.Users[userBundleAdmin].Entries[0]),
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       "shared-nokey",
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			Token:      sd.Users[userNoRoles].Token,
+			StatusCode: http.StatusOK,
+			Method:     http.MethodGet,
+			GotResp:    &entryapp.Entry{},
+			ExpResp:    toAppEntryPtr(sd.Users[userBundleAdmin].Entries[0]),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
