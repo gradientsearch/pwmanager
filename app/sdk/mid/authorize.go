@@ -3,6 +3,7 @@ package mid
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -175,8 +176,70 @@ func AuthorizeKey(client *authclient.Client, keyBus *keybus.Business) web.MidFun
 					}
 				}
 				if !isAdmin {
-					return errs.New(errs.PermissionDenied, err)
+					return errs.New(errs.PermissionDenied, fmt.Errorf("must be an admin of bundle[%s] to modify user keys", k.BundleID.String()))
 				}
+			}
+
+			// -------------------------------------------------------------------------
+
+			ctx = setKey(ctx, k)
+
+			return next(ctx, r)
+		}
+
+		return h
+	}
+
+	return m
+}
+
+// AuthorizeKeyCreate executes the specified role and extracts the specified
+// key from the DB if a key id is specified in the call. Only Admins of a bundle can add new
+// keys for users for that bundle.
+func AuthorizeKeyCreate(client *authclient.Client, keyBus *keybus.Business) web.MidFunc {
+	m := func(next web.HandlerFunc) web.HandlerFunc {
+		h := func(ctx context.Context, r *http.Request) web.Encoder {
+			id := web.Param(r, "bundle_id")
+
+			// -------------------------------------------------------------------------
+			// Validation
+			if id == "" {
+				return errs.New(errs.InvalidArgument, ErrInvalidID)
+			}
+
+			bundleID, err := uuid.Parse(id)
+			if err != nil {
+				return errs.New(errs.Unauthenticated, ErrInvalidID)
+			}
+
+			userID, err := GetUserID(ctx)
+			if err != nil {
+				return errs.New(errs.Unauthenticated, ErrInvalidID)
+			}
+
+			// -------------------------------------------------------------------------
+			// Authorize
+
+			var k keybus.Key
+			k, err = keyBus.QueryByUserIDBundleID(ctx, userID, bundleID)
+			if err != nil {
+				switch {
+				case errors.Is(err, keybus.ErrNotFound):
+					return errs.New(errs.Unauthenticated, err)
+				default:
+					return errs.Newf(errs.Internal, "querybyuseridbundleid: user_id[%s]  bundle_id[%s]: %s", userID, bundleID, err)
+				}
+			}
+
+			isAdmin := false
+			for _, r := range k.Roles {
+				if r.Equal(bundlerole.Admin) {
+					isAdmin = true
+					break
+				}
+			}
+			if !isAdmin {
+				return errs.New(errs.PermissionDenied, err)
 			}
 
 			// -------------------------------------------------------------------------

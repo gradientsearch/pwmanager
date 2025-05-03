@@ -199,7 +199,7 @@ func (b *Business) QueryByUserIDBundleID(ctx context.Context, userID uuid.UUID, 
 
 	k, err := b.storer.QueryByUserIDBundleID(ctx, userID, bundleID)
 	if err != nil {
-		return Key{}, fmt.Errorf("query: bundleID[%s] userID[%s]: %w", bundleID, userID, err)
+		return Key{}, fmt.Errorf("query: userID[%s] bundleID[%s]: %w", userID, bundleID, err)
 	}
 
 	return k, nil

@@ -1,6 +1,7 @@
 package key_test
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/go-cmp/cmp"
@@ -13,13 +14,13 @@ func create200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        "/v1/keys",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.NewKey{
 				BundleID: sd.Users[0].Bundles[2].ID.String(),
-				UserID:   string(sd.Users[0].ID[0]),
+				UserID:   string(sd.Users[1].ID[0]),
 				Data:     "Guitar",
 				Roles:    []string{"ADMIN", "WRITE", "READ"},
 			},
@@ -55,7 +56,7 @@ func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "missing-input",
-			URL:        "/v1/keys",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
@@ -75,7 +76,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        "/v1/keys",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
 			Token:      "&nbsp;",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -87,7 +88,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badtoken",
-			URL:        "/v1/keys",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
 			Token:      sd.Admins[0].Token[:10],
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -99,8 +100,8 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        "/v1/keys",
-			Token:      sd.Admins[0].Token + "A",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
+			Token:      sd.Users[0].Token + "A",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -111,32 +112,17 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        "/v1/keys",
-			Token:      sd.Admins[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[2].ID.String()),
+			Token:      sd.Users[1].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+
+			ExpResp: errs.Newf(errs.Unauthenticated, ""),
 			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-		{
-			Name:       "nonadmin",
-			URL:        "/v1/keys",
-			Token:      sd.Users[1].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusOK,
-			Input: &keyapp.NewKey{
-				BundleID: sd.Users[0].Bundles[0].ID.String(),
-				UserID:   string(sd.Users[1].ID[0]),
-				Data:     "Guitar",
-				Roles:    []string{"ADMIN", "WRITE", "READ"},
-			},
-			GotResp: &keyapp.Key{},
-			ExpResp: &errs.Error{},
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
+				expResp := exp.(*errs.Error)
+				expResp.Message = fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[1].ID.String(), sd.Users[0].Bundles[2].ID.String())
+				return cmp.Diff(got, expResp)
 			},
 		},
 	}
