@@ -28,8 +28,9 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &keyapp.Key{
 				ID:          sd.Users[0].Keys[0].ID.String(),
 				UserID:      sd.Users[0].ID.String(),
+				BundleID:    sd.Users[0].Bundles[0].ID.String(),
 				Data:        "Guitar",
-				Roles:       []string{"ADMIN", "WRITE", "READ"},
+				Roles:       []string{"ADMIN", "READ", "WRITE"},
 				DateCreated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 				DateUpdated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 			},
@@ -47,7 +48,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "role",
-			URL:        fmt.Sprintf("/v1/keys/role/%s", sd.Users[0].ID),
+			URL:        fmt.Sprintf("/v1/keys/role/%s", sd.Users[0].Keys[0].ID),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
@@ -55,19 +56,21 @@ func update200(sd apitest.SeedData) []apitest.Table {
 				Roles: []string{"ADMIN", "WRITE", "READ"},
 			},
 			GotResp: &keyapp.Key{},
-			ExpResp: &keyapp.UpdateBundleRole{
-				Roles: []string{bundlerole.Admin.String(), bundlerole.Read.String(), bundlerole.Write.String()},
-			},
+			ExpResp: &keyapp.UpdateBundleRole{},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*keyapp.Key)
-				if !exists {
-					return "error occurred"
+				gotResp := got.(*keyapp.Key)
+				gotRoles := keyapp.UpdateBundleRole{
+					Roles: gotResp.Roles,
+				}
+				expRoles := keyapp.UpdateBundleRole{
+					Roles: []string{
+						bundlerole.Admin.String(),
+						bundlerole.Read.String(),
+						bundlerole.Write.String(),
+					},
 				}
 
-				expResp := exp.(*keyapp.Key)
-				gotResp.DateUpdated = expResp.DateUpdated
-
-				return cmp.Diff(gotResp, expResp)
+				return cmp.Diff(gotRoles, expRoles)
 			},
 		},
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
 
@@ -33,7 +34,8 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		bids = append(bids, v.ID)
 	}
 
-	keys, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	roles := []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write}
+	keys, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids, roles)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
@@ -46,8 +48,15 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
+	roles = []bundlerole.Role{bundlerole.Read, bundlerole.Write}
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[1].ID, bids, roles)
+	if err != nil {
+		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
+	}
+
 	tu2 := apitest.User{
 		User:  usrs[1],
+		Keys:  keys,
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[1].Email.Address),
 	}
 
@@ -69,8 +78,8 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	for _, v := range bdls {
 		bids = append(bids, v.ID)
 	}
-
-	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	roles = []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write}
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids, roles)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 // TestGenerateNewKeys is a helper method for testing.
-func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID) []NewKey {
+func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID, roles []bundlerole.Role) []NewKey {
 	newKeys := make([]NewKey, n)
 
 	idx := rand.Intn(10000)
@@ -20,7 +20,7 @@ func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID) []NewKey {
 
 		nk := NewKey{
 			Data:     key.MustParse(fmt.Sprintf("Name%d", idx)),
-			Roles:    []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write},
+			Roles:    roles,
 			BundleID: bids[i],
 			UserID:   userID,
 		}
@@ -32,8 +32,8 @@ func TestGenerateNewKeys(n int, userID uuid.UUID, bids []uuid.UUID) []NewKey {
 }
 
 // TestGenerateSeedKeys is a helper method for testing.
-func TestGenerateSeedKeys(ctx context.Context, n int, api *Business, userID uuid.UUID, bids []uuid.UUID) ([]Key, error) {
-	newKeys := TestGenerateNewKeys(n, userID, bids)
+func TestGenerateSeedKeys(ctx context.Context, n int, api *Business, userID uuid.UUID, bids []uuid.UUID, roles []bundlerole.Role) ([]Key, error) {
+	newKeys := TestGenerateNewKeys(n, userID, bids, roles)
 
 	keys := make([]Key, len(newKeys))
 	for i, nk := range newKeys {

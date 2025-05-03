@@ -15,6 +15,7 @@ import (
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
 	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/business/sdk/unitest"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/business/types/key"
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
@@ -57,7 +58,8 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		bids = append(bids, v.ID)
 	}
 
-	keys, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	roles := []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write}
+	keys, err := keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids, roles)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
@@ -85,7 +87,8 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 		bids = append(bids, v.ID)
 	}
 
-	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids)
+	roles = []bundlerole.Role{bundlerole.Read, bundlerole.Write}
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids, roles)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}

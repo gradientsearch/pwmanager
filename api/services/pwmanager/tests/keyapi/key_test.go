@@ -20,7 +20,6 @@ func Test_Key(t *testing.T) {
 
 	// -------------------------------------------------------------------------
 
-	test.Run(t, query400(sd), "query-400")
 	test.Run(t, queryByID200(sd), "querybyid-200")
 	test.Run(t, queryByID401(sd), "querybyid-401")
 

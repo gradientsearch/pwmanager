@@ -121,6 +121,24 @@ func create401(sd apitest.SeedData) []apitest.Table {
 				return cmp.Diff(got, exp)
 			},
 		},
+		{
+			Name:       "nonadmin",
+			URL:        "/v1/keys",
+			Token:      sd.Users[1].Token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusOK,
+			Input: &keyapp.NewKey{
+				BundleID: sd.Users[0].Bundles[0].ID.String(),
+				UserID:   string(sd.Users[1].ID[0]),
+				Data:     "Guitar",
+				Roles:    []string{"ADMIN", "WRITE", "READ"},
+			},
+			GotResp: &keyapp.Key{},
+			ExpResp: &errs.Error{},
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		},
 	}
 
 	return table
