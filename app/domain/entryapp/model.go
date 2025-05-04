@@ -149,7 +149,7 @@ func (app UpdateEntry) Validate() error {
 	return nil
 }
 
-func toBusUpdateEntry(app UpdateEntry) (entrybus.UpdateEntry, error) {
+func toBusUpdateEntry(ctx context.Context, app UpdateEntry) (entrybus.UpdateEntry, error) {
 	var e *entry.Entry
 	if app.Data != nil {
 		k, err := entry.Parse(*app.Data)
@@ -159,8 +159,14 @@ func toBusUpdateEntry(app UpdateEntry) (entrybus.UpdateEntry, error) {
 		e = &k
 	}
 
+	userID, err := mid.GetUserID(ctx)
+	if err != nil {
+		return entrybus.UpdateEntry{}, err
+	}
+
 	bus := entrybus.UpdateEntry{
-		Data: e,
+		Data:   e,
+		UserID: &userID,
 	}
 
 	return bus, nil

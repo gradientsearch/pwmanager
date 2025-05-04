@@ -13,7 +13,7 @@ import (
 func create200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "user-bundle-admin",
+			Name:       fmt.Sprintf("tu%d-user-bundle-admin", userBundleAdmin),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
@@ -55,7 +55,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 			},
 		},
 		{
-			Name:       "shared-user-read-write",
+			Name:       fmt.Sprintf("tu%d-shared-user-read-write", userReadWrite),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userReadWrite].Token,
 			Method:     http.MethodPost,
@@ -169,7 +169,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 func create403(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "shared-read-only",
+			Name:       fmt.Sprintf("tu%d-shared-read-only", userRead),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userRead].Token,
 			Method:     http.MethodPost,
@@ -188,7 +188,7 @@ func create403(sd apitest.SeedData) []apitest.Table {
 			},
 		},
 		{
-			Name:       "shared-no-roles",
+			Name:       fmt.Sprintf("tu%d-shared-no-roles", userNoRoles),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userNoRoles].Token,
 			Method:     http.MethodPost,
@@ -202,6 +202,25 @@ func create403(sd apitest.SeedData) []apitest.Table {
 			CmpFunc: func(got any, exp any) string {
 				expResp := exp.(*errs.Error)
 				expResp.Message = fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID)
+				return cmp.Diff(got, exp)
+			},
+		},
+		{
+			Name:       fmt.Sprintf("tu%d-shared-no-key", userNoKey),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      sd.Users[userNoKey].Token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusForbidden,
+			Input: &entryapp.NewEntryTX{
+				Data:     "Guitar",
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &errs.Error{},
+			ExpResp: errs.Newf(errs.PermissionDenied, ""),
+			CmpFunc: func(got any, exp any) string {
+				expResp := exp.(*errs.Error)
+
+				expResp.Message = fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[userNoKey].ID, sd.Users[userBundleAdmin].Bundles[0].ID)
 				return cmp.Diff(got, exp)
 			},
 		},

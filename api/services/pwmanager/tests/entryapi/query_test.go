@@ -37,7 +37,7 @@ func queryByID200(sd apitest.SeedData) []apitest.Table {
 			},
 		},
 		{
-			Name:       "shared-readonly",
+			Name:       "shared-user-read-only",
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[userRead].Token,
 			StatusCode: http.StatusOK,
@@ -56,7 +56,7 @@ func queryByID403(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 
 		{
-			Name:       "shared-noroles",
+			Name:       "shared-user-no-roles",
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[userNoRoles].Token,
 			StatusCode: http.StatusForbidden,
@@ -70,7 +70,7 @@ func queryByID403(sd apitest.SeedData) []apitest.Table {
 			},
 		},
 		{
-			Name:       "shared-nokey",
+			Name:       "shared-user-no-key",
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[userNoKey].Token,
 			StatusCode: http.StatusForbidden,

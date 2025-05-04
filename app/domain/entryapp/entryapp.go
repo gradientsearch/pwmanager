@@ -111,7 +111,7 @@ func (a *app) update(ctx context.Context, r *http.Request) web.Encoder {
 	// =============================================================================
 	// Entry update
 
-	ue, err := toBusUpdateEntry(app)
+	ue, err := toBusUpdateEntry(ctx, app)
 	if err != nil {
 		return errs.New(errs.InvalidArgument, err)
 	}

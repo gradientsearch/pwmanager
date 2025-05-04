@@ -9,21 +9,28 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/entry"
 )
 
+const ()
+
 // TestGenerateNewEntries is a helper method for testing.
+// n specifies how many entries to add to each bundle.
+// e.g. n = 10 than thn the the first 10 entries would be
+// associated to the first bundle, the next 10 with the second bundle and so on.
 func TestGenerateNewEntries(n int, userID uuid.UUID, bids []uuid.UUID) []NewEntry {
-	newEntries := make([]NewEntry, n)
+	newEntries := make([]NewEntry, n*len(bids))
 
 	idx := rand.Intn(10000)
-	for i := range n {
+
+	for i := range len(bids) {
 		idx++
+		for b := range n {
+			ne := NewEntry{
+				Data:     entry.MustParse(fmt.Sprintf("Name%d", idx)),
+				BundleID: bids[i],
+				UserID:   userID,
+			}
 
-		ne := NewEntry{
-			Data:     entry.MustParse(fmt.Sprintf("Name%d", idx)),
-			BundleID: bids[i],
-			UserID:   userID,
+			newEntries[(i*n)+b] = ne
 		}
-
-		newEntries[i] = ne
 	}
 
 	return newEntries
