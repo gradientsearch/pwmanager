@@ -30,9 +30,8 @@ var userKeyMapping = map[userKey]string{
 	userBundleAdmin: "user-bundle-owner",
 	userReadWrite:   "user-read-write",
 	userRead:        "user-read",
-
-	userNoRoles: "user-no-roles",
-	userNoKey:   "user-no-key",
+	userNoRoles:     "user-no-roles",
+	userNoKey:       "user-no-key",
 }
 
 const (
@@ -49,6 +48,9 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
+
+	// -------------------------------------------------------------------------
+	// tu1
 
 	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, NUMBER_OF_BUNDLES, busDomain.Bundle, usrs[userBundleAdmin].ID)
 	if err != nil {

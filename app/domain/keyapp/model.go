@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/business/domain/keybus"
 	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/business/types/key"
@@ -77,11 +76,10 @@ func (app NewKey) Validate() error {
 }
 
 func toBusNewKey(ctx context.Context, app NewKey) (keybus.NewKey, error) {
-	userID, err := mid.GetUserID(ctx)
+	userID, err := uuid.Parse(app.UserID)
 	if err != nil {
-		return keybus.NewKey{}, fmt.Errorf("getuserid: %w", err)
+		return keybus.NewKey{}, fmt.Errorf("parse userid: %w", err)
 	}
-
 	bundleID, err := uuid.Parse(app.BundleID)
 	if err != nil {
 		return keybus.NewKey{}, fmt.Errorf("getuserid: %w", err)

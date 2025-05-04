@@ -11,24 +11,36 @@ import (
 )
 
 func create200(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user userKey
+	}{
 		{
+			userReadWrite,
+		},
+		{
+			userRead,
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
 			Name:       "basic",
-			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[userBundleAdmin].Bundles[2].ID.String()),
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.NewKey{
-				BundleID: sd.Users[0].Bundles[2].ID.String(),
-				UserID:   string(sd.Users[1].ID[0]),
+				BundleID: sd.Users[userBundleAdmin].Bundles[2].ID.String(),
+				UserID:   sd.Users[i.user].ID.String(),
 				Data:     "Guitar",
 				Roles:    []string{"ADMIN", "WRITE", "READ"},
 			},
 			GotResp: &keyapp.Key{},
 			ExpResp: &keyapp.Key{
 				Data:     "Guitar",
-				UserID:   sd.Users[0].ID.String(),
-				BundleID: sd.Users[0].Bundles[2].ID.String(),
+				UserID:   sd.Users[i.user].ID.String(),
+				BundleID: sd.Users[userBundleAdmin].Bundles[2].ID.String(),
 				Roles:    []string{"ADMIN", "WRITE", "READ"},
 			},
 			CmpFunc: func(got any, exp any) string {
@@ -46,7 +58,8 @@ func create200(sd apitest.SeedData) []apitest.Table {
 
 				return cmp.Diff(gotResp, expResp)
 			},
-		},
+		}
+		table = append(table, t)
 	}
 
 	return table

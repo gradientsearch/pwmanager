@@ -197,11 +197,6 @@ func AuthorizeKeyCreate(client *authclient.Client, keyBus *keybus.Business) web.
 				return errs.New(errs.PermissionDenied, err)
 			}
 
-			// -------------------------------------------------------------------------
-			// Set key
-
-			ctx = setKey(ctx, k)
-
 			return next(ctx, r)
 		}
 
