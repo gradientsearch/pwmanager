@@ -118,7 +118,6 @@ func update401(sd apitest.SeedData) []apitest.Table {
 }
 
 func update403(sd apitest.SeedData) []apitest.Table {
-
 	permError := fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID)
 
 	roles := []struct {
