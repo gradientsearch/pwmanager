@@ -75,7 +75,7 @@ func create200(sd apitest.SeedData) []apitest.Table {
 func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "missing-input",
+			Name:       fmt.Sprintf("tu%d-missing-input", userBundleAdmin),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
 			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
@@ -95,106 +95,90 @@ func create400(sd apitest.SeedData) []apitest.Table {
 }
 
 func create401(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	table := []apitest.Table{}
+	inputs := []struct {
+		name  string
+		token string
+		err   *errs.Error
+	}{
 		{
-			Name:       "emptytoken",
+			"emptytoken",
+			"&nbsp;",
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+		},
+		{
+			"badtoken",
+			sd.Users[userBundleAdmin].Token[:10],
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+		},
+		{
+			"badsig",
+			sd.Users[userBundleAdmin].Token + "A",
+			errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+		},
+	}
+
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", userBundleAdmin, i.name),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      "&nbsp;",
+			Token:      i.token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+			ExpResp:    i.err,
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
-		},
-		{
-			Name:       "badtoken",
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      sd.Users[userBundleAdmin].Token[:10],
-			Method:     http.MethodPost,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-		{
-			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      sd.Users[userBundleAdmin].Token + "A",
-			Method:     http.MethodPost,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
+		}
+
+		table = append(table, t)
 	}
 
 	return table
 }
 
 func create403(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user       userKey
+		errMessage string
+	}{
 		{
-			Name:       fmt.Sprintf("tu%d-shared-read-only", userRead),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      sd.Users[userRead].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusForbidden,
-			Input: &entryapp.NewEntryTX{
-				Data:     "Guitar",
-				Metadata: "UPDATED BUNDLE METADATA",
-			},
-			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.PermissionDenied, ""),
-			CmpFunc: func(got any, exp any) string {
-				// &errs.Error{Code:errs.ErrCode{value:8}, Message:"must have write perms for bundle[bb459b0a-79a5-4af9-b89a-67d830ec1db9] to create an entry", FuncName:"", FileName:""}
-				expResp := exp.(*errs.Error)
-				expResp.Message = fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID)
-				return cmp.Diff(got, exp)
-			},
+			userRead,
+			fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID),
 		},
 		{
-			Name:       fmt.Sprintf("tu%d-shared-no-roles", userNoRoles),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      sd.Users[userNoRoles].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusForbidden,
-			Input: &entryapp.NewEntryTX{
-				Data:     "Guitar",
-				Metadata: "UPDATED BUNDLE METADATA",
-			},
-			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.PermissionDenied, ""),
-			CmpFunc: func(got any, exp any) string {
-				expResp := exp.(*errs.Error)
-				expResp.Message = fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID)
-				return cmp.Diff(got, exp)
-			},
+			userNoRoles,
+			fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID),
 		},
 		{
-			Name:       fmt.Sprintf("tu%d-shared-no-key", userNoKey),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      sd.Users[userNoKey].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusForbidden,
-			Input: &entryapp.NewEntryTX{
-				Data:     "Guitar",
-				Metadata: "UPDATED BUNDLE METADATA",
-			},
-			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.PermissionDenied, ""),
-			CmpFunc: func(got any, exp any) string {
-				expResp := exp.(*errs.Error)
+			userNoKey,
+			fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[userNoKey].ID, sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+	}
 
-				expResp.Message = fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[userNoKey].ID, sd.Users[userBundleAdmin].Bundles[0].ID)
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", userRead, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      sd.Users[i.user].Token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusForbidden,
+			Input: &entryapp.NewEntryTX{
+				Data:     "Guitar",
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &errs.Error{},
+			ExpResp: errs.Newf(errs.PermissionDenied, ""),
+			CmpFunc: func(got any, exp any) string {
+				expResp := exp.(*errs.Error)
+				expResp.Message = i.errMessage
 				return cmp.Diff(got, exp)
 			},
-		},
+		}
+
+		table = append(table, t)
 	}
 	return table
 }
