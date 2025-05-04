@@ -20,15 +20,23 @@ type userKey int
 
 const (
 	userBundleAdmin userKey = iota
-	userSharedAdmin
 	userReadWrite
 	userRead
 	userNoRoles
 	userNoKey
 )
 
+var userKeyMapping = map[userKey]string{
+	userBundleAdmin: "user-bundle-owner",
+	userReadWrite:   "user-read-write",
+	userRead:        "user-read",
+
+	userNoRoles: "user-no-roles",
+	userNoKey:   "user-no-key",
+}
+
 const (
-	NUMBER_OF_USERS    = 6
+	NUMBER_OF_USERS    = 5
 	NUMBER_OF_BUNDLES  = 3
 	ENTRIES_PER_BUNDLE = 10
 )
@@ -74,35 +82,20 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	// -------------------------------------------------------------------------
 	// tu2
 
-	roles = []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write}
-	keys, err = keybus.TestGenerateSeedKeys(ctx, NUMBER_OF_BUNDLES, busDomain.Key, usrs[userSharedAdmin].ID, bids, roles)
-	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
-	}
-
-	tu2 := apitest.User{
-		User:  usrs[userSharedAdmin],
-		Keys:  keys,
-		Token: apitest.Token(db.BusDomain.User, ath, usrs[userSharedAdmin].Email.Address),
-	}
-
-	// -------------------------------------------------------------------------
-	// tu3
-
 	roles = []bundlerole.Role{bundlerole.Read, bundlerole.Write}
 	keys, err = keybus.TestGenerateSeedKeys(ctx, NUMBER_OF_BUNDLES, busDomain.Key, usrs[userReadWrite].ID, bids, roles)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
-	tu3 := apitest.User{
+	tu2 := apitest.User{
 		User:  usrs[userReadWrite],
 		Keys:  keys,
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[userReadWrite].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
-	// tu4
+	// tu3
 
 	roles = []bundlerole.Role{bundlerole.Read}
 	keys, err = keybus.TestGenerateSeedKeys(ctx, NUMBER_OF_BUNDLES, busDomain.Key, usrs[userRead].ID, bids, roles)
@@ -110,14 +103,14 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
-	tu4 := apitest.User{
+	tu3 := apitest.User{
 		User:  usrs[userRead],
 		Keys:  keys,
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[userRead].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
-	// tu5
+	// tu4
 
 	roles = []bundlerole.Role{}
 	keys, err = keybus.TestGenerateSeedKeys(ctx, NUMBER_OF_BUNDLES, busDomain.Key, usrs[userNoRoles].ID, bids, roles)
@@ -125,16 +118,16 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
-	tu5 := apitest.User{
+	tu4 := apitest.User{
 		User:  usrs[userNoRoles],
 		Keys:  keys,
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[userNoRoles].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
-	// tu6
+	// tu5
 
-	tu6 := apitest.User{
+	tu5 := apitest.User{
 		User:  usrs[userNoKey],
 		Token: apitest.Token(db.BusDomain.User, ath, usrs[userNoKey].Email.Address),
 	}
@@ -176,7 +169,7 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 
 	sd := apitest.SeedData{
 		Admins: []apitest.User{ta1},
-		Users:  []apitest.User{tu1, tu2, tu3, tu4, tu5, tu6},
+		Users:  []apitest.User{tu1, tu2, tu3, tu4, tu5},
 	}
 
 	return sd, nil
