@@ -244,6 +244,7 @@ func update(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				BundleID:    sd.Users[0].Bundles[0].ID,
 				UserID:      sd.Users[0].ID,
 				Data:        key.MustParse("Guitar"),
+				Roles:       []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write},
 				DateCreated: sd.Users[0].Keys[0].DateCreated,
 				DateUpdated: sd.Users[0].Keys[0].DateCreated,
 			},

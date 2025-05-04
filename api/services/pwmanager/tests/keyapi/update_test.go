@@ -53,7 +53,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.Key{
-				Roles: []string{"ADMIN", "WRITE", "READ"},
+				Roles: []string{"ADMIN", "READ", "WRITE"},
 			},
 			GotResp: &keyapp.Key{},
 			ExpResp: &keyapp.UpdateBundleRole{},

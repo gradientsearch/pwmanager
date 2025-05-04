@@ -28,6 +28,7 @@ func Routes(app *web.App, cfg Config) {
 
 	api := newApp(cfg.BundleBus)
 
+	// TODO update authorization for this
 	app.HandlerFunc(http.MethodGet, version, "/bundles", api.query, authen, ruleAny)
 	app.HandlerFunc(http.MethodGet, version, "/bundles/{bundle_id}", api.queryByID, authen, ruleAuthorizeBundle)
 	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}", api.update, authen, ruleAuthorizeBundle)

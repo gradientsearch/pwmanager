@@ -124,6 +124,10 @@ func (b *Business) Update(ctx context.Context, k Key, uk UpdateKey) (Key, error)
 		k.Data = *uk.Data
 	}
 
+	if uk.Roles != nil {
+		k.Roles = uk.Roles
+	}
+
 	k.DateUpdated = time.Now()
 
 	if err := b.storer.Update(ctx, k); err != nil {
