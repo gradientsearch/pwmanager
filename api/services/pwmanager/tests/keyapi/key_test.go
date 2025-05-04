@@ -32,7 +32,7 @@ func Test_Key(t *testing.T) {
 	test.Run(t, update401(sd), "update-401")
 	test.Run(t, update403(sd), "update-403")
 
-	test.Run(t, delete200(sd), "delete-200")
 	test.Run(t, delete401(sd), "delete-401")
 	test.Run(t, delete403(sd), "delete-403")
+	test.Run(t, delete200(sd), "delete-200")
 }

@@ -102,6 +102,7 @@ func delete403(sd apitest.SeedData) []apitest.Table {
 	}{
 		{
 			userRead,
+			// TODO update message to say modify
 			fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID),
 		},
 		{

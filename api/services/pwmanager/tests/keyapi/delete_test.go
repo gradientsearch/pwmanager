@@ -10,44 +10,60 @@ import (
 )
 
 func delete200(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	table := []apitest.Table{}
+	inputs := []struct {
+		user userKey
+	}{
 		{
-			Name:       "asuser",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[0].ID),
-			Token:      sd.Users[0].Token,
+			userBundleAdmin,
+		},
+	}
+
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[i.user].Keys[0].ID),
+			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusNoContent,
-		},
-		{
-			Name:       "asadmin",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[0].ID),
-			Token:      sd.Admins[0].Token,
-			Method:     http.MethodDelete,
-			StatusCode: http.StatusNoContent,
-		},
+		}
+
+		table = append(table, t)
 	}
 
 	return table
 }
 
 func delete401(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	table := []apitest.Table{}
+	inputs := []struct {
+		name  string
+		token string
+		err   *errs.Error
+	}{
 		{
-			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
-			Token:      "&nbsp;",
-			Method:     http.MethodDelete,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
+			"emptytoken",
+			"&nbsp;",
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 		},
 		{
-			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
-			Token:      sd.Users[0].Token + "A",
+			"badtoken",
+			sd.Users[userBundleAdmin].Token[:10],
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+		},
+		{
+			"badsig",
+			sd.Users[userBundleAdmin].Token + "A",
+			errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+		},
+	}
+
+	for _, i := range inputs {
+		t := apitest.Table{
+
+			Name:       fmt.Sprintf("tu%d-%s", userBundleAdmin, i.name),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[userBundleAdmin].Keys[2].ID),
+			Token:      sd.Users[userBundleAdmin].Token + "A",
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -55,18 +71,43 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
-		},
+		}
+
+		table = append(table, t)
 	}
 
 	return table
 }
 
 func delete403(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user       userKey
+		errMessage string
+	}{
 		{
-			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
-			Token:      sd.Users[1].Token,
+			userReadWrite,
+			fmt.Sprintf("must be an admin for bundle[%s] to modify a key", sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+		{
+			userRead,
+			fmt.Sprintf("must be an admin for bundle[%s] to modify a key", sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+		{
+			userNoRoles,
+			fmt.Sprintf("must be an admin for bundle[%s] to modify a key", sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+		{
+			userNoKey,
+			fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[userNoKey].ID, sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[userBundleAdmin].Keys[0].ID),
+			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusForbidden,
 			GotResp:    &errs.Error{},
@@ -74,10 +115,12 @@ func delete403(sd apitest.SeedData) []apitest.Table {
 			ExpResp: errs.Newf(errs.PermissionDenied, ""),
 			CmpFunc: func(got any, exp any) string {
 				expResp := exp.(*errs.Error)
-				expResp.Message = fmt.Sprintf("must be an admin of bundle[%s] to modify user keys", sd.Users[0].Keys[1].BundleID)
+				expResp.Message = i.errMessage
 				return cmp.Diff(got, expResp)
 			},
-		},
+		}
+
+		table = append(table, t)
 	}
 
 	return table
