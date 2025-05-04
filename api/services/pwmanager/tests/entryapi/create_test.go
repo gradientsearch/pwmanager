@@ -8,29 +8,43 @@ import (
 	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
+	"github.com/gradientsearch/pwmanager/business/types/bundletype"
 )
 
 func create200(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user userKey
+	}{
 		{
-			Name:       fmt.Sprintf("tu%d-user-bundle-admin", userBundleAdmin),
+			userBundleAdmin,
+		},
+		{
+			userReadWrite,
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      sd.Users[userBundleAdmin].Token,
+			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &entryapp.NewEntryTX{
-				Data:     "Guitar",
-				Metadata: "UPDATED BUNDLE METADATA",
+				Data:     fmt.Sprintf("DATA%d", i.user),
+				Metadata: fmt.Sprintf("METADATA%d", i.user),
 			},
 			GotResp: &entryapp.EntryTx{},
 			ExpResp: &entryapp.EntryTx{
 				Entry: entryapp.Entry{
-					Data:     "Guitar",
-					UserID:   sd.Users[userBundleAdmin].ID.String(),
+					Data:     fmt.Sprintf("DATA%d", i.user),
+					UserID:   sd.Users[i.user].ID.String(),
 					BundleID: sd.Users[userBundleAdmin].Bundles[0].ID.String(),
 				},
 				Bundle: entryapp.Bundle{
-					Metadata: "UPDATED BUNDLE METADATA",
+					Metadata: fmt.Sprintf("METADATA%d", i.user),
+					Type:     bundletype.Shareable.String(),
 					UserID:   sd.Users[userBundleAdmin].ID.String(),
 					ID:       sd.Users[userBundleAdmin].Bundles[0].ID.String(),
 				},
@@ -42,60 +56,17 @@ func create200(sd apitest.SeedData) []apitest.Table {
 				}
 
 				expResp := exp.(*entryapp.EntryTx)
-
 				expResp.Entry.ID = gotResp.Entry.ID
 				expResp.Entry.DateCreated = gotResp.Entry.DateCreated
 				expResp.Entry.DateUpdated = gotResp.Entry.DateUpdated
-
 				expResp.Bundle.Type = gotResp.Bundle.Type
 				expResp.Bundle.DateCreated = gotResp.Bundle.DateCreated
 				expResp.Bundle.DateUpdated = gotResp.Bundle.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
 			},
-		},
-		{
-			Name:       fmt.Sprintf("tu%d-shared-user-read-write", userReadWrite),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
-			Token:      sd.Users[userReadWrite].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusOK,
-			Input: &entryapp.NewEntryTX{
-				Data:     "Guitar",
-				Metadata: "UPDATED BUNDLE METADATA",
-			},
-			GotResp: &entryapp.EntryTx{},
-			ExpResp: &entryapp.EntryTx{
-				Entry: entryapp.Entry{
-					Data:     "Guitar",
-					UserID:   sd.Users[userReadWrite].ID.String(),
-					BundleID: sd.Users[userBundleAdmin].Bundles[0].ID.String(),
-				},
-				Bundle: entryapp.Bundle{
-					Metadata: "UPDATED BUNDLE METADATA",
-					UserID:   sd.Users[userBundleAdmin].ID.String(),
-					ID:       sd.Users[userBundleAdmin].Bundles[0].ID.String(),
-				},
-			},
-			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*entryapp.EntryTx)
-				if !exists {
-					return "error occurred"
-				}
-
-				expResp := exp.(*entryapp.EntryTx)
-
-				expResp.Entry.ID = gotResp.Entry.ID
-				expResp.Entry.DateCreated = gotResp.Entry.DateCreated
-				expResp.Entry.DateUpdated = gotResp.Entry.DateUpdated
-
-				expResp.Bundle.Type = gotResp.Bundle.Type
-				expResp.Bundle.DateCreated = gotResp.Bundle.DateCreated
-				expResp.Bundle.DateUpdated = gotResp.Bundle.DateUpdated
-
-				return cmp.Diff(gotResp, expResp)
-			},
-		},
+		}
+		table = append(table, t)
 	}
 
 	return table
