@@ -131,8 +131,8 @@ func toBusNewEntry(ctx context.Context, app NewEntryTX) (entrybus.NewEntry, erro
 
 // UpdateEntry defines the data needed to update a entry.
 type UpdateEntry struct {
-	Data     *string `json:"data" validate:"required"`
-	Metadata string  `json:"metadata" validate:"required"`
+	Data     string `json:"data" validate:"required"`
+	Metadata string `json:"metadata" validate:"required"`
 }
 
 // Decode implements the decoder interface.
@@ -149,18 +149,24 @@ func (app UpdateEntry) Validate() error {
 	return nil
 }
 
-func toBusUpdateEntry(app UpdateEntry) (entrybus.UpdateEntry, error) {
+func toBusUpdateEntry(ctx context.Context, app UpdateEntry) (entrybus.UpdateEntry, error) {
 	var e *entry.Entry
-	if app.Data != nil {
-		k, err := entry.Parse(*app.Data)
+	if app.Data != "" {
+		k, err := entry.Parse(app.Data)
 		if err != nil {
 			return entrybus.UpdateEntry{}, fmt.Errorf("parse: %w", err)
 		}
 		e = &k
 	}
 
+	userID, err := mid.GetUserID(ctx)
+	if err != nil {
+		return entrybus.UpdateEntry{}, err
+	}
+
 	bus := entrybus.UpdateEntry{
-		Data: e,
+		Data:   e,
+		UserID: &userID,
 	}
 
 	return bus, nil

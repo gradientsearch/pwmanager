@@ -70,6 +70,7 @@ func (s *Store) Update(ctx context.Context, k entrybus.Entry) error {
 		entries
 	SET
 		"data" = :data,
+		"user_id" = :user_id,
 		"date_updated" = :date_updated
 	WHERE
 		entry_id = :entry_id`

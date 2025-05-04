@@ -1,37 +1,52 @@
 package entry_test
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
+	"github.com/gradientsearch/pwmanager/business/types/bundletype"
 )
 
 func create200(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user userKey
+	}{
 		{
-			Name:       "basic",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Users[0].Token,
+			userBundleAdmin,
+		},
+		{
+			userReadWrite,
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &entryapp.NewEntryTX{
-				Data:     "Guitar",
-				Metadata: "UPDATED BUNDLE METADATA",
+				Data:     fmt.Sprintf("DATA%d", i.user),
+				Metadata: fmt.Sprintf("METADATA%d", i.user),
 			},
 			GotResp: &entryapp.EntryTx{},
 			ExpResp: &entryapp.EntryTx{
 				Entry: entryapp.Entry{
-					Data:     "Guitar",
-					UserID:   sd.Users[0].ID.String(),
-					BundleID: sd.Users[0].Bundles[0].ID.String(),
+					Data:     fmt.Sprintf("DATA%d", i.user),
+					UserID:   sd.Users[i.user].ID.String(),
+					BundleID: sd.Users[userBundleAdmin].Bundles[0].ID.String(),
 				},
 				Bundle: entryapp.Bundle{
-					Metadata: "UPDATED BUNDLE METADATA",
-					UserID:   sd.Users[0].ID.String(),
-					ID:       sd.Users[0].Bundles[0].ID.String(),
+					Metadata: fmt.Sprintf("METADATA%d", i.user),
+					Type:     bundletype.Shareable.String(),
+					UserID:   sd.Users[userBundleAdmin].ID.String(),
+					ID:       sd.Users[userBundleAdmin].Bundles[0].ID.String(),
 				},
 			},
 			CmpFunc: func(got any, exp any) string {
@@ -41,18 +56,17 @@ func create200(sd apitest.SeedData) []apitest.Table {
 				}
 
 				expResp := exp.(*entryapp.EntryTx)
-
 				expResp.Entry.ID = gotResp.Entry.ID
 				expResp.Entry.DateCreated = gotResp.Entry.DateCreated
 				expResp.Entry.DateUpdated = gotResp.Entry.DateUpdated
-
 				expResp.Bundle.Type = gotResp.Bundle.Type
 				expResp.Bundle.DateCreated = gotResp.Bundle.DateCreated
 				expResp.Bundle.DateUpdated = gotResp.Bundle.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
 			},
-		},
+		}
+		table = append(table, t)
 	}
 
 	return table
@@ -61,9 +75,9 @@ func create200(sd apitest.SeedData) []apitest.Table {
 func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
-			Name:       "missing-input",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Users[0].Token,
+			Name:       fmt.Sprintf("tu%d-missing-input", userBundleAdmin),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input: &entryapp.NewEntryTX{
@@ -81,56 +95,90 @@ func create400(sd apitest.SeedData) []apitest.Table {
 }
 
 func create401(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	table := []apitest.Table{}
+	inputs := []struct {
+		name  string
+		token string
+		err   *errs.Error
+	}{
 		{
-			Name:       "emptytoken",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      "&nbsp;",
-			Method:     http.MethodPost,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
+			"emptytoken",
+			"&nbsp;",
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 		},
 		{
-			Name:       "badtoken",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Admins[0].Token[:10],
-			Method:     http.MethodPost,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
+			"badtoken",
+			sd.Users[userBundleAdmin].Token[:10],
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 		},
 		{
-			Name:       "badsig",
-			URL:        "/v1/bundles/" + sd.Users[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Admins[0].Token + "A",
-			Method:     http.MethodPost,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-		{
-			Name:       "asadmin",
-			URL:        "/v1/bundles/" + sd.Admins[0].Bundles[0].ID.String() + "/entries",
-			Token:      sd.Admins[0].Token,
-			Method:     http.MethodPost,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
+			"badsig",
+			sd.Users[userBundleAdmin].Token + "A",
+			errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
 		},
 	}
 
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", userBundleAdmin, i.name),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      i.token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusUnauthorized,
+			GotResp:    &errs.Error{},
+			ExpResp:    i.err,
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		}
+
+		table = append(table, t)
+	}
+
+	return table
+}
+
+func create403(sd apitest.SeedData) []apitest.Table {
+	inputs := []struct {
+		user       userKey
+		errMessage string
+	}{
+		{
+			userRead,
+			fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+		{
+			userNoRoles,
+			fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+		{
+			userNoKey,
+			fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[userNoKey].ID, sd.Users[userBundleAdmin].Bundles[0].ID),
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", userRead, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries", sd.Users[userBundleAdmin].Bundles[0].ID.String()),
+			Token:      sd.Users[i.user].Token,
+			Method:     http.MethodPost,
+			StatusCode: http.StatusForbidden,
+			Input: &entryapp.NewEntryTX{
+				Data:     "Guitar",
+				Metadata: "UPDATED BUNDLE METADATA",
+			},
+			GotResp: &errs.Error{},
+			ExpResp: errs.Newf(errs.PermissionDenied, ""),
+			CmpFunc: func(got any, exp any) string {
+				expResp := exp.(*errs.Error)
+				expResp.Message = i.errMessage
+				return cmp.Diff(got, exp)
+			},
+		}
+
+		table = append(table, t)
+	}
 	return table
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 )
 
 func update200(sd apitest.SeedData) []apitest.Table {
@@ -27,7 +28,9 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			ExpResp: &keyapp.Key{
 				ID:          sd.Users[0].Keys[0].ID.String(),
 				UserID:      sd.Users[0].ID.String(),
+				BundleID:    sd.Users[0].Bundles[0].ID.String(),
 				Data:        "Guitar",
+				Roles:       []string{"ADMIN", "READ", "WRITE"},
 				DateCreated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 				DateUpdated: sd.Users[0].Keys[0].DateCreated.Format(time.RFC3339),
 			},
@@ -41,6 +44,33 @@ func update200(sd apitest.SeedData) []apitest.Table {
 				gotResp.DateUpdated = expResp.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
+			},
+		},
+		{
+			Name:       "role",
+			URL:        fmt.Sprintf("/v1/keys/role/%s", sd.Users[0].Keys[0].ID),
+			Token:      sd.Users[0].Token,
+			Method:     http.MethodPut,
+			StatusCode: http.StatusOK,
+			Input: &keyapp.Key{
+				Roles: []string{"ADMIN", "READ", "WRITE"},
+			},
+			GotResp: &keyapp.Key{},
+			ExpResp: &keyapp.UpdateBundleRole{},
+			CmpFunc: func(got any, exp any) string {
+				gotResp := got.(*keyapp.Key)
+				gotRoles := keyapp.UpdateBundleRole{
+					Roles: gotResp.Roles,
+				}
+				expRoles := keyapp.UpdateBundleRole{
+					Roles: []string{
+						bundlerole.Admin.String(),
+						bundlerole.Read.String(),
+						bundlerole.Write.String(),
+					},
+				}
+
+				return cmp.Diff(gotRoles, expRoles)
 			},
 		},
 	}
@@ -74,19 +104,29 @@ func update401(sd apitest.SeedData) []apitest.Table {
 				return cmp.Diff(got, exp)
 			},
 		},
+	}
+
+	return table
+}
+
+func update403(sd apitest.SeedData) []apitest.Table {
+	table := []apitest.Table{
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[0].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
+			Token:      sd.Users[1].Token,
 			Method:     http.MethodPut,
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusForbidden,
 			Input: &keyapp.UpdateKey{
 				Data: dbtest.StringPointer("Guitar"),
 			},
 			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: errs.Newf(errs.PermissionDenied, ""),
 			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
+				expResp := exp.(*errs.Error)
+				expResp.Message = fmt.Sprintf("must be an admin of bundle[%s] to modify user keys", sd.Users[0].Keys[1].BundleID)
+
+				return cmp.Diff(got, expResp)
 			},
 		},
 	}

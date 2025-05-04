@@ -119,3 +119,27 @@ func (a *app) queryByID(ctx context.Context, r *http.Request) web.Encoder {
 
 	return toAppKey(k)
 }
+
+func (a *app) updateRole(ctx context.Context, r *http.Request) web.Encoder {
+	var app UpdateBundleRole
+	if err := web.Decode(r, &app); err != nil {
+		return errs.New(errs.InvalidArgument, err)
+	}
+
+	uu, err := toBusUpdateBundleRole(app)
+	if err != nil {
+		return errs.New(errs.InvalidArgument, err)
+	}
+
+	k, err := mid.GetKey(ctx)
+	if err != nil {
+		return errs.Newf(errs.Internal, "key missing in context: %s", err)
+	}
+
+	updKey, err := a.keyBus.Update(ctx, k, uu)
+	if err != nil {
+		return errs.Newf(errs.Internal, "updaterole: userID[%s] uu[%+v]: %s", k.ID, uu, err)
+	}
+
+	return toAppKey(updKey)
+}

@@ -122,6 +122,10 @@ func (b *Business) Update(ctx context.Context, e Entry, ue UpdateEntry) (Entry, 
 		e.Data = *ue.Data
 	}
 
+	if ue.UserID != nil {
+		e.UserID = *ue.UserID
+	}
+
 	e.DateUpdated = time.Now()
 
 	if err := b.storer.Update(ctx, e); err != nil {

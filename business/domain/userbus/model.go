@@ -4,9 +4,9 @@ import (
 	"net/mail"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/role"
-	"github.com/google/uuid"
 )
 
 // User represents information about an individual user.

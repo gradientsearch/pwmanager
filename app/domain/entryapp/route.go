@@ -29,14 +29,15 @@ func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
 	authen := mid.Authenticate(cfg.AuthClient)
-	ruleAuthorizeEntry := mid.AuthorizeEntry(cfg.AuthClient, cfg.KeyBus, cfg.EntryBus, cfg.BundleBus)
+	ruleAuthorizeEntryRetrieve := mid.AuthorizeEntryRetrieve(cfg.AuthClient, cfg.KeyBus, cfg.EntryBus, cfg.BundleBus)
+	ruleAuthorizeEntryCreate := mid.AuthorizeEntryCreate(cfg.AuthClient, cfg.KeyBus, cfg.EntryBus, cfg.BundleBus)
+	ruleAuthorizeEntryModify := mid.AuthorizeEntryModify(cfg.AuthClient, cfg.KeyBus, cfg.EntryBus, cfg.BundleBus)
 	transaction := mid.BeginCommitRollback(cfg.Log, sqldb.NewBeginner(cfg.DB))
 
 	api := newApp(cfg.EntryBus, cfg.BundleBus)
 
-	app.HandlerFunc(http.MethodGet, version, "/bundles/{bundle_id}/entries/{entry_id}", api.queryByID, authen, ruleAuthorizeEntry)
-
-	app.HandlerFunc(http.MethodPost, version, "/bundles/{bundle_id}/entries", api.create, authen, ruleAuthorizeEntry, transaction)
-	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}/entries/{entry_id}", api.update, authen, ruleAuthorizeEntry, transaction)
-	app.HandlerFunc(http.MethodDelete, version, "/bundles/{bundle_id}/entries/{entry_id}", api.delete, authen, ruleAuthorizeEntry, transaction)
+	app.HandlerFunc(http.MethodGet, version, "/bundles/{bundle_id}/entries/{entry_id}", api.queryByID, authen, ruleAuthorizeEntryRetrieve)
+	app.HandlerFunc(http.MethodPost, version, "/bundles/{bundle_id}/entries", api.create, authen, ruleAuthorizeEntryCreate, transaction)
+	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}/entries/{entry_id}", api.update, authen, ruleAuthorizeEntryModify, transaction)
+	app.HandlerFunc(http.MethodDelete, version, "/bundles/{bundle_id}/entries/{entry_id}", api.delete, authen, ruleAuthorizeEntryModify, transaction)
 }

@@ -56,16 +56,26 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 				return cmp.Diff(got, exp)
 			},
 		},
+	}
+
+	return table
+}
+
+func delete403(sd apitest.SeedData) []apitest.Table {
+	table := []apitest.Table{
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/keys/%s", sd.Admins[0].Keys[1].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/keys/%s", sd.Users[0].Keys[1].ID),
+			Token:      sd.Users[1].Token,
 			Method:     http.MethodDelete,
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusForbidden,
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+
+			ExpResp: errs.Newf(errs.PermissionDenied, ""),
 			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
+				expResp := exp.(*errs.Error)
+				expResp.Message = fmt.Sprintf("must be an admin of bundle[%s] to modify user keys", sd.Users[0].Keys[1].BundleID)
+				return cmp.Diff(got, expResp)
 			},
 		},
 	}

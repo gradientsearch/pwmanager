@@ -100,9 +100,10 @@ func (b *Business) Create(ctx context.Context, nk NewKey) (Key, error) {
 
 	k := Key{
 		ID:          uuid.New(),
-		Data:        nk.Data,
 		UserID:      nk.UserID,
 		BundleID:    nk.BundleID,
+		Data:        nk.Data,
+		Roles:       nk.Roles,
 		DateCreated: now,
 		DateUpdated: now,
 	}
@@ -121,6 +122,10 @@ func (b *Business) Update(ctx context.Context, k Key, uk UpdateKey) (Key, error)
 
 	if uk.Data != nil {
 		k.Data = *uk.Data
+	}
+
+	if uk.Roles != nil {
+		k.Roles = uk.Roles
 	}
 
 	k.DateUpdated = time.Now()
@@ -198,7 +203,7 @@ func (b *Business) QueryByUserIDBundleID(ctx context.Context, userID uuid.UUID, 
 
 	k, err := b.storer.QueryByUserIDBundleID(ctx, userID, bundleID)
 	if err != nil {
-		return Key{}, fmt.Errorf("query: bundleID[%s] userID[%s]: %w", bundleID, userID, err)
+		return Key{}, fmt.Errorf("query: userID[%s] bundleID[%s]: %w", userID, bundleID, err)
 	}
 
 	return k, nil

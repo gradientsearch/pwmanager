@@ -1,6 +1,7 @@
 package key_test
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/go-cmp/cmp"
@@ -10,22 +11,37 @@ import (
 )
 
 func create200(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user userKey
+	}{
 		{
+			userReadWrite,
+		},
+		{
+			userRead,
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
 			Name:       "basic",
-			URL:        "/v1/keys",
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[userBundleAdmin].Bundles[2].ID.String()),
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
 			Input: &keyapp.NewKey{
+				BundleID: sd.Users[userBundleAdmin].Bundles[2].ID.String(),
+				UserID:   sd.Users[i.user].ID.String(),
 				Data:     "Guitar",
-				BundleID: sd.Users[0].Bundles[2].ID.String(),
-				UserID:   string(sd.Users[0].ID[0]),
+				Roles:    []string{"ADMIN", "WRITE", "READ"},
 			},
 			GotResp: &keyapp.Key{},
 			ExpResp: &keyapp.Key{
-				Data:   "Guitar",
-				UserID: sd.Users[0].ID.String(),
+				Data:     "Guitar",
+				UserID:   sd.Users[i.user].ID.String(),
+				BundleID: sd.Users[userBundleAdmin].Bundles[2].ID.String(),
+				Roles:    []string{"ADMIN", "WRITE", "READ"},
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*keyapp.Key)
@@ -36,12 +52,14 @@ func create200(sd apitest.SeedData) []apitest.Table {
 				expResp := exp.(*keyapp.Key)
 
 				expResp.ID = gotResp.ID
+				expResp.BundleID = gotResp.BundleID
 				expResp.DateCreated = gotResp.DateCreated
 				expResp.DateUpdated = gotResp.DateUpdated
 
 				return cmp.Diff(gotResp, expResp)
 			},
-		},
+		}
+		table = append(table, t)
 	}
 
 	return table
@@ -51,13 +69,13 @@ func create400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "missing-input",
-			URL:        "/v1/keys",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
 			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
 			Input:      &keyapp.NewKey{},
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"data\",\"error\":\"data is a required field\"},{\"field\":\"bundleID\",\"error\":\"bundleID is a required field\"},{\"field\":\"userID\",\"error\":\"userID is a required field\"}]"),
+			ExpResp:    errs.Newf(errs.InvalidArgument, "validate: [{\"field\":\"data\",\"error\":\"data is a required field\"},{\"field\":\"bundleID\",\"error\":\"bundleID is a required field\"},{\"field\":\"userID\",\"error\":\"userID is a required field\"},{\"field\":\"roles\",\"error\":\"roles is a required field\"}]"),
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
@@ -71,7 +89,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        "/v1/keys",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
 			Token:      "&nbsp;",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -83,7 +101,7 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badtoken",
-			URL:        "/v1/keys",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
 			Token:      sd.Admins[0].Token[:10],
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
@@ -95,8 +113,8 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        "/v1/keys",
-			Token:      sd.Admins[0].Token + "A",
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[1].ID.String()),
+			Token:      sd.Users[0].Token + "A",
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -107,14 +125,17 @@ func create401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        "/v1/keys",
-			Token:      sd.Admins[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s/keys", sd.Users[0].Bundles[2].ID.String()),
+			Token:      sd.Users[1].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[ADMIN]] rule[rule_user_only]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+
+			ExpResp: errs.Newf(errs.Unauthenticated, ""),
 			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
+				expResp := exp.(*errs.Error)
+				expResp.Message = fmt.Sprintf("query: userID[%s] bundleID[%s]: db: key not found", sd.Users[1].ID.String(), sd.Users[0].Bundles[2].ID.String())
+				return cmp.Diff(got, expResp)
 			},
 		},
 	}
