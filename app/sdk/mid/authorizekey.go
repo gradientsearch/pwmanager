@@ -180,7 +180,7 @@ func AuthorizeKeyCreate(client *authclient.Client, keyBus *keybus.Business) web.
 			if err != nil {
 				switch {
 				case errors.Is(err, keybus.ErrNotFound):
-					return errs.New(errs.Unauthenticated, err)
+					return errs.New(errs.PermissionDenied, err)
 				default:
 					return errs.Newf(errs.Internal, "querybyuseridbundleid: user_id[%s]  bundle_id[%s]: %s", userID, bundleID, err)
 				}
@@ -194,7 +194,7 @@ func AuthorizeKeyCreate(client *authclient.Client, keyBus *keybus.Business) web.
 				}
 			}
 			if !isAdmin {
-				return errs.New(errs.PermissionDenied, err)
+				return errs.New(errs.PermissionDenied, fmt.Errorf("must have admin perms for bundle[%s] to create a key", k.BundleID.String()))
 			}
 
 			return next(ctx, r)

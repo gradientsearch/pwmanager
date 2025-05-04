@@ -24,8 +24,9 @@ func Test_Key(t *testing.T) {
 	test.Run(t, queryByID403(sd), "querybyid-403")
 
 	test.Run(t, create200(sd), "create-200")
-	test.Run(t, create401(sd), "create-401")
 	test.Run(t, create400(sd), "create-400")
+	test.Run(t, create401(sd), "create-401")
+	test.Run(t, create403(sd), "create-403")
 
 	test.Run(t, update200(sd), "update-200")
 	test.Run(t, update401(sd), "update-401")
