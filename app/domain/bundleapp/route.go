@@ -3,7 +3,6 @@ package bundleapp
 import (
 	"net/http"
 
-	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
@@ -30,16 +29,15 @@ func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
 	authen := mid.Authenticate(cfg.AuthClient)
-	ruleAuthorizeBundle := mid.AuthorizeBundle(cfg.AuthClient, cfg.BundleBus)
+	ruleAuthorizeBundleRetrieve := mid.AuthorizeBundleRetrieve(cfg.AuthClient, cfg.BundleBus)
+	ruleAuthorizeBundleModify := mid.AuthorizeBundleModify(cfg.AuthClient, cfg.BundleBus)
+
 	transaction := mid.BeginCommitRollback(cfg.Log, sqldb.NewBeginner(cfg.DB))
-	ruleAuthorizeUser := mid.Authorize(cfg.AuthClient, auth.RuleAdminOrSubject)
 
 	api := newApp(cfg.UserBus, cfg.KeyBus, cfg.BundleBus)
 
-	app.HandlerFunc(http.MethodGet, version, "/bundles/{bundle_id}", api.queryByID, authen, ruleAuthorizeBundle)
-
-	app.HandlerFunc(http.MethodPost, version, "/bundles", api.create, authen, ruleAuthorizeUser, transaction)
-
-	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}", api.update, authen, ruleAuthorizeBundle)
-	app.HandlerFunc(http.MethodDelete, version, "/bundles/{bundle_id}", api.delete, authen, ruleAuthorizeBundle)
+	app.HandlerFunc(http.MethodGet, version, "/bundles/{bundle_id}", api.queryByID, authen, ruleAuthorizeBundleRetrieve)
+	app.HandlerFunc(http.MethodPost, version, "/bundles", api.create, authen, transaction)
+	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}", api.update, authen, ruleAuthorizeBundleModify)
+	app.HandlerFunc(http.MethodDelete, version, "/bundles/{bundle_id}", api.delete, authen, ruleAuthorizeBundleModify)
 }

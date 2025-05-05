@@ -7,10 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/gradientsearch/pwmanager/app/sdk/auth"
 	"github.com/gradientsearch/pwmanager/app/sdk/authclient"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/gradientsearch/pwmanager/business/domain/bundlebus"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
@@ -87,60 +85,6 @@ func AuthorizeUser(client *authclient.Client, userBus *userbus.Business, rule st
 				Claims: GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
-			}
-
-			if err := client.Authorize(ctx, auth); err != nil {
-				return errs.New(errs.Unauthenticated, err)
-			}
-
-			return next(ctx, r)
-		}
-
-		return h
-	}
-
-	return m
-}
-
-// AuthorizeBundle executes the specified role and extracts the specified
-// bundle from the DB if a bundle id is specified in the call. Depending on
-// the rule specified, the userid from the claims may be compared with the
-// specified user id from the bundle.
-func AuthorizeBundle(client *authclient.Client, bundleBus *bundlebus.Business) web.MidFunc {
-	m := func(next web.HandlerFunc) web.HandlerFunc {
-		h := func(ctx context.Context, r *http.Request) web.Encoder {
-			id := web.Param(r, "bundle_id")
-
-			var userID uuid.UUID
-
-			if id != "" {
-				var err error
-				bundleID, err := uuid.Parse(id)
-				if err != nil {
-					return errs.New(errs.Unauthenticated, ErrInvalidID)
-				}
-
-				bdl, err := bundleBus.QueryByID(ctx, bundleID)
-				if err != nil {
-					switch {
-					case errors.Is(err, bundlebus.ErrNotFound):
-						return errs.New(errs.Unauthenticated, err)
-					default:
-						return errs.Newf(errs.Unauthenticated, "querybyid: bundleID[%s]: %s", bundleID, err)
-					}
-				}
-
-				userID = bdl.UserID
-				ctx = setBundle(ctx, bdl)
-			}
-
-			ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-			defer cancel()
-
-			auth := authclient.Authorize{
-				Claims: GetClaims(ctx),
-				UserID: userID,
-				Rule:   auth.RuleAdminOrSubject,
 			}
 
 			if err := client.Authorize(ctx, auth); err != nil {

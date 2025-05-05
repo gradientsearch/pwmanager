@@ -15,8 +15,8 @@ func update200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
-			Token:      sd.Users[userBundleAdmin].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userA].Bundles[0].ID),
+			Token:      sd.Users[userA].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.UpdateBundle{
@@ -24,8 +24,8 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			},
 			GotResp: &bundleapp.Bundle{},
 			ExpResp: &bundleapp.Bundle{
-				ID:     sd.Users[userBundleAdmin].Bundles[0].ID.String(),
-				UserID: sd.Users[userBundleAdmin].ID.String(),
+				ID:     sd.Users[userA].Bundles[0].ID.String(),
+				UserID: sd.Users[userA].ID.String(),
 				Type:   "PERSONAL",
 			},
 			CmpFunc: func(got any, exp any) string {
@@ -50,8 +50,8 @@ func update400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "bad-type",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
-			Token:      sd.Users[userBundleAdmin].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userA].Bundles[0].ID),
+			Token:      sd.Users[userA].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
 			Input: &bundleapp.UpdateBundle{
@@ -72,7 +72,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userA].Bundles[0].ID),
 			Token:      "&nbsp;",
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
@@ -84,8 +84,8 @@ func update401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
-			Token:      sd.Users[userBundleAdmin].Token + "A",
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userA].Bundles[0].ID),
+			Token:      sd.Users[userA].Token + "A",
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -96,8 +96,8 @@ func update401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
-			Token:      sd.Users[userReadWrite].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userA].Bundles[0].ID),
+			Token:      sd.Users[userB].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			Input: &bundleapp.UpdateBundle{
