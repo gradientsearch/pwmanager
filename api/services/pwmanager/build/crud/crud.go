@@ -3,7 +3,6 @@ package crud
 
 import (
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
-	"github.com/gradientsearch/pwmanager/app/domain/bundletxapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
 	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
 	"github.com/gradientsearch/pwmanager/app/domain/userapp"
@@ -28,6 +27,10 @@ func (add) Add(app *web.App, cfg mux.Config) {
 	})
 
 	bundleapp.Routes(app, bundleapp.Config{
+		Log:        cfg.Log,
+		DB:         cfg.DB,
+		UserBus:    cfg.BusConfig.UserBus,
+		KeyBus:     cfg.BusConfig.KeyBus,
 		BundleBus:  cfg.BusConfig.BundleBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
@@ -35,14 +38,6 @@ func (add) Add(app *web.App, cfg mux.Config) {
 	keyapp.Routes(app, keyapp.Config{
 		KeyBus:     cfg.BusConfig.KeyBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
-	})
-
-	bundletxapp.Routes(app, bundletxapp.Config{
-		UserBus:    cfg.BusConfig.UserBus,
-		KeyBus:     cfg.BusConfig.KeyBus,
-		Log:        cfg.Log,
-		AuthClient: cfg.PwManagerConfig.AuthClient,
-		DB:         cfg.DB,
 	})
 
 	userapp.Routes(app, userapp.Config{

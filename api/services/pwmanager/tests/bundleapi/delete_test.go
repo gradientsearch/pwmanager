@@ -13,15 +13,8 @@ func delete200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "asuser",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
-			Method:     http.MethodDelete,
-			StatusCode: http.StatusNoContent,
-		},
-		{
-			Name:       "asadmin",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Admins[0].Bundles[0].ID),
-			Token:      sd.Admins[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusNoContent,
 		},
@@ -34,7 +27,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[1].ID),
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[1].ID),
 			Token:      "&nbsp;",
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
@@ -46,8 +39,8 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[1].ID),
-			Token:      sd.Users[0].Token + "A",
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[1].ID),
+			Token:      sd.Users[userBundleAdmin].Token + "A",
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -58,7 +51,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[1].ID),
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[1].ID),
 			Token:      sd.Users[1].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,

@@ -12,73 +12,72 @@ import (
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
 
+type userKey int
+
+const (
+	userBundleAdmin userKey = iota
+	userReadWrite
+	userRead
+	userNoRoles
+	userNoKey
+)
+
+var userKeyMapping = map[userKey]string{
+	userBundleAdmin: "user-bundle-owner",
+	userReadWrite:   "user-read-write",
+	userRead:        "user-read",
+	userNoRoles:     "user-no-roles",
+	userNoKey:       "user-no-key",
+}
+
 func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, error) {
 	ctx := context.Background()
 	busDomain := db.BusDomain
 
-	usrs, err := userbus.TestSeedUsers(ctx, 1, role.User, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 5, role.User, busDomain.User)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
 
-	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
+	bdls, err := bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[userBundleAdmin].ID)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
 	}
 
 	tu1 := apitest.User{
-		User:    usrs[0],
+		User:    usrs[userBundleAdmin],
 		Bundles: bdls,
-		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		Token:   apitest.Token(db.BusDomain.User, ath, usrs[userBundleAdmin].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
-
-	usrs, err = userbus.TestSeedUsers(ctx, 1, role.User, busDomain.User)
-	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
-	}
+	// tu2
 
 	tu2 := apitest.User{
-		User:  usrs[0],
-		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		User:  usrs[userReadWrite],
+		Token: apitest.Token(db.BusDomain.User, ath, usrs[userReadWrite].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
-
-	usrs, err = userbus.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
-	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
-	}
-
-	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
-	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
-	}
+	// tu3
 
 	tu3 := apitest.User{
-		User:    usrs[0],
+		User:    usrs[userRead],
 		Bundles: bdls,
-		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		Token:   apitest.Token(db.BusDomain.User, ath, usrs[userRead].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
-	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
-	}
-
 	tu4 := apitest.User{
-		User:  usrs[0],
-		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		User:  usrs[userNoRoles],
+		Token: apitest.Token(db.BusDomain.User, ath, usrs[userNoRoles].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
 
 	sd := apitest.SeedData{
-		Users:  []apitest.User{tu1, tu2},
-		Admins: []apitest.User{tu3, tu4},
+		Users: []apitest.User{tu1, tu2, tu3, tu4},
 	}
 
 	return sd, nil

@@ -3,7 +3,6 @@ package all
 
 import (
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
-	"github.com/gradientsearch/pwmanager/app/domain/bundletxapp"
 	"github.com/gradientsearch/pwmanager/app/domain/checkapp"
 	"github.com/gradientsearch/pwmanager/app/domain/entryapp"
 	"github.com/gradientsearch/pwmanager/app/domain/keyapp"
@@ -45,6 +44,9 @@ func (add) Add(app *web.App, cfg mux.Config) {
 
 	bundleapp.Routes(app, bundleapp.Config{
 		Log:        cfg.Log,
+		DB:         cfg.DB,
+		UserBus:    cfg.BusConfig.UserBus,
+		KeyBus:     cfg.BusConfig.KeyBus,
 		BundleBus:  cfg.BusConfig.BundleBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
@@ -61,18 +63,6 @@ func (add) Add(app *web.App, cfg mux.Config) {
 		BundleBus:  cfg.BusConfig.BundleBus,
 		KeyBus:     cfg.BusConfig.KeyBus,
 		EntryBus:   cfg.BusConfig.EntryBus,
-		AuthClient: cfg.PwManagerConfig.AuthClient,
-	})
-
-	// -------------------------------------------------------------------------
-	// TX
-
-	bundletxapp.Routes(app, bundletxapp.Config{
-		Log:        cfg.Log,
-		DB:         cfg.DB,
-		UserBus:    cfg.BusConfig.UserBus,
-		KeyBus:     cfg.BusConfig.KeyBus,
-		BundleBus:  cfg.BusConfig.BundleBus,
 		AuthClient: cfg.PwManagerConfig.AuthClient,
 	})
 

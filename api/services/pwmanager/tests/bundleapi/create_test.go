@@ -1,10 +1,10 @@
-package bundletx_test
+package bundle_test
 
 import (
 	"net/http"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/gradientsearch/pwmanager/app/domain/bundletxapp"
+	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 )
@@ -14,35 +14,35 @@ func create200(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:       "basic",
 			URL:        "/v1/bundles",
-			Token:      sd.Admins[0].Token,
+			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusOK,
-			Input: &bundletxapp.NewBundleTx{
-				Key: bundletxapp.NewKey{
+			Input: &bundleapp.NewBundleTx{
+				Key: bundleapp.NewKey{
 					Data: "Guitar",
 				},
-				Bundle: bundletxapp.NewBundle{
+				Bundle: bundleapp.NewBundle{
 					Type:     "PERSONAL",
 					Metadata: "Bundle Metadata",
 				},
 			},
-			GotResp: &bundletxapp.BundleTx{},
-			ExpResp: &bundletxapp.BundleTx{
-				Key: bundletxapp.Key{
+			GotResp: &bundleapp.BundleTx{},
+			ExpResp: &bundleapp.BundleTx{
+				Key: bundleapp.Key{
 					Data: "Guitar",
 				},
-				Bundle: bundletxapp.Bundle{
+				Bundle: bundleapp.Bundle{
 					Type:     "PERSONAL",
 					Metadata: "Bundle Metadata",
 				},
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.(*bundletxapp.BundleTx)
+				gotResp, exists := got.(*bundleapp.BundleTx)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.(*bundletxapp.BundleTx)
+				expResp := exp.(*bundleapp.BundleTx)
 
 				expResp.Bundle.ID = gotResp.Bundle.ID
 				expResp.Bundle.DateCreated = gotResp.Bundle.DateCreated
@@ -67,15 +67,15 @@ func create400(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:       "bad-type",
 			URL:        "/v1/bundles",
-			Token:      sd.Admins[0].Token,
+			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input: &bundletxapp.NewBundleTx{
-				Bundle: bundletxapp.NewBundle{
+			Input: &bundleapp.NewBundleTx{
+				Bundle: bundleapp.NewBundle{
 					Type:     "SPACE",
 					Metadata: "BUNDLE METADATA",
 				},
-				Key: bundletxapp.NewKey{
+				Key: bundleapp.NewKey{
 					Data: "ENCRYPTED SYMMETRIC KEY",
 				},
 			},
@@ -88,11 +88,11 @@ func create400(sd apitest.SeedData) []apitest.Table {
 		{
 			Name:       "missing-input",
 			URL:        "/v1/bundles",
-			Token:      sd.Admins[0].Token,
+			Token:      sd.Users[0].Token,
 			Method:     http.MethodPost,
 			StatusCode: http.StatusBadRequest,
-			Input: &bundletxapp.NewBundleTx{
-				Bundle: bundletxapp.NewBundle{
+			Input: &bundleapp.NewBundleTx{
+				Bundle: bundleapp.NewBundle{
 					Type: "PERSONAL",
 				},
 			},

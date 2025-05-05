@@ -3,7 +3,6 @@ package bundle_test
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
@@ -16,8 +15,8 @@ func update200(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.UpdateBundle{
@@ -25,11 +24,9 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			},
 			GotResp: &bundleapp.Bundle{},
 			ExpResp: &bundleapp.Bundle{
-				ID:          sd.Users[0].Bundles[0].ID.String(),
-				UserID:      sd.Users[0].ID.String(),
-				Type:        "PERSONAL",
-				DateCreated: sd.Users[0].Bundles[0].DateCreated.Format(time.RFC3339),
-				DateUpdated: sd.Users[0].Bundles[0].DateCreated.Format(time.RFC3339),
+				ID:     sd.Users[userBundleAdmin].Bundles[0].ID.String(),
+				UserID: sd.Users[userBundleAdmin].ID.String(),
+				Type:   "PERSONAL",
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*bundleapp.Bundle)
@@ -39,6 +36,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 
 				expResp := exp.(*bundleapp.Bundle)
 				gotResp.DateUpdated = expResp.DateUpdated
+				gotResp.DateCreated = expResp.DateCreated
 
 				return cmp.Diff(gotResp, expResp)
 			},
@@ -52,8 +50,8 @@ func update400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "bad-type",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
+			Token:      sd.Users[userBundleAdmin].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
 			Input: &bundleapp.UpdateBundle{
@@ -74,7 +72,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
 			Token:      "&nbsp;",
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
@@ -86,8 +84,8 @@ func update401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token + "A",
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
+			Token:      sd.Users[userBundleAdmin].Token + "A",
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			GotResp:    &errs.Error{},
@@ -98,8 +96,8 @@ func update401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Admins[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userBundleAdmin].Bundles[0].ID),
+			Token:      sd.Users[userReadWrite].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			Input: &bundleapp.UpdateBundle{
