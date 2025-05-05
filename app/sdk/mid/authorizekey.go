@@ -43,7 +43,7 @@ func AuthorizeKeyRetrieve(client *authclient.Client, keyBus *keybus.Business) we
 			if err != nil {
 				switch {
 				case errors.Is(err, keybus.ErrNotFound):
-					return errs.New(errs.Unauthenticated, err)
+					return errs.New(errs.PermissionDenied, err)
 				default:
 					return errs.Newf(errs.Internal, "querybyid: keyID[%s]: %s", keyID, err)
 				}

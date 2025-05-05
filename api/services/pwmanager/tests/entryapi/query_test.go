@@ -45,6 +45,50 @@ func queryByID200(sd apitest.SeedData) []apitest.Table {
 	return table
 }
 
+func queryByID401(sd apitest.SeedData) []apitest.Table {
+	table := []apitest.Table{}
+	inputs := []struct {
+		name  string
+		token string
+		err   *errs.Error
+	}{
+		{
+			"emptytoken",
+			"&nbsp;",
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+		},
+		{
+			"badtoken",
+			sd.Users[userBundleAdmin].Token[:10],
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+		},
+		{
+			"badsig",
+			sd.Users[userBundleAdmin].Token + "A",
+			errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+		},
+	}
+
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s-%s", userBundleAdmin, userKeyMapping[userBundleAdmin], i.name),
+			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			Token:      i.token,
+			StatusCode: http.StatusOK,
+			Method:     http.MethodGet,
+			GotResp:    &entryapp.Entry{},
+			ExpResp:    toAppEntryPtr(sd.Users[userBundleAdmin].Entries[0]),
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		}
+
+		table = append(table, t)
+	}
+
+	return table
+}
+
 func queryByID403(sd apitest.SeedData) []apitest.Table {
 	permError := fmt.Sprintf("must have read perms for bundle[%s] to read entry", sd.Users[userBundleAdmin].Bundles[0].ID)
 
