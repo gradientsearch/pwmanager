@@ -13,7 +13,6 @@ import (
 // retrieve data.
 type Storer interface {
 	QueryByID(ctx context.Context, userID uuid.UUID) ([]Key, error)
-	Count(ctx context.Context, filter QueryFilter) (int, error)
 }
 
 // Business manages the set of APIs for view key access.
@@ -39,12 +38,4 @@ func (b *Business) QueryByID(ctx context.Context, userID uuid.UUID) ([]Key, erro
 	}
 
 	return users, nil
-}
-
-// Count returns the total number of keys.
-func (b *Business) Count(ctx context.Context, filter QueryFilter) (int, error) {
-	ctx, span := otel.AddSpan(ctx, "business.vbundlebus.count")
-	defer span.End()
-
-	return b.storer.Count(ctx, filter)
 }

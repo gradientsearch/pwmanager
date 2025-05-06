@@ -2,7 +2,6 @@
 package vbundledb
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 
@@ -36,22 +35,20 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) ([]vbundlebus.K
 	const q = `
 SELECT
 	u.user_id,
+	u.name,
     b.bundle_id,
-    b.type AS bundle_type,
-    b.metadata AS bundle_metadata,
-    b.date_created AS bundle_date_created,
-    b.date_updated AS bundle_date_updated,
-    k.key_id,
+    b.type,
+    b.metadata,
+    b.date_created,
+    b.date_updated,
     k.data AS key_data,
     k.roles AS key_roles,
-    k.date_created AS key_date_created,
-    k.date_updated AS key_date_updated,
     (
         SELECT json_agg(json_build_object('user_id', ku.user_id, 'name', ku.name, 'email', ku.email, 'roles', k2.roles))
         FROM keys k2
         JOIN users ku ON k2.user_id = ku.user_id
         WHERE k2.bundle_id = b.bundle_id
-    ) AS users_with_access
+    ) AS users
 FROM
     users u
 JOIN
@@ -71,27 +68,4 @@ WHERE b.user_id = :user_id`
 	}
 
 	return k, nil
-}
-
-// Count returns the total number of keys in the DB.
-func (s *Store) Count(ctx context.Context, filter vbundlebus.QueryFilter) (int, error) {
-	data := map[string]any{}
-
-	const q = `
-	SELECT
-		count(1)
-	FROM
-		view_keys`
-
-	buf := bytes.NewBufferString(q)
-	s.applyFilter(filter, data, buf)
-
-	var count struct {
-		Count int `db:"count"`
-	}
-	if err := sqldb.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
-		return 0, fmt.Errorf("db: %w", err)
-	}
-
-	return count.Count, nil
 }
