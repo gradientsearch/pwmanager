@@ -35,7 +35,9 @@ func Routes(app *web.App, cfg Config) {
 
 	api := newApp(cfg.UserBus, cfg.KeyBus, cfg.BundleBus)
 
+	// Users can only create bundles for themselves.
 	app.HandlerFunc(http.MethodPost, version, "/bundles", api.create, authen, transaction)
+
 	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}", api.update, authen, ruleAuthorizeBundleModify)
 	app.HandlerFunc(http.MethodDelete, version, "/bundles/{bundle_id}", api.delete, authen, ruleAuthorizeBundleModify)
 }

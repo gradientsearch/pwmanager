@@ -27,7 +27,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
@@ -105,7 +105,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, i.name),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      i.token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
@@ -147,7 +147,7 @@ func update403(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusForbidden,

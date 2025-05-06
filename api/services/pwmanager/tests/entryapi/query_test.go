@@ -29,7 +29,7 @@ func queryByID200(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[i.user].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
@@ -72,7 +72,7 @@ func queryByID401(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s-%s", userBundleAdmin, userKeyMapping[userBundleAdmin], i.name),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      i.token,
 			StatusCode: http.StatusUnauthorized,
 			Method:     http.MethodGet,
@@ -110,7 +110,7 @@ func queryByID403(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[i.user].Token,
 			StatusCode: http.StatusForbidden,
 			Method:     http.MethodGet,
