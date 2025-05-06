@@ -74,10 +74,10 @@ func queryByID401(sd apitest.SeedData) []apitest.Table {
 			Name:       fmt.Sprintf("tu%d-%s-%s", userBundleAdmin, userKeyMapping[userBundleAdmin], i.name),
 			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      i.token,
-			StatusCode: http.StatusOK,
+			StatusCode: http.StatusUnauthorized,
 			Method:     http.MethodGet,
-			GotResp:    &entryapp.Entry{},
-			ExpResp:    toAppEntryPtr(sd.Users[userBundleAdmin].Entries[0]),
+			GotResp:    &errs.Error{},
+			ExpResp:    i.err,
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},

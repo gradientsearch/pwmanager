@@ -29,14 +29,12 @@ func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
 	authen := mid.Authenticate(cfg.AuthClient)
-	ruleAuthorizeBundleRetrieve := mid.AuthorizeBundleRetrieve(cfg.AuthClient, cfg.BundleBus)
 	ruleAuthorizeBundleModify := mid.AuthorizeBundleModify(cfg.AuthClient, cfg.BundleBus)
 
 	transaction := mid.BeginCommitRollback(cfg.Log, sqldb.NewBeginner(cfg.DB))
 
 	api := newApp(cfg.UserBus, cfg.KeyBus, cfg.BundleBus)
 
-	app.HandlerFunc(http.MethodGet, version, "/bundles/{bundle_id}", api.queryByID, authen, ruleAuthorizeBundleRetrieve)
 	app.HandlerFunc(http.MethodPost, version, "/bundles", api.create, authen, transaction)
 	app.HandlerFunc(http.MethodPut, version, "/bundles/{bundle_id}", api.update, authen, ruleAuthorizeBundleModify)
 	app.HandlerFunc(http.MethodDelete, version, "/bundles/{bundle_id}", api.delete, authen, ruleAuthorizeBundleModify)

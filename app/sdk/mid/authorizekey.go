@@ -70,9 +70,8 @@ func AuthorizeKeyRetrieve(client *authclient.Client, keyBus *keybus.Business) we
 	return m
 }
 
-// AuthorizeKeyCreate executes the specified role and extracts the specified
-// key from the DB if a key id is specified in the call. Only Admins of a bundle can add new
-// keys for users for that bundle.
+// AuthorizeKeyCreate determines if a user can create a key for a bundle
+// Only bundle admins can create keys for a bundle.
 func AuthorizeKeyCreate(client *authclient.Client, keyBus *keybus.Business) web.MidFunc {
 	m := func(next web.HandlerFunc) web.HandlerFunc {
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
