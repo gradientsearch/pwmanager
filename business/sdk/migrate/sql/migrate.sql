@@ -48,15 +48,3 @@ CREATE TABLE entries (
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (bundle_id) REFERENCES bundles(bundle_id) ON DELETE CASCADE
 );
-
-CREATE
-OR REPLACE VIEW view_keys AS
-SELECT
-    p.key_id,
-    p.user_id,
-    p.date_created,
-    p.date_updated,
-    u.name AS user_name
-FROM
-    keys AS p
-    JOIN users AS u ON u.user_id = p.user_id

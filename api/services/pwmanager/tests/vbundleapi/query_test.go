@@ -2,70 +2,83 @@ package vbundle_test
 
 import (
 	"net/http"
-	"sort"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/vbundleapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
-	"github.com/gradientsearch/pwmanager/app/sdk/errs"
-	"github.com/gradientsearch/pwmanager/app/sdk/query"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 )
 
 func query200(sd apitest.SeedData) []apitest.Table {
-	keys := toAppVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
-	keys = append(keys, toAppVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
-
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i].ID <= keys[j].ID
-	})
-
 	table := []apitest.Table{
 		{
 			Name:       "basic",
-			URL:        "/v1/vbundles?page=1&rows=10&orderBy=key_id,ASC",
-			Token:      sd.Admins[0].Token,
+			URL:        "/v1/vbundles",
+			Token:      sd.Users[0].Token,
 			StatusCode: http.StatusOK,
 			Method:     http.MethodGet,
-			GotResp:    &query.Result[vbundleapp.Key]{},
-			ExpResp: &query.Result[vbundleapp.Key]{
-				Page:        1,
-				RowsPerPage: 10,
-				Total:       len(keys),
-				Items:       keys,
-			},
+			GotResp:    &vbundleapp.UserBundleKeys{},
+			ExpResp:    &vbundleapp.UserBundleKeys{},
 			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-	}
+				gotResp := *(got.(*vbundleapp.UserBundleKeys))
+				if len(gotResp) != 2 {
+					return "should have returned 2 bundles"
+				}
 
-	return table
-}
+				tu1 := sd.Users[0]
+				tu2 := sd.Users[1]
 
-func query400(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
-		{
-			Name:       "bad-query-filter",
-			URL:        "/v1/vbundles?page=1&rows=10&name=$#!",
-			Token:      sd.Admins[0].Token,
-			StatusCode: http.StatusBadRequest,
-			Method:     http.MethodGet,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "[{\"field\":\"name\",\"error\":\"invalid name \\\"$#!\\\"\"}]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
-		},
-		{
-			Name:       "bad-orderby-value",
-			URL:        "/v1/vbundles?page=1&rows=10&orderBy=roduct_id,ASC",
-			Token:      sd.Admins[0].Token,
-			StatusCode: http.StatusBadRequest,
-			Method:     http.MethodGet,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.InvalidArgument, "[{\"field\":\"order\",\"error\":\"unknown order: roduct_id\"}]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
+				b1 := gotResp[0]
+				b2 := gotResp[1]
+
+				expResp := vbundleapp.UserBundleKeys{
+					{
+						UserID:      tu1.User.ID,
+						BundleID:    tu1.Bundles[0].ID,
+						Name:        tu1.User.Name.String(),
+						Type:        b1.Type,
+						Metadata:    tu1.Bundles[0].Metadata,
+						DateCreated: b1.DateCreated,
+						DateUpdated: b1.DateUpdated,
+						KeyData:     tu1.Keys[0].Data.String(),
+						KeyRoles:    bundlerole.ParseToString(tu1.Keys[0].Roles),
+						Users: []vbundleapp.BundleUser{
+							{
+								UserID: tu1.User.ID,
+								Name:   tu1.User.Name.String(),
+								Email:  tu1.User.Email.Address,
+								Roles:  bundlerole.ParseToString(tu1.Keys[0].Roles),
+							},
+							{
+								UserID: tu2.User.ID,
+								Name:   tu2.User.Name.String(),
+								Email:  tu2.User.Email.Address,
+								Roles:  bundlerole.ParseToString(tu2.Keys[0].Roles),
+							},
+						},
+					},
+					{
+						UserID:      tu1.User.ID,
+						BundleID:    tu1.Bundles[1].ID,
+						Name:        tu1.User.Name.String(),
+						Type:        b2.Type,
+						Metadata:    tu1.Bundles[1].Metadata,
+						DateCreated: b2.DateCreated,
+						DateUpdated: b2.DateUpdated,
+						KeyData:     tu1.Keys[1].Data.String(),
+						KeyRoles:    bundlerole.ParseToString(tu1.Keys[1].Roles),
+						Users: []vbundleapp.BundleUser{
+							{
+								UserID: tu1.User.ID,
+								Name:   tu1.User.Name.String(),
+								Email:  tu1.User.Email.Address,
+								Roles:  bundlerole.ParseToString(tu1.Keys[1].Roles),
+							},
+						},
+					},
+				}
+
+				return cmp.Diff(gotResp, expResp)
 			},
 		},
 	}

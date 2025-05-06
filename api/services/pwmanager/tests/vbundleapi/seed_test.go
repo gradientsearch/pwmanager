@@ -19,7 +19,7 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	ctx := context.Background()
 	busDomain := db.BusDomain
 
-	usrs, err := userbus.TestSeedUsers(ctx, 1, role.User, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 2, role.User, busDomain.User)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -41,45 +41,28 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	}
 
 	tu1 := apitest.User{
-		User:  usrs[0],
-		Keys:  keys,
-		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		User:    usrs[0],
+		Bundles: bdls,
+		Keys:    keys,
+		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
-	// -------------------------------------------------------------------------
-
-	usrs, err = userbus.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
-	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
-	}
-
-	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
-	if err != nil {
-		return apitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
-	}
-
-	bids = []uuid.UUID{}
-	for _, v := range bdls {
-		bids = append(bids, v.ID)
-	}
-
-	roles = []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write}
-	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids, roles)
+	roles = []bundlerole.Role{bundlerole.Read, bundlerole.Write}
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 1, busDomain.Key, usrs[1].ID, []uuid.UUID{bids[0]}, roles)
 	if err != nil {
 		return apitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := apitest.User{
-		User:  usrs[0],
+		User:  usrs[1],
 		Keys:  keys,
-		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		Token: apitest.Token(db.BusDomain.User, ath, usrs[1].Email.Address),
 	}
 
 	// -------------------------------------------------------------------------
 
 	sd := apitest.SeedData{
-		Admins: []apitest.User{tu2},
-		Users:  []apitest.User{tu1},
+		Users: []apitest.User{tu1, tu2},
 	}
 
 	return sd, nil

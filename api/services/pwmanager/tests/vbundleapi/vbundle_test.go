@@ -21,5 +21,4 @@ func Test_VBundle(t *testing.T) {
 	// -------------------------------------------------------------------------
 
 	test.Run(t, query200(sd), "query-200")
-	test.Run(t, query400(sd), "query-400")
 }

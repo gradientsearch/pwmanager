@@ -3,9 +3,7 @@ package vbundlebus_test
 import (
 	"context"
 	"fmt"
-	"sort"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
@@ -14,7 +12,6 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
-	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/business/sdk/unitest"
 	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/business/types/role"
@@ -40,7 +37,7 @@ func Test_VBundle(t *testing.T) {
 func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	ctx := context.Background()
 
-	usrs, err := userbus.TestSeedUsers(ctx, 1, role.User, busDomain.User)
+	usrs, err := userbus.TestSeedUsers(ctx, 2, role.User, busDomain.User)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
 	}
@@ -62,43 +59,28 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 	}
 
 	tu1 := unitest.User{
-		User: usrs[0],
-		Keys: keys,
+		User:    usrs[0],
+		Bundles: bdls,
+		Keys:    keys,
 	}
 
 	// -------------------------------------------------------------------------
 
-	usrs, err = userbus.TestSeedUsers(ctx, 1, role.Admin, busDomain.User)
-	if err != nil {
-		return unitest.SeedData{}, fmt.Errorf("seeding users : %w", err)
-	}
-
-	bdls, err = bundlebus.TestGenerateSeedBundles(ctx, 2, busDomain.Bundle, usrs[0].ID)
-	if err != nil {
-		return unitest.SeedData{}, fmt.Errorf("seeding bundles : %w", err)
-	}
-
-	bids = []uuid.UUID{}
-	for _, v := range bdls {
-		bids = append(bids, v.ID)
-	}
-
-	roles = []bundlerole.Role{bundlerole.Admin, bundlerole.Read, bundlerole.Write}
-	keys, err = keybus.TestGenerateSeedKeys(ctx, 2, busDomain.Key, usrs[0].ID, bids, roles)
+	roles = []bundlerole.Role{bundlerole.Read, bundlerole.Write}
+	keys, err = keybus.TestGenerateSeedKeys(ctx, 1, busDomain.Key, usrs[1].ID, []uuid.UUID{bids[0]}, roles)
 	if err != nil {
 		return unitest.SeedData{}, fmt.Errorf("seeding keys : %w", err)
 	}
 
 	tu2 := unitest.User{
-		User: usrs[0],
+		User: usrs[1],
 		Keys: keys,
 	}
 
 	// -------------------------------------------------------------------------
 
 	sd := unitest.SeedData{
-		Admins: []unitest.User{tu2},
-		Users:  []unitest.User{tu1},
+		Users: []unitest.User{tu1, tu2},
 	}
 
 	return sd, nil
@@ -106,45 +88,15 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 // =============================================================================
 
-func toVBundle(usr userbus.User, k keybus.Key) vbundlebus.Key {
-	return vbundlebus.Key{
-		ID:          k.ID,
-		UserID:      k.UserID,
-		Data:        k.Data,
-		DateCreated: k.DateCreated,
-		DateUpdated: k.DateUpdated,
-	}
-}
-
-func toVBundles(usr userbus.User, keys []keybus.Key) []vbundlebus.Key {
-	items := make([]vbundlebus.Key, len(keys))
-	for i, k := range keys {
-		items[i] = toVBundle(usr, k)
-	}
-
-	return items
-}
-
-// =============================================================================
-
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	keys := toVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
-	keys = append(keys, toVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
-
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i].ID.String() <= keys[j].ID.String()
-	})
 
 	table := []unitest.Table{
 		{
 			Name:    "all",
-			ExpResp: keys,
+			ExpResp: make([]vbundlebus.UserBundleKey, 2),
 			ExcFunc: func(ctx context.Context) any {
-				filter := vbundlebus.QueryFilter{
-					Name: dbtest.NamePointer("Name"),
-				}
 
-				resp, err := busDomain.VBundle.Query(ctx, filter, vbundlebus.DefaultOrderBy, page.MustParse("1", "10"))
+				resp, err := busDomain.VBundle.QueryByID(ctx, sd.Users[0].User.ID)
 				if err != nil {
 					return err
 				}
@@ -152,21 +104,63 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.([]vbundlebus.Key)
+				gotResp, exists := got.([]vbundlebus.UserBundleKey)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.([]vbundlebus.Key)
+				tu1 := sd.Users[0]
+				tu2 := sd.Users[1]
+				// =============================================================================
 
-				for i := range gotResp {
-					if gotResp[i].DateCreated.Format(time.RFC3339) == expResp[i].DateCreated.Format(time.RFC3339) {
-						expResp[i].DateCreated = gotResp[i].DateCreated
-					}
+				b1 := gotResp[0]
+				b2 := gotResp[1]
 
-					if gotResp[i].DateUpdated.Format(time.RFC3339) == expResp[i].DateUpdated.Format(time.RFC3339) {
-						expResp[i].DateUpdated = gotResp[i].DateUpdated
-					}
+				expResp := []vbundlebus.UserBundleKey{
+					{
+						UserID:      tu1.User.ID,
+						BundleID:    tu1.Bundles[0].ID,
+						Name:        tu1.User.Name.String(),
+						Type:        b1.Type,
+						Metadata:    tu1.Bundles[0].Metadata,
+						DateCreated: b1.DateCreated,
+						DateUpdated: b1.DateUpdated,
+						KeyData:     tu1.Keys[0].Data.String(),
+						KeyRoles:    tu1.Keys[0].Roles,
+						Users: []vbundlebus.BundleUser{
+							{
+								UserID: tu1.User.ID,
+								Name:   tu1.User.Name.String(),
+								Email:  tu1.User.Email.Address,
+								Roles:  tu1.Keys[0].Roles,
+							},
+							{
+								UserID: tu2.User.ID,
+								Name:   tu2.User.Name.String(),
+								Email:  tu2.User.Email.Address,
+								Roles:  tu2.Keys[0].Roles,
+							},
+						},
+					},
+					{
+						UserID:      tu1.User.ID,
+						BundleID:    tu1.Bundles[1].ID,
+						Name:        tu1.User.Name.String(),
+						Type:        b2.Type,
+						Metadata:    tu1.Bundles[1].Metadata,
+						DateCreated: b2.DateCreated,
+						DateUpdated: b2.DateUpdated,
+						KeyData:     tu1.Keys[1].Data.String(),
+						KeyRoles:    tu1.Keys[1].Roles,
+						Users: []vbundlebus.BundleUser{
+							{
+								UserID: tu1.User.ID,
+								Name:   tu1.User.Name.String(),
+								Email:  tu1.User.Email.Address,
+								Roles:  tu1.Keys[1].Roles,
+							},
+						},
+					},
 				}
 
 				return cmp.Diff(gotResp, expResp)
