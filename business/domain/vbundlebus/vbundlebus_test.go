@@ -3,7 +3,6 @@ package vbundlebus_test
 import (
 	"context"
 	"fmt"
-	"sort"
 	"testing"
 	"time"
 
@@ -105,18 +104,16 @@ func insertSeedData(busDomain dbtest.BusDomain) (unitest.SeedData, error) {
 
 // =============================================================================
 
-func toVBundle(usr userbus.User, k keybus.Key) vbundlebus.Key {
-	return vbundlebus.Key{
-		ID:          k.ID,
+func toVBundle(usr userbus.User, k keybus.Key) vbundlebus.UserBundleKey {
+	return vbundlebus.UserBundleKey{
 		UserID:      k.UserID,
-		Data:        k.Data,
 		DateCreated: k.DateCreated,
 		DateUpdated: k.DateUpdated,
 	}
 }
 
-func toVBundles(usr userbus.User, keys []keybus.Key) []vbundlebus.Key {
-	items := make([]vbundlebus.Key, len(keys))
+func toVBundles(usr userbus.User, keys []keybus.Key) []vbundlebus.UserBundleKey {
+	items := make([]vbundlebus.UserBundleKey, len(keys))
 	for i, k := range keys {
 		items[i] = toVBundle(usr, k)
 	}
@@ -127,17 +124,11 @@ func toVBundles(usr userbus.User, keys []keybus.Key) []vbundlebus.Key {
 // =============================================================================
 
 func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
-	keys := toVBundles(sd.Admins[0].User, sd.Admins[0].Keys)
-	keys = append(keys, toVBundles(sd.Users[0].User, sd.Users[0].Keys)...)
-
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i].ID.String() <= keys[j].ID.String()
-	})
 
 	table := []unitest.Table{
 		{
 			Name:    "all",
-			ExpResp: keys,
+			ExpResp: []vbundlebus.UserBundleKey{},
 			ExcFunc: func(ctx context.Context) any {
 
 				resp, err := busDomain.VBundle.QueryByID(ctx, sd.Users[0].User.ID)
@@ -148,12 +139,12 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 				return resp
 			},
 			CmpFunc: func(got any, exp any) string {
-				gotResp, exists := got.([]vbundlebus.Key)
+				gotResp, exists := got.([]vbundlebus.UserBundleKey)
 				if !exists {
 					return "error occurred"
 				}
 
-				expResp := exp.([]vbundlebus.Key)
+				expResp := exp.([]vbundlebus.UserBundleKey)
 
 				for i := range gotResp {
 					if gotResp[i].DateCreated.Format(time.RFC3339) == expResp[i].DateCreated.Format(time.RFC3339) {

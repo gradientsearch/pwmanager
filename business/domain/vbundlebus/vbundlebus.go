@@ -12,7 +12,7 @@ import (
 // Storer interface declares the behavior this package needs to persist and
 // retrieve data.
 type Storer interface {
-	QueryByID(ctx context.Context, userID uuid.UUID) ([]Key, error)
+	QueryByID(ctx context.Context, userID uuid.UUID) ([]UserBundleKey, error)
 }
 
 // Business manages the set of APIs for view key access.
@@ -28,7 +28,7 @@ func NewBusiness(storer Storer) *Business {
 }
 
 // Query retrieves a list of existing keys.
-func (b *Business) QueryByID(ctx context.Context, userID uuid.UUID) ([]Key, error) {
+func (b *Business) QueryByID(ctx context.Context, userID uuid.UUID) ([]UserBundleKey, error) {
 	ctx, span := otel.AddSpan(ctx, "business.vbundlebus.query")
 	defer span.End()
 

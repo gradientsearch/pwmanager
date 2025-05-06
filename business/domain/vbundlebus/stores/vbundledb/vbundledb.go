@@ -27,7 +27,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 }
 
 // Query retrieves a list of existing keys from the database.
-func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) ([]vbundlebus.Key, error) {
+func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) ([]vbundlebus.UserBundleKey, error) {
 	data := map[string]any{
 		"user_id": userID,
 	}
@@ -57,12 +57,12 @@ LEFT JOIN
     keys k ON k.bundle_id = b.bundle_id AND k.user_id = u.user_id
 WHERE b.user_id = :user_id`
 
-	var dnKey []key
+	var dnKey []userBundleKey
 	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dnKey); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	k, err := toBusKeys(dnKey)
+	k, err := toBusBundles(dnKey)
 	if err != nil {
 		return nil, err
 	}

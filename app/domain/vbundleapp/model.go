@@ -4,39 +4,58 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 )
 
-// Key represents information about an individual key with
-// extended information.
-type Key struct {
-	ID          string `json:"id"`
-	UserID      string `json:"userID"`
-	Data        string `json:"data"`
-	DateCreated string `json:"dateCreated"`
-	DateUpdated string `json:"dateUpdated"`
+// Nested user info inside the "users" JSON array
+type BundleUser struct {
+	UserID uuid.UUID `json:"user_id"`
+	Name   string    `json:"name"`
+	Email  string    `json:"email"`
+	Roles  []string  `json:"roles"`
+}
+
+// Main structure for the query result
+type UserBundleKey struct {
+	UserID      uuid.UUID    `json:"user_id"`
+	Name        string       `json:"name"`
+	BundleID    uuid.UUID    `json:"bundle_id"`
+	Type        string       `json:"type"`
+	Metadata    string       `json:"metadata"`
+	DateCreated time.Time    `json:"date_created"`
+	DateUpdated time.Time    `json:"date_updated"`
+	KeyData     string       `json:"key_data"`
+	KeyRoles    []string     `json:"key_roles"`
+	Users       []BundleUser `json:"users"`
+}
+
+type UserBundleKeys []UserBundleKey
+
+// Decode implements the decoder interface.
+func (app *UserBundleKeys) Decode(data []byte) error {
+	return json.Unmarshal(data, app)
 }
 
 // Encode implements the encoder interface.
-func (app Key) Encode() ([]byte, string, error) {
+func (app UserBundleKeys) Encode() ([]byte, string, error) {
 	data, err := json.Marshal(app)
 	return data, "application/json", err
 }
 
-func toAppKey(k vbundlebus.Key) Key {
-	return Key{
-		ID:          k.ID.String(),
-		UserID:      k.UserID.String(),
-		Data:        k.Data.String(),
-		DateCreated: k.DateCreated.Format(time.RFC3339),
-		DateUpdated: k.DateUpdated.Format(time.RFC3339),
+func toAppUserBundleKey(ub vbundlebus.UserBundleKey) UserBundleKey {
+	return UserBundleKey{
+		UserID:      ub.UserID,
+		KeyData:     ub.KeyData,
+		DateCreated: ub.DateCreated,
+		DateUpdated: ub.DateUpdated,
 	}
 }
 
-func toAppKeys(keys []vbundlebus.Key) []Key {
-	app := make([]Key, len(keys))
+func toAppUserBundleKeys(keys []vbundlebus.UserBundleKey) UserBundleKeys {
+	app := make(UserBundleKeys, len(keys))
 	for i, k := range keys {
-		app[i] = toAppKey(k)
+		app[i] = toAppUserBundleKey(k)
 	}
 
 	return app

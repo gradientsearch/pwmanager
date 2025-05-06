@@ -7,9 +7,7 @@ import (
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/app/sdk/mid"
-	"github.com/gradientsearch/pwmanager/app/sdk/query"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
-	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
 
@@ -34,5 +32,5 @@ func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 		return errs.Newf(errs.Internal, "query: %s", err)
 	}
 
-	return query.NewResult(bdls, 0, page.Page{})
+	return toAppUserBundleKeys(bdls)
 }
