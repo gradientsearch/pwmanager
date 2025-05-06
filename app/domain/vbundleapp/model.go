@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
+	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 )
 
 // Nested user info inside the "users" JSON array
@@ -43,10 +44,27 @@ func (app UserBundleKeys) Encode() ([]byte, string, error) {
 	return data, "application/json", err
 }
 
+func toAppBundleUsers(bus []vbundlebus.BundleUser) []BundleUser {
+	app := make([]BundleUser, len(bus))
+	for i, v := range bus {
+		app[i].Email = v.Email
+		app[i].Name = v.Name
+		app[i].UserID = v.UserID
+		app[i].Roles = bundlerole.ParseToString(v.Roles)
+	}
+	return app
+}
+
 func toAppUserBundleKey(ub vbundlebus.UserBundleKey) UserBundleKey {
 	return UserBundleKey{
 		UserID:      ub.UserID,
+		Name:        ub.Name,
+		BundleID:    ub.BundleID,
+		Type:        ub.Type,
+		Metadata:    ub.Metadata,
 		KeyData:     ub.KeyData,
+		KeyRoles:    bundlerole.ParseToString(ub.KeyRoles),
+		Users:       toAppBundleUsers(ub.Users),
 		DateCreated: ub.DateCreated,
 		DateUpdated: ub.DateUpdated,
 	}

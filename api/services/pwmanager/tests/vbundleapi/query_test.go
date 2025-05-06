@@ -3,7 +3,6 @@ package vbundle_test
 import (
 	"net/http"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/vbundleapp"
 	"github.com/gradientsearch/pwmanager/app/sdk/apitest"
 )
@@ -19,7 +18,24 @@ func query200(sd apitest.SeedData) []apitest.Table {
 			GotResp:    &vbundleapp.UserBundleKeys{},
 			ExpResp:    &vbundleapp.UserBundleKeys{},
 			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
+				gotResp := *(got.(*vbundleapp.UserBundleKeys))
+				if len(gotResp) != 2 {
+					return "should have returned 2 bundles"
+				}
+
+				b1 := gotResp[0]
+
+				if len(b1.Users) != 2 {
+					return "should have returned 2 users in bundle 1"
+				}
+
+				b2 := gotResp[1]
+
+				if len(b2.Users) != 1 {
+					return "should have returned 1 users in bundle 2"
+				}
+
+				return ""
 			},
 		},
 	}
