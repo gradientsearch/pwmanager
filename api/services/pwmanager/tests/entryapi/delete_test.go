@@ -26,7 +26,7 @@ func delete200(sd apitest.SeedData) []apitest.Table {
 	for idx, i := range inputs {
 		t := apitest.Table{
 			Name:  fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
-			URL:   fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[idx].ID),
+			URL:   fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[idx].ID),
 			Token: sd.Users[i.user].Token,
 			Input: &entryapp.DeleteEntry{
 				Metadata: fmt.Sprintf("UPDATED BUNDLE METADATA %d", i.user),
@@ -77,7 +77,7 @@ func delete401(sd apitest.SeedData) []apitest.Table {
 		t := apitest.Table{
 
 			Name:       fmt.Sprintf("tu%d-%s", userBundleAdmin, i.name),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[1].ID, sd.Users[userBundleAdmin].Entries[2].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[2].ID),
 			Token:      i.token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusUnauthorized,
@@ -102,6 +102,7 @@ func delete403(sd apitest.SeedData) []apitest.Table {
 	}{
 		{
 			userRead,
+			// TODO update message to say modify
 			fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID),
 		},
 		{
@@ -118,7 +119,7 @@ func delete403(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[2].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[2].ID),
 			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodDelete,
 			StatusCode: http.StatusForbidden,

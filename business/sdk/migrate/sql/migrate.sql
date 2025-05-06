@@ -21,7 +21,7 @@ CREATE TABLE bundles (
     date_created TIMESTAMP NOT NULL,
     date_updated TIMESTAMP NOT NULL,
     PRIMARY KEY (bundle_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE keys (
@@ -33,7 +33,7 @@ CREATE TABLE keys (
     date_created TIMESTAMP NOT NULL,
     date_updated TIMESTAMP NOT NULL,
     PRIMARY KEY (user_id, bundle_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (bundle_id) REFERENCES bundles(bundle_id) ON DELETE CASCADE
 );
 
@@ -45,7 +45,7 @@ CREATE TABLE entries (
     date_created TIMESTAMP NOT NULL,
     date_updated TIMESTAMP NOT NULL,
     PRIMARY KEY (entry_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (bundle_id) REFERENCES bundles(bundle_id) ON DELETE CASCADE
 );
 

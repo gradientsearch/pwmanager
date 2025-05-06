@@ -12,7 +12,6 @@ import (
 )
 
 func update200(sd apitest.SeedData) []apitest.Table {
-
 	inputs := []struct {
 		user userKey
 	}{
@@ -28,7 +27,7 @@ func update200(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
@@ -76,7 +75,6 @@ func update200(sd apitest.SeedData) []apitest.Table {
 }
 
 func update401(sd apitest.SeedData) []apitest.Table {
-
 	inputs := []struct {
 		user  userKey
 		name  string
@@ -91,6 +89,12 @@ func update401(sd apitest.SeedData) []apitest.Table {
 		},
 		{
 			userBundleAdmin,
+			"badtoken",
+			sd.Users[userBundleAdmin].Token[:10],
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
+		},
+		{
+			userBundleAdmin,
 			"badsig",
 			sd.Users[userBundleAdmin].Token + "A",
 			errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
@@ -101,7 +105,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 	for _, i := range inputs {
 		t := apitest.Table{
 			Name:       fmt.Sprintf("tu%d-%s", i.user, i.name),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Bundles[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
 			Token:      i.token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
@@ -120,7 +124,7 @@ func update401(sd apitest.SeedData) []apitest.Table {
 func update403(sd apitest.SeedData) []apitest.Table {
 	permError := fmt.Sprintf("must have write perms for bundle[%s] to create an entry", sd.Users[userBundleAdmin].Bundles[0].ID)
 
-	roles := []struct {
+	inputs := []struct {
 		user       userKey
 		errMessage string
 	}{
@@ -140,11 +144,11 @@ func update403(sd apitest.SeedData) []apitest.Table {
 	}
 
 	table := []apitest.Table{}
-	for _, r := range roles {
+	for _, i := range inputs {
 		t := apitest.Table{
-			Name:       fmt.Sprintf("tu%d-%s", r.user, userKeyMapping[r.user]),
-			URL:        fmt.Sprintf("/v1/bundles/%s/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID, sd.Users[userBundleAdmin].Entries[0].ID),
-			Token:      sd.Users[r.user].Token,
+			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/entries/%s", sd.Users[userBundleAdmin].Entries[0].ID),
+			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusForbidden,
 			Input: &entryapp.UpdateEntry{
@@ -155,7 +159,7 @@ func update403(sd apitest.SeedData) []apitest.Table {
 			ExpResp: errs.Newf(errs.PermissionDenied, ""),
 			CmpFunc: func(got any, exp any) string {
 				expResp := exp.(*errs.Error)
-				expResp.Message = r.errMessage
+				expResp.Message = i.errMessage
 				return cmp.Diff(got, exp)
 			},
 		}

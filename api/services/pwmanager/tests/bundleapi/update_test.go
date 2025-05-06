@@ -3,7 +3,6 @@ package bundle_test
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/gradientsearch/pwmanager/app/domain/bundleapp"
@@ -13,11 +12,23 @@ import (
 )
 
 func update200(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user userKey
+	}{
 		{
-			Name:       "basic",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
+			userA,
+		},
+		{
+			userB,
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[i.user].Bundles[0].ID),
+			Token:      sd.Users[i.user].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusOK,
 			Input: &bundleapp.UpdateBundle{
@@ -25,11 +36,9 @@ func update200(sd apitest.SeedData) []apitest.Table {
 			},
 			GotResp: &bundleapp.Bundle{},
 			ExpResp: &bundleapp.Bundle{
-				ID:          sd.Users[0].Bundles[0].ID.String(),
-				UserID:      sd.Users[0].ID.String(),
-				Type:        "PERSONAL",
-				DateCreated: sd.Users[0].Bundles[0].DateCreated.Format(time.RFC3339),
-				DateUpdated: sd.Users[0].Bundles[0].DateCreated.Format(time.RFC3339),
+				ID:     sd.Users[i.user].Bundles[0].ID.String(),
+				UserID: sd.Users[i.user].ID.String(),
+				Type:   "PERSONAL",
 			},
 			CmpFunc: func(got any, exp any) string {
 				gotResp, exists := got.(*bundleapp.Bundle)
@@ -39,12 +48,13 @@ func update200(sd apitest.SeedData) []apitest.Table {
 
 				expResp := exp.(*bundleapp.Bundle)
 				gotResp.DateUpdated = expResp.DateUpdated
+				gotResp.DateCreated = expResp.DateCreated
 
 				return cmp.Diff(gotResp, expResp)
 			},
-		},
+		}
+		table = append(table, t)
 	}
-
 	return table
 }
 
@@ -52,8 +62,8 @@ func update400(sd apitest.SeedData) []apitest.Table {
 	table := []apitest.Table{
 		{
 			Name:       "bad-type",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[userA].Bundles[0].ID),
+			Token:      sd.Users[userA].Token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusBadRequest,
 			Input: &bundleapp.UpdateBundle{
@@ -71,46 +81,91 @@ func update400(sd apitest.SeedData) []apitest.Table {
 }
 
 func update401(sd apitest.SeedData) []apitest.Table {
-	table := []apitest.Table{
+	inputs := []struct {
+		user  userKey
+		name  string
+		token string
+		err   *errs.Error
+	}{
 		{
-			Name:       "emptytoken",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      "&nbsp;",
-			Method:     http.MethodPut,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
+			userA,
+			"emptytoken",
+			"&nbsp;",
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 		},
 		{
-			Name:       "badsig",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token + "A",
-			Method:     http.MethodPut,
-			StatusCode: http.StatusUnauthorized,
-			GotResp:    &errs.Error{},
-			ExpResp:    errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
-			CmpFunc: func(got any, exp any) string {
-				return cmp.Diff(got, exp)
-			},
+			userA,
+			"badtoken",
+			sd.Users[userA].Token[:10],
+			errs.Newf(errs.Unauthenticated, "error parsing token: token contains an invalid number of segments"),
 		},
 		{
-			Name:       "wronguser",
-			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Admins[0].Bundles[0].ID),
-			Token:      sd.Users[0].Token,
+			userA,
+			"badsig",
+			sd.Users[userA].Token + "A",
+			errs.Newf(errs.Unauthenticated, "authentication failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", i.user, i.name),
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[i.user].Bundles[0].ID),
+			Token:      i.token,
 			Method:     http.MethodPut,
 			StatusCode: http.StatusUnauthorized,
 			Input: &bundleapp.UpdateBundle{
 				Type: dbtest.StringPointer("PERSONAL"),
 			},
 			GotResp: &errs.Error{},
-			ExpResp: errs.Newf(errs.Unauthenticated, "authorize: you are not authorized for that action, claims[[USER]] rule[rule_admin_or_subject]: rego evaluation failed : bindings results[[{[true] map[x:false]}]] ok[true]"),
+			ExpResp: i.err,
 			CmpFunc: func(got any, exp any) string {
 				return cmp.Diff(got, exp)
 			},
+		}
+		table = append(table, t)
+	}
+
+	return table
+}
+
+func update403(sd apitest.SeedData) []apitest.Table {
+	inputs := []struct {
+		user         userKey
+		userToUpdate userKey
+		err          *errs.Error
+	}{
+		{
+			userA,
+			userB,
+			errs.Newf(errs.PermissionDenied, "only bundle owner can modify bundleID[%s]", sd.Users[userB].Bundles[0].ID),
 		},
+		{
+			userB,
+			userA,
+			errs.Newf(errs.PermissionDenied, "only bundle owner can modify bundleID[%s]", sd.Users[userA].Bundles[0].ID),
+		},
+	}
+
+	table := []apitest.Table{}
+	for _, i := range inputs {
+		t := apitest.Table{
+			Name:       fmt.Sprintf("tu%d-%s", i.user, userKeyMapping[i.user]),
+			URL:        fmt.Sprintf("/v1/bundles/%s", sd.Users[i.userToUpdate].Bundles[0].ID),
+			Token:      sd.Users[i.user].Token,
+			Method:     http.MethodPut,
+			StatusCode: http.StatusForbidden,
+			Input: &bundleapp.UpdateBundle{
+				Type: dbtest.StringPointer("PERSONAL"),
+			},
+			GotResp: &errs.Error{},
+			ExpResp: i.err,
+			CmpFunc: func(got any, exp any) string {
+				return cmp.Diff(got, exp)
+			},
+		}
+		table = append(table, t)
 	}
 
 	return table

@@ -89,6 +89,9 @@ func AuthorizeEntryRetrieve(client *authclient.Client, keyBus *keybus.Business, 
 func AuthorizeEntryCreate(client *authclient.Client, keyBus *keybus.Business, entryBus *entrybus.Business, bundleBus *bundlebus.Business) web.MidFunc {
 	m := func(next web.HandlerFunc) web.HandlerFunc {
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
+			// -------------------------------------------------------------------------
+			// Validate input
+
 			bundleID := web.Param(r, "bundle_id")
 			bID, err := uuid.Parse(bundleID)
 			if err != nil {
@@ -100,6 +103,9 @@ func AuthorizeEntryCreate(client *authclient.Client, keyBus *keybus.Business, en
 				return errs.New(errs.Unauthenticated, ErrInvalidID)
 			}
 
+			// -------------------------------------------------------------------------
+			// Get User Key
+
 			k, err := keyBus.QueryByUserIDBundleID(ctx, userID, bID)
 			if err != nil {
 				switch {
@@ -109,6 +115,9 @@ func AuthorizeEntryCreate(client *authclient.Client, keyBus *keybus.Business, en
 					return errs.Newf(errs.Internal, "querybyid: userID[%s] bundleID[%s]: %s", userID, bID, err)
 				}
 			}
+
+			// -------------------------------------------------------------------------
+			// Authorize
 
 			canWrite := false
 			for _, r := range k.Roles {
@@ -121,6 +130,9 @@ func AuthorizeEntryCreate(client *authclient.Client, keyBus *keybus.Business, en
 				return errs.New(errs.PermissionDenied, fmt.Errorf("must have write perms for bundle[%s] to create an entry", k.BundleID.String()))
 			}
 
+			// -------------------------------------------------------------------------
+			// Get Bundle
+
 			bdl, err := bundleBus.QueryByID(ctx, bID)
 			if err != nil {
 				switch {
@@ -130,6 +142,9 @@ func AuthorizeEntryCreate(client *authclient.Client, keyBus *keybus.Business, en
 					return errs.Newf(errs.Internal, "querybyid: bundleID[%s] : %s", bID, err)
 				}
 			}
+
+			// -------------------------------------------------------------------------
+			// Set Bundle and Entry
 
 			ctx = setBundle(ctx, bdl)
 
@@ -149,8 +164,6 @@ func AuthorizeEntryCreate(client *authclient.Client, keyBus *keybus.Business, en
 }
 
 // AuthorizeEntryModify validates the user is able modify an entry in the bundle.
-
-// AuthorizeEntryCreate validates the user is able to create an entry in the bundle.
 func AuthorizeEntryModify(client *authclient.Client, keyBus *keybus.Business, entryBus *entrybus.Business, bundleBus *bundlebus.Business) web.MidFunc {
 	m := func(next web.HandlerFunc) web.HandlerFunc {
 		h := func(ctx context.Context, r *http.Request) web.Encoder {
