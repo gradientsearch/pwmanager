@@ -41,9 +41,10 @@ func insertSeedData(db *dbtest.Database, ath *auth.Auth) (apitest.SeedData, erro
 	}
 
 	tu1 := apitest.User{
-		User:  usrs[0],
-		Keys:  keys,
-		Token: apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
+		User:    usrs[0],
+		Bundles: bdls,
+		Keys:    keys,
+		Token:   apitest.Token(db.BusDomain.User, ath, usrs[0].Email.Address),
 	}
 
 	roles = []bundlerole.Role{bundlerole.Read, bundlerole.Write}
