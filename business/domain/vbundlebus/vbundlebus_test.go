@@ -14,7 +14,6 @@ import (
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
 	"github.com/gradientsearch/pwmanager/business/sdk/dbtest"
-	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/business/sdk/unitest"
 	"github.com/gradientsearch/pwmanager/business/types/bundlerole"
 	"github.com/gradientsearch/pwmanager/business/types/role"
@@ -140,11 +139,8 @@ func query(busDomain dbtest.BusDomain, sd unitest.SeedData) []unitest.Table {
 			Name:    "all",
 			ExpResp: keys,
 			ExcFunc: func(ctx context.Context) any {
-				filter := vbundlebus.QueryFilter{
-					Name: dbtest.NamePointer("Name"),
-				}
 
-				resp, err := busDomain.VBundle.Query(ctx, filter, vbundlebus.DefaultOrderBy, page.MustParse("1", "10"))
+				resp, err := busDomain.VBundle.QueryByID(ctx, sd.Users[0].User.ID)
 				if err != nil {
 					return err
 				}

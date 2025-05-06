@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
+	"github.com/gradientsearch/pwmanager/app/sdk/mid"
 	"github.com/gradientsearch/pwmanager/app/sdk/query"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
-	"github.com/gradientsearch/pwmanager/business/sdk/order"
 	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/foundation/web"
 )
@@ -24,32 +24,15 @@ func newApp(vbundleBus *vbundlebus.Business) *app {
 }
 
 func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
-	qp := parseQueryParams(r)
-
-	page, err := page.Parse(qp.Page, qp.Rows)
+	userID, err := mid.GetUserID(ctx)
 	if err != nil {
-		return errs.NewFieldErrors("page", err)
+		return errs.Newf(errs.InvalidArgument, "userID not found: %s", err)
 	}
 
-	filter, err := parseFilter(qp)
-	if err != nil {
-		return err.(*errs.Error)
-	}
-
-	orderBy, err := order.Parse(orderByFields, qp.OrderBy, vbundlebus.DefaultOrderBy)
-	if err != nil {
-		return errs.NewFieldErrors("order", err)
-	}
-
-	keys, err := a.vbundleBus.Query(ctx, filter, orderBy, page)
+	bdls, err := a.vbundleBus.QueryByID(ctx, userID)
 	if err != nil {
 		return errs.Newf(errs.Internal, "query: %s", err)
 	}
 
-	total, err := a.vbundleBus.Count(ctx, filter)
-	if err != nil {
-		return errs.Newf(errs.Internal, "count: %s", err)
-	}
-
-	return query.NewResult(toAppKeys(keys), total, page)
+	return query.NewResult(bdls, 0, page.Page{})
 }

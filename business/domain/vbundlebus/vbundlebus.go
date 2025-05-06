@@ -5,15 +5,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gradientsearch/pwmanager/business/sdk/order"
-	"github.com/gradientsearch/pwmanager/business/sdk/page"
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/foundation/otel"
 )
 
 // Storer interface declares the behavior this package needs to persist and
 // retrieve data.
 type Storer interface {
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error)
+	QueryByID(ctx context.Context, userID uuid.UUID) ([]Key, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 }
 
@@ -30,11 +29,11 @@ func NewBusiness(storer Storer) *Business {
 }
 
 // Query retrieves a list of existing keys.
-func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Key, error) {
+func (b *Business) QueryByID(ctx context.Context, userID uuid.UUID) ([]Key, error) {
 	ctx, span := otel.AddSpan(ctx, "business.vbundlebus.query")
 	defer span.End()
 
-	users, err := b.storer.Query(ctx, filter, orderBy, page)
+	users, err := b.storer.QueryByID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}

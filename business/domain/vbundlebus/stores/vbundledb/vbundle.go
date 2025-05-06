@@ -6,9 +6,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/gradientsearch/pwmanager/business/domain/vbundlebus"
-	"github.com/gradientsearch/pwmanager/business/sdk/order"
-	"github.com/gradientsearch/pwmanager/business/sdk/page"
 	"github.com/gradientsearch/pwmanager/business/sdk/sqldb"
 	"github.com/gradientsearch/pwmanager/foundation/logger"
 	"github.com/jmoiron/sqlx"
@@ -29,38 +28,40 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 }
 
 // Query retrieves a list of existing keys from the database.
-func (s *Store) Query(ctx context.Context, filter vbundlebus.QueryFilter, orderBy order.By, page page.Page) ([]vbundlebus.Key, error) {
+func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) ([]vbundlebus.Key, error) {
 	data := map[string]any{
-		"offset":        (page.Number() - 1) * page.RowsPerPage(),
-		"rows_per_page": page.RowsPerPage(),
+		"user_id": userID,
 	}
 
 	const q = `
-	SELECT
-		key_id,
-		user_id,
-		name,
-		cost,
-		quantity,
-		date_created,
-		date_updated,
-		user_name
-	FROM
-		view_keys`
-
-	buf := bytes.NewBufferString(q)
-	s.applyFilter(filter, data, buf)
-
-	orderByClause, err := orderByClause(orderBy)
-	if err != nil {
-		return nil, err
-	}
-
-	buf.WriteString(orderByClause)
-	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
+SELECT
+	u.user_id,
+    b.bundle_id,
+    b.type AS bundle_type,
+    b.metadata AS bundle_metadata,
+    b.date_created AS bundle_date_created,
+    b.date_updated AS bundle_date_updated,
+    k.key_id,
+    k.data AS key_data,
+    k.roles AS key_roles,
+    k.date_created AS key_date_created,
+    k.date_updated AS key_date_updated,
+    (
+        SELECT json_agg(json_build_object('user_id', ku.user_id, 'name', ku.name, 'email', ku.email, 'roles', k2.roles))
+        FROM keys k2
+        JOIN users ku ON k2.user_id = ku.user_id
+        WHERE k2.bundle_id = b.bundle_id
+    ) AS users_with_access
+FROM
+    users u
+JOIN
+    bundles b ON b.user_id = u.user_id
+LEFT JOIN
+    keys k ON k.bundle_id = b.bundle_id AND k.user_id = u.user_id
+WHERE b.user_id = :user_id`
 
 	var dnKey []key
-	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dnKey); err != nil {
+	if err := sqldb.NamedQuerySlice(ctx, s.log, s.db, q, data, &dnKey); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
