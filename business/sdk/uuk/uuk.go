@@ -208,13 +208,13 @@ func (uuk *UUK) withEncryptedBy(eb string) {
 }
 
 // derives the 2SKD from provided parameters
-func (uuk *UUK) twoSkd(password, mount, secretKey, entityID []byte) ([]byte, error) {
+func (uuk *UUK) twoSkd(password, groupID, secretKey, userID []byte) ([]byte, error) {
 	initialSalt, err := hex.DecodeString(uuk.EncSymKey.P2s)
 	if err != nil {
 		return nil, err
 	}
 	// hkdf 1
-	saltHash := hkdf.New(sha256.New, initialSalt, entityID, nil)
+	saltHash := hkdf.New(sha256.New, initialSalt, userID, nil)
 	saltDerivedKey := make([]byte, 32)
 	if _, err := io.ReadFull(saltHash, saltDerivedKey); err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (uuk *UUK) twoSkd(password, mount, secretKey, entityID []byte) ([]byte, err
 	}
 
 	// hkdf 2
-	secretKeyHash := hkdf.New(sha256.New, secretKey, mount, nil)
+	secretKeyHash := hkdf.New(sha256.New, secretKey, groupID, nil)
 	secretDerivedKey := make([]byte, 32)
 	if _, err := io.ReadFull(secretKeyHash, secretDerivedKey); err != nil {
 		return nil, err
@@ -278,7 +278,7 @@ func (uuk *UUK) twoSkd(password, mount, secretKey, entityID []byte) ([]byte, err
 //	      "n": "3gB8w0CbpMnZCiA6QSUeCXyAsx9v...",
 //	    },
 //	}
-func (uuk *UUK) Build(password, mount, secretKey, entityID []byte) error {
+func (uuk *UUK) Build(password, groupID, secretKey, userID []byte) error {
 
 	uuk.UUID = uuid.New()
 
@@ -288,7 +288,7 @@ func (uuk *UUK) Build(password, mount, secretKey, entityID []byte) error {
 
 	uuk.withPasswordIterations(650000)
 
-	twoSKD, err := uuk.twoSkd(password, mount, secretKey, entityID)
+	twoSKD, err := uuk.twoSkd(password, groupID, secretKey, userID)
 	if err != nil {
 		return err
 	}
@@ -314,8 +314,8 @@ func (uuk *UUK) Build(password, mount, secretKey, entityID []byte) error {
 
 // DecryptEncPriKey decrypts the UUK EncPriKey using the EncSymKey and the the users SecretKey
 // returns priv key used to encrypt payloads
-func (uuk *UUK) DecryptEncPriKey(password, mount, secretKey, entityID []byte) (jwk.Key, error) {
-	twoSKD, err := uuk.twoSkd(password, mount, secretKey, entityID)
+func (uuk *UUK) DecryptEncPriKey(password, groupID, secretKey, userID []byte) (jwk.Key, error) {
+	twoSKD, err := uuk.twoSkd(password, groupID, secretKey, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create 2SKD %s", err)
 	}
