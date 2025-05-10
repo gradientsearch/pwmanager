@@ -25,13 +25,21 @@ type User struct {
 }
 
 // NewUser contains information needed to create a new user.
+// New users are created by admins. Users will use Register
+// to update the password and create a UUK payload.
 type NewUser struct {
 	Name       name.Name
 	Email      mail.Address
 	Roles      []role.Role
 	Department name.Null
 	Password   string
-	UUK        uuk.UUK
+}
+
+// UpdateRegister contains information needed to update user password and UUK.
+type UserRegister struct {
+	CurrentPassword string
+	Password        string
+	UUK             uuk.UUK
 }
 
 // UpdateUser contains information needed to update a user.
@@ -42,5 +50,9 @@ type UpdateUser struct {
 	Department *name.Null
 	Password   *string
 	Enabled    *bool
-	UUK        *uuk.UUK
+}
+
+// UpdateUserPassword contains information needed to update user password.
+type UpdateUserPassword struct {
+	Password *string
 }
