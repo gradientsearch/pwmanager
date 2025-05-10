@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gradientsearch/pwmanager/business/sdk/uuk"
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
@@ -20,15 +21,25 @@ type User struct {
 	Enabled      bool
 	DateCreated  time.Time
 	DateUpdated  time.Time
+	UUK          uuk.UUK
 }
 
 // NewUser contains information needed to create a new user.
+// New users are created by admins. Users will use Register
+// to update the password and create a UUK payload.
 type NewUser struct {
 	Name       name.Name
 	Email      mail.Address
 	Roles      []role.Role
 	Department name.Null
 	Password   string
+}
+
+// UpdateRegister contains information needed to update user password and UUK.
+type UserRegister struct {
+	CurrentPassword string
+	Password        string
+	UUK             uuk.UUK
 }
 
 // UpdateUser contains information needed to update a user.
@@ -39,4 +50,9 @@ type UpdateUser struct {
 	Department *name.Null
 	Password   *string
 	Enabled    *bool
+}
+
+// UpdateUserPassword contains information needed to update user password.
+type UpdateUserPassword struct {
+	Password *string
 }
