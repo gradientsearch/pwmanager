@@ -8,6 +8,7 @@ import (
 
 	"github.com/gradientsearch/pwmanager/app/sdk/errs"
 	"github.com/gradientsearch/pwmanager/business/domain/userbus"
+	"github.com/gradientsearch/pwmanager/business/sdk/uuk"
 	"github.com/gradientsearch/pwmanager/business/types/name"
 	"github.com/gradientsearch/pwmanager/business/types/role"
 )
@@ -211,6 +212,40 @@ func toBusUpdateUser(app UpdateUser) (userbus.UpdateUser, error) {
 		Password:   app.Password,
 		Enabled:    app.Enabled,
 	}
+
+	return bus, nil
+}
+
+// =============================================================================
+
+// Decode implements the decoder interface.
+func (app *RegisterUser) Decode(data []byte) error {
+	return json.Unmarshal(data, app)
+}
+
+// Validate checks the data in the model is considered clean.
+func (app RegisterUser) Validate() error {
+	if err := errs.Check(app); err != nil {
+		return fmt.Errorf("validate: %w", err)
+	}
+
+	return nil
+}
+
+// RegisterUser defines the data needed to register a user.
+type RegisterUser struct {
+	Token           string  `json:"token"`
+	Password        string  `json:"password" validate:"required"`
+	PasswordConfirm string  `json:"passwordConfirm" validate:"eqfield=Password"`
+	UUK             uuk.UUK `json:"uuk" validate:"required"`
+}
+
+func toBusRegisterUser(app RegisterUser) (userbus.RegisterUser, error) {
+	bus := userbus.RegisterUser{}
+
+	bus.Token = app.Token
+	bus.Password = app.Password
+	bus.UUK = app.UUK
 
 	return bus, nil
 }
