@@ -35,11 +35,12 @@ type NewUser struct {
 	Password   string
 }
 
-// UpdateRegister contains information needed to update user password and UUK.
-type UserRegister struct {
-	CurrentPassword string
-	Password        string
-	UUK             uuk.UUK
+// RegisterUser contains information needed to register a user with a password and UUK.
+// Token is the users register token provided by an admin.
+type RegisterUser struct {
+	Token    string
+	Password string
+	UUK      uuk.UUK
 }
 
 // UpdateUser contains information needed to update a user.
